@@ -1,93 +1,78 @@
-# final-pjt
+0. 아이템 선정
+- 프로젝트 주제 : 사용자 `감정` 기반 영화 추천 서비스
+- 이걸 왜 만들게 되었는가? : 
+    1. 영화를 볼거야. 근데 뭘 볼지 모르겠어. OR 
+    2. 고르는데 한 세월이야. 빨리 정하고 봐야되는데? OR 
+    3. 당사자의 현재 감정이 영화를 고르는데 중요한 지표가 된다 (자료1) 이렇게 고른 영화는 만족도를 올려준다. -> 근거가 필요하다.
+
+* 자료는 추후 검색 요망.
+
+1. 개요
+- 프로젝트 명칭 : `감정의 색`
+
+- 개발 인원 및 기간 : 2명 11/18~11/26
+
+- 주요 기능 : 
+    0. 준비물
+        전처리할 데이터 (영화-포스터 연결 : 1000편 이상)
+
+    1. 기술 반영 순서
+        - 사용자 감정 분석 
+            - 동영상, 사진V 
+            - 카메라 응시 
+            - 사진 10장정도 촬영 
+            - -> 사용할 기술
+
+        - 감정에 따른 분류
+            - 감정은 7가지 
+            - 7가지 항목(중립 하나) 
+            - 감정별로 영화 추천 리스트 작성
+            - -> 사용할 기술
+
+        - 감정의 퍼센테이지 만큼 영화의 비중이 바뀐다.
+            - -> 사용할 기술
+
+        - 감정, 색 데이터 통신            
+            1. 프론트에서 색감 정보
+            2. 카메라 화면 웹에 띄우기
+            3. 안면 인식
+            4. 인식된 데이터 백으로 전달
+            5. 백에서 (  )를 통해 영화 데이터 선별
+            6. 선별 기준에 맞는 영화 정보 프론트로 전달
+
+    2. 별점, 좋아요 기능(개인의 취향, 통계적인 것->개인정보를 확실하게 받아서 통계적으로 활용할 수 있도록.), 
+    3. CRUD(문의 게시판, 댓글), 
+    4. 검색?
+    5. 색감 -> 몇개를 쓸건가? -> 섞일 수 있는가?(데이터를 빡세게 모아야 겠지?)
+    6. 감점 분석 -> 사용자가 선택한 색감 -> 감+색 추천 
+    7. 색감 뽑아내는 알고리즘? 가능할수도? API가 있는지 확인 : 존재
+
+- 기술 스택 : JS, PYTHON, VUE3, DJANGO, SQLite, Git, DevOps(가능하면,)
+- 
+
+2. MTV / 내일
+
+3. 간트 차트
+
+![alt text](image.png)
+
+4. API 구성 -> 백
+엑셀 ? 
+
+1. 와이어프레임(화면 설계서)
+- MainView
 
 
+---
+1. 개발 및 테스트
 
-## Getting started
+2. 배포?
+---
+1. README 및 포폴 작성
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+2. 회고
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
 
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
-
-```
-cd existing_repo
-git remote add origin https://lab.ssafy.com/ung03/final-pjt.git
-git branch -M master
-git push -uf origin master
-```
-
-## Integrate with your tools
-
-- [ ] [Set up project integrations](https://lab.ssafy.com/ung03/final-pjt/-/settings/integrations)
-
-## Collaborate with your team
-
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+10. 문제와 해결
+- 강사님 컴퓨터 성능이 너무 낮다
+    - 외부에서 노트북 반입이 되는가?
