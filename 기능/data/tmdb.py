@@ -1,9 +1,14 @@
 ﻿import requests
 import json
 from pprint import pprint
+import os
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
+TMDB = os.getenv('tmdb')
 
 results=[]
-TMDB='API_TOKEN'
+
 headers = {
     "accept": "application/json",
     "Authorization": f"Bearer {TMDB}"
@@ -14,7 +19,7 @@ poster_url = "https://image.tmdb.org/t/p/original"
 de=['adult', 'backdrop_path', 'video', 'popularity', 'vote_count']
 set_provider=(8,119,337,356,97,350)
 
-for i in range(1, 51):
+for i in range(1, 2):
     movie_params = {
         'sort_by':'popularity.desc',
         'include_adult':False,
@@ -53,8 +58,6 @@ for i in range(1, 51):
         if p: response['watch_providers']=list(p)
 
     results+=responses
-
-
 
 
 with open('data.json', 'w', encoding='utf-8') as f:
