@@ -3,7 +3,7 @@
     <div v-if="isOpen" class="modal-overlay">
       <div class="modal-content">
         <h2>Measure Modal</h2>
-        <p>여기에 측정 관련 내용을 넣으세요.</p>
+        <CameraComponent />
         <button @click="completeModal">완료</button>
         <button @click="closeModal">닫기</button>
       </div>
@@ -13,6 +13,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
+import CameraComponent from './CameraComponent.vue';
 defineProps({
   isOpen: Boolean,
   useTransition: Boolean
