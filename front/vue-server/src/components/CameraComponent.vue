@@ -1,13 +1,13 @@
-﻿<!-- components/CameraComponent.vue -->
-<template>
+﻿<template>
   <div class="camera-container">
-    <video ref="videoElement" autoplay playsinline style="display: none"></video>
-    <canvas ref="canvasElement" style="display: none"></canvas>
+    <video ref="videoElement" autoplay playsinline style="display: none" width="400" height="300"></video>
+    <canvas ref="canvasElement" style="display: none" width="400" height="300"></canvas>
     <img 
       ref="imgElement" 
       class="camera-display"
       :src="frameData ? 'data:image/jpeg;base64,' + frameData : ''"
       alt="camera feed"
+      width="400" height="300"
     />
     <div class="camera-controls">
       <button @click="startStreaming">{{ buttonText }}</button>
@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { defineEmits } from 'vue';
+import { defineEmits } from 'vue'
 import { ref, onUnmounted } from 'vue'
 
 const videoElement = ref(null)
@@ -31,7 +31,7 @@ const frameData = ref("")
 const emotions = ref(null)
 const buttonText = ref("카메라 시작")
 
-const emit = defineEmits(['capture', 'emotion-detected'])
+const emit = defineEmits(['emotion-detected'])
 
 const startStreaming = async () => {
   mode.value = !mode.value
@@ -40,10 +40,7 @@ const startStreaming = async () => {
     try {
       buttonText.value = "카메라 중지"
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          width: 640,
-          height: 480
-        } 
+        video: true 
       })
       videoElement.value.srcObject = stream
       videoElement.value.play()
@@ -118,14 +115,12 @@ onUnmounted(() => {
 
 <style scoped>
 .camera-container {
-  width: 100%;
   max-width: 640px;
   margin: 0 auto;
   text-align: center;
 }
 
 .camera-display {
-  width: 100%;
   max-width: 640px;
   height: auto;
   border-radius: 8px;
