@@ -1,21 +1,20 @@
 ﻿<template>
-  <transition name="modal">
-    <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-content">
-        <button @click="closeModal" class="close-button">&times;</button>
-        <h2>{{ cardData.title }}</h2>
-        <img :src="cardData.image" :alt="cardData.title" class="modal-image">
-        <p>{{ cardData.description }}</p>
-      </div>
+  <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
+    <div class="modal-content">
+      <button @click="closeModal" class="close-button">&times;</button>
+      <h2>{{ card.title }}</h2>
+      <img :src="card.image" :alt="card.title" class="modal-image">
+      <p>{{ card.description }}</p>
     </div>
-  </transition>
+  </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits } from 'vue'
+
 defineProps({
   isOpen: Boolean,
-  cardData: Object
+  card: Object
 })
 
 const emit = defineEmits(['close'])
@@ -45,7 +44,6 @@ const closeModal = () => {
   border-radius: 5px;
   max-width: 500px;
   position: relative;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
 }
 
 .close-button {
@@ -56,23 +54,12 @@ const closeModal = () => {
   cursor: pointer;
   background: none;
   border: none;
-  color: #333;
 }
 
 .modal-image {
   width: 100%;
   max-height: 300px;
   object-fit: cover;
-  border-radius: 5px;
   margin-bottom: 10px;
-}
-
-/* 트랜지션 효과 */
-.modal-enter-active, .modal-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.modal-enter-from, .modal-leave-to {
-  opacity: 0;
 }
 </style>
