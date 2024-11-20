@@ -3,12 +3,6 @@
     <div class="content-wrapper">
       <h3 class="title">Let's find your emotions</h3>
       <div class="circle-container">
-        <!-- SVG 애니메이션 추가 -->
-        <svg v-if="measurementComplete" class="circle-effect" viewBox="0 0 100 100">
-          <circle class="wave" cx="50" cy="50" r="48" />
-          <circle class="wave" cx="50" cy="50" r="48" />
-          <circle class="wave" cx="50" cy="50" r="48" />
-        </svg>
         <div class="circle">
           <button 
             v-if="!measurementComplete" 
@@ -73,8 +67,8 @@ const completeMeasurement = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;  /* 추가 */
-  z-index: 1;  /* 추가 */
+  position: relative;
+  z-index: 1;
 }
 
 .content-wrapper {
@@ -91,15 +85,26 @@ const completeMeasurement = () => {
   font-weight: 500;
 }
 
-.circle {
+.circle-container {
+  position: relative;
   width: 300px;
   height: 300px;
+  z-index: 2;
+}
+
+.circle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: white;
   border: 2px solid #333;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 2;
   transition: transform 0.3s ease;
 }
 
@@ -139,75 +144,5 @@ const completeMeasurement = () => {
 .start-button:hover {
   background-color: #45a049;
   transform: scale(1.05);
-}
-
-/* 웨이브 효과 */
-.circle-container {
-  position: relative;
-  width: 300px;
-  height: 300px;
-  z-index: 2;  /* 수정 */
-}
-
-.circle {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: white;
-  border: 2px solid #333;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2;
-}
-
-.circle-effect {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-
-.wave {
-  fill: none;
-  stroke-width: 1px;
-  stroke-linecap: round;
-  animation: wave 3s ease-in-out infinite;
-  transform-origin: center; /* 회전 중심점 설정 */
-}
-
-.wave:nth-child(1) {
-  stroke: rgba(76, 175, 80, 0.3);
-  animation-delay: 0s;
-}
-
-.wave:nth-child(2) {
-  stroke: rgba(76, 175, 80, 0.2);
-  animation-delay: 1s;
-}
-
-.wave:nth-child(3) {
-  stroke: rgba(76, 175, 80, 0.1);
-  animation-delay: 2s;
-}
-
-@keyframes wave {
-  0% {
-    transform: rotate(0deg) scale(0.9);
-    opacity: 0.3;
-  }
-  50% {
-    transform: rotate(180deg) scale(1.1);
-    opacity: 0.5;
-  }
-  100% {
-    transform: rotate(360deg) scale(0.9);
-    opacity: 0.3;
-  }
 }
 </style>
