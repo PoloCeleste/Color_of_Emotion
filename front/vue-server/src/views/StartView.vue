@@ -1,32 +1,34 @@
 ﻿<template>
   <div class="start-container">
     <div class="content-wrapper">
-      <h3 class="title">Let's find your emotions</h3>
       <div class="circle-container">
-        <div class="circle"  :class="[{ 'rainbow-shadow': measurementComplete }]">
+        <div class="circle" :class="[{ 'rainbow-shadow': measurementComplete }]">
           <button 
             v-if="!measurementComplete" 
             class="measure-button" 
             @click="openModal"
           >
-            MEASURE
+            Let's find your emotions
           </button>
           <button 
             v-else 
-            class="measure-button" 
+            class="start-button" 
             @click="goToRecommend"
           >
             START
           </button>
         </div>
-        
       </div>
     </div>
-    <MeasureModal
-      :isOpen="isModalOpen"
-      @close="closeModal"
-      @complete="completeMeasurement"
-    /> 
+    <!-- 모달 트랜지션 추가 -->
+    <transition name="modal-fade">
+      <MeasureModal
+        v-if="isModalOpen"
+        :isOpen="isModalOpen"
+        @close="closeModal"
+        @complete="completeMeasurement"
+      /> 
+    </transition>
   </div>
 </template>
 
@@ -64,12 +66,29 @@ const completeMeasurement = () => {
 .start-container {
   width: 100%;
   height: 70vh;
-  background-color: white;
+  background-color: whitesmoke;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  z-index: 1;
+}
+
+/* 모달 트랜지션 효과 */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: all 0.5s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.67);
+}
+
+.modal-fade-enter-to,
+.modal-fade-leave-from {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .content-wrapper {
@@ -86,12 +105,15 @@ const completeMeasurement = () => {
   font-weight: 500;
 }
 
+/* circle-container 위치 조정 */
 .circle-container {
-  position: relative;
-  width: 300px;
-  height: 300px;
+  position: fixed; /* absolute에서 fixed로 변경 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
   z-index: 2;
-  border-radius: 50%;
 }
 
 .circle {
@@ -101,8 +123,8 @@ const completeMeasurement = () => {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  background-color: white;
-  border: 2px solid #333;
+  background-color: whitesmoke;
+  border: 2px solid darkgray;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -116,41 +138,44 @@ const completeMeasurement = () => {
   border: 0px solid transparent;
   background-origin: border-box;
   background-clip: content-box, border-box;
-  filter: 
-    drop-shadow(0 0 4px #ff0000)
-    drop-shadow(0 0 4px #ff7f00)
-    drop-shadow(0 0 4px #ffff00)
-    drop-shadow(0 0 4px #00ff00)
-    drop-shadow(0 0 4px #0000ff)
-    drop-shadow(0 0 4px #8b00ff);
-  /* background: 
-    linear-gradient(white, white) padding-box,
-    linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) border-box; */
-  animation: move-shadow 2s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.5));
+  filter: saturate(150%) drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
+  animation: move-shadow 5s linear infinite;
+  opacity: 0.8;
 }
 
 @keyframes move-shadow {
-  0% { filter: drop-shadow(10.00px 0.00px 4px rgba(255, 0, 0, 0.5)); }
-  5% { filter: drop-shadow(9.51px 3.09px 4px rgba(255, 127, 0, 0.5)); }
-  10% { filter: drop-shadow(8.09px 5.88px 4px rgba(255, 255, 0, 0.5)); }
-  15% { filter: drop-shadow(5.88px 8.09px 4px rgba(0, 255, 0, 0.5)); }
-  20% { filter: drop-shadow(3.09px 9.51px 4px rgba(0, 255, 255, 0.5)); }
-  25% { filter: drop-shadow(0.00px 10.00px 4px rgba(0, 0, 255, 0.5)); }
-  30% { filter: drop-shadow(-3.09px 9.51px 4px rgba(255, 0, 255, 0.5)); }
-  35% { filter: drop-shadow(-5.88px 8.09px 4px rgba(255, 0, 127, 0.5)); }
-  40% { filter: drop-shadow(-8.09px 5.88px 4px rgba(255, 127, 127, 0.5)); }
-  45% { filter: drop-shadow(-9.51px 3.09px 4px rgba(0, 255, 127, 0.5)); }
-  50% { filter: drop-shadow(-10.00px 0.00px 4px rgba(127, 0, 255, 0.5)); }
-  55% { filter: drop-shadow(-9.51px -3.09px 4px rgba(255, 0, 0, 0.5)); }
-  60% { filter: drop-shadow(-8.09px -5.88px 4px rgba(255, 127, 0, 0.5)); }
-  65% { filter: drop-shadow(-5.88px -8.09px 4px rgba(255, 255, 0, 0.5)); }
-  70% { filter: drop-shadow(-3.09px -9.51px 4px rgba(0, 255, 0, 0.5)); }
-  75% { filter: drop-shadow(-0.00px -10.00px 4px rgba(0, 255, 255, 0.5)); }
-  80% { filter: drop-shadow(3.09px -9.51px 4px rgba(0, 0, 255, 0.5)); }
-  85% { filter: drop-shadow(5.88px -8.09px 4px rgba(255, 0, 255, 0.5)); }
-  90% { filter: drop-shadow(8.09px -5.88px 4px rgba(255, 0, 127, 0.5)); }
-  95% { filter: drop-shadow(9.51px -3.09px 4px rgba(255, 127, 127, 0.5)); }
-  100% { filter: drop-shadow(10.00px -0.00px 4px rgba(255, 0, 0, 0.5)); }
+  0% { filter: drop-shadow(10.00px 0.00px 6px rgba(255, 0, 0, 0.7)) drop-shadow(10.00px 0.00px 7px rgba(255, 0, 0, 0.4)); }
+  3.33% { filter: drop-shadow(9.66px 2.59px 6px rgba(255, 102, 0, 0.7)) drop-shadow(9.66px 2.59px 7px rgba(255, 102, 0, 0.4)); }
+  6.67% { filter: drop-shadow(8.66px 5.00px 6px rgba(255, 204, 0, 0.7)) drop-shadow(8.66px 5.00px 7px rgba(255, 204, 0, 0.4)); }
+  10% { filter: drop-shadow(7.07px 7.07px 6px rgba(255, 255, 0, 0.7)) drop-shadow(7.07px 7.07px 7px rgba(255, 255, 0, 0.4)); }
+  13.33% { filter: drop-shadow(5.00px 8.66px 6px rgba(102, 255, 0, 0.7)) drop-shadow(5.00px 8.66px 7px rgba(102, 255, 0, 0.4)); }
+  16.67% { filter: drop-shadow(2.59px 9.66px 6px rgba(0, 255, 0, 0.7)) drop-shadow(2.59px 9.66px 7px rgba(0, 255, 0, 0.4)); }
+  20% { filter: drop-shadow(0.00px 10.00px 6px rgba(0, 255, 102, 0.7)) drop-shadow(0.00px 10.00px 7px rgba(0, 255, 102, 0.4)); }
+  23.33% { filter: drop-shadow(-2.59px 9.66px 6px rgba(0, 255, 204, 0.7)) drop-shadow(-2.59px 9.66px 7px rgba(0, 255, 204, 0.4)); }
+  26.67% { filter: drop-shadow(-5.00px 8.66px 6px rgba(0, 255, 255, 0.7)) drop-shadow(-5.00px 8.66px 7px rgba(0, 255, 255, 0.4)); }
+  30% { filter: drop-shadow(-7.07px 7.07px 6px rgba(0, 204, 255, 0.7)) drop-shadow(-7.07px 7.07px 7px rgba(0, 204, 255, 0.4)); }
+  33.33% { filter: drop-shadow(-8.66px 5.00px 6px rgba(0, 102, 255, 0.7)) drop-shadow(-8.66px 5.00px 7px rgba(0, 102, 255, 0.4)); }
+  36.67% { filter: drop-shadow(-9.66px 2.59px 6px rgba(0, 0, 255, 0.7)) drop-shadow(-9.66px 2.59px 7px rgba(0, 0, 255, 0.4)); }
+  40% { filter: drop-shadow(-10.00px 0.00px 6px rgba(102, 0, 255, 0.7)) drop-shadow(-10.00px 0.00px 7px rgba(102, 0, 255, 0.4)); }
+  43.33% { filter: drop-shadow(-9.66px -2.59px 6px rgba(204, 0, 255, 0.7)) drop-shadow(-9.66px -2.59px 7px rgba(204, 0, 255, 0.4)); }
+  46.67% { filter: drop-shadow(-8.66px -5.00px 6px rgba(255, 0, 255, 0.7)) drop-shadow(-8.66px -5.00px 7px rgba(255, 0, 255, 0.4)); }
+  50% { filter: drop-shadow(0.00px -10.00px 6px rgba(255, 0, 204, 0.7)) drop-shadow(0.00px -10.00px 7px rgba(255, 0, 204, 0.4)); }
+  53.33% { filter: drop-shadow(2.59px -9.66px 6px rgba(255, 0, 102, 0.7)) drop-shadow(2.59px -9.66px 7px rgba(255, 0, 102, 0.4)); }
+  56.67% { filter: drop-shadow(5.00px -8.66px 6px rgba(255, 0, 0, 0.7)) drop-shadow(5.00px -8.66px 7px rgba(255, 0, 0, 0.4)); }
+  60% { filter: drop-shadow(7.07px -7.07px 6px rgba(255, 51, 0, 0.7)) drop-shadow(7.07px -7.07px 7px rgba(255, 51, 0, 0.4)); }
+  63.33% { filter: drop-shadow(8.66px -5.00px 6px rgba(255, 102, 0, 0.7)) drop-shadow(8.66px -5.00px 7px rgba(255, 102, 0, 0.4)); }
+  66.67% { filter: drop-shadow(9.66px -2.59px 6px rgba(255, 153, 0, 0.7)) drop-shadow(9.66px -2.59px 7px rgba(255, 153, 0, 0.4)); }
+  70% { filter: drop-shadow(10.00px 0.00px 6px rgba(255, 204, 0, 0.7)) drop-shadow(10.00px 0.00px 7px rgba(255, 204, 0, 0.4)); }
+  73.33% { filter: drop-shadow(9.66px 2.59px 6px rgba(255, 255, 0, 0.7)) drop-shadow(9.66px 2.59px 7px rgba(255, 255, 0, 0.4)); }
+  76.67% { filter: drop-shadow(8.66px 5.00px 6px rgba(255, 204, 0, 0.7)) drop-shadow(8.66px 5.00px 7px rgba(255, 204, 0, 0.4)); }
+  80% { filter: drop-shadow(7.07px 7.07px 6px rgba(255, 153, 0, 0.7)) drop-shadow(7.07px 7.07px 7px rgba(255, 153, 0, 0.4)); }
+  83.33% { filter: drop-shadow(5.00px 8.66px 6px rgba(255, 102, 0, 0.7)) drop-shadow(5.00px 8.66px 7px rgba(255, 102, 0, 0.4)); }
+  86.67% { filter: drop-shadow(2.59px 9.66px 6px rgba(255, 51, 0, 0.7)) drop-shadow(2.59px 9.66px 7px rgba(255, 51, 0, 0.4)); }
+  90% { filter: drop-shadow(0.00px 10.00px 6px rgba(255, 25, 0, 0.7)) drop-shadow(0.00px 10.00px 7px rgba(255, 25, 0, 0.4)); }
+  93.33% { filter: drop-shadow(-2.59px 9.66px 6px rgba(255, 13, 0, 0.7)) drop-shadow(-2.59px 9.66px 7px rgba(255, 13, 0, 0.4)); }
+  96.67% { filter: drop-shadow(-5.00px 8.66px 6px rgba(255, 6, 0, 0.7)) drop-shadow(-5.00px 8.66px 7px rgba(255, 6, 0, 0.4)); }
+  100% { filter: drop-shadow(10.00px 0.00px 6px rgba(255, 0, 0, 0.7)) drop-shadow(10.00px 0.00px 7px rgba(255, 0, 0, 0.4)); }
 }
 
 .circle:hover {
@@ -161,12 +186,19 @@ const completeMeasurement = () => {
   padding: 20px 40px;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #333;
+  color: darkgray;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: color 0.3s ease;
   letter-spacing: 2px;
+  overflow: hidden;
+  /* 모든 속성에 대해 transition 적용 */
+  transition: all 0.3s ease;
+}
+
+.measure-button:hover {
+  transform: scale(1.1);
+  color: #4CAF50;
 }
 
 .start-button {
@@ -181,25 +213,61 @@ const completeMeasurement = () => {
   letter-spacing: 2px;
 }
 
-.measure-button:hover {
-  color: #4CAF50;
-}
-
 .start-button {
   padding: 20px 40px;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #4CAF50;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
   letter-spacing: 2px;
-  z-index: 3;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  /* 모든 속성에 대해 transition 적용 */
+  transition: all 0.3s ease;
+}
+
+/* START 버튼일 때의 스타일 */
+.rainbow-shadow .start-button {
+  animation: text-color-change 5s linear infinite;
 }
 
 .start-button:hover {
-  background-color: #45a049;
-  transform: scale(1.05);
+  transform: scale(1.15);
 }
+
+@keyframes text-color-change {
+  0% { color: rgba(255, 0, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  3.33% { color: rgba(255, 102, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  6.67% { color: rgba(255, 204, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  10% { color: rgba(255, 255, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  13.33% { color: rgba(102, 255, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  16.67% { color: rgba(0, 255, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  20% { color: rgba(0, 255, 102, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  23.33% { color: rgba(0, 255, 204, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  26.67% { color: rgba(0, 255, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  30% { color: rgba(0, 204, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  33.33% { color: rgba(0, 102, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  36.67% { color: rgba(0, 0, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  40% { color: rgba(102, 0, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  43.33% { color: rgba(204, 0, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  46.67% { color: rgba(255, 0, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  50% { color: rgba(255, 0, 204, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  53.33% { color: rgba(255, 0, 102, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  56.67% { color: rgba(255, 0, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  60% { color: rgba(255, 51, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  63.33% { color: rgba(255, 102, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  66.67% { color: rgba(255, 153, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  70% { color: rgba(255, 204, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  73.33% { color: rgba(255, 255, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  76.67% { color: rgba(255, 204, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  80% { color: rgba(255, 153, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  83.33% { color: rgba(255, 102, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  86.67% { color: rgba(255, 51, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  90% { color: rgba(255, 25, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  93.33% { color: rgba(255, 13, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  96.67% { color: rgba(255, 6, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+  100% { color: rgba(255, 0, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+}
+
+
 </style>

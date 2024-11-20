@@ -1,25 +1,24 @@
 ﻿<template>
-  <div class="camera-container">
-    <video ref="videoElement" autoplay playsinline style="display: none" width="400" height="300"></video>
-    <canvas ref="canvasElement" style="display: none" width="400" height="300"></canvas>
-    
-    <!-- 초기 멘트 div -->
-    <div v-if="showIntroMessages" class="intro-messages">
-      <h2>{{ currentMessage }}</h2>
-    </div>
-
-    <!-- 카메라 화면 -->
-     <div class="camera-display" v-else style="width: 400px; height: 300px;">
-    <img 
-      
-      ref="imgElement" 
-      class="camera-display"
-      :src="frameData ? 'data:image/jpeg;base64,' + frameData : ''"
-      alt="camera feed"
-      style="width: 100%; height: 100%;"
-    /></div>
-    <div class="camera-controls">
-      <button @click="startStreaming">{{ buttonText }}</button>
+  <div>
+    <div class="camera-container">
+      <video ref="videoElement" autoplay playsinline style="display: none" width="600" height="500"></video>
+      <canvas ref="canvasElement" style="display: none" width="600" height="500"></canvas>
+      <!-- 초기 멘트 div -->
+      <div v-if="showIntroMessages" class="intro-messages">
+        <h2>{{ currentMessage }}</h2>
+      </div>
+      <!-- 카메라 화면 -->
+      <div class="camera-display" v-else style="width: 400px; height: 300px;" @click="startStreaming">
+        <img 
+          v-if="frameData"
+          ref="imgElement" 
+          class="camera-display"
+          :src="frameData ? 'data:image/jpeg;base64,' + frameData : ''"
+          alt="camera feed"
+          style="width: 100%; height: 100%;"
+        />
+        <h1>{{ buttonText }}</h1>
+      </div>
     </div>
     <!-- <p v-if="emotions" class="emotion-text">감지된 감정: {{ emotions.emotion }}</p> -->
     <!-- 상태 메시지 수정 -->
@@ -243,24 +242,25 @@ onUnmounted(() => {
 
 <style scoped>
 .camera-container {
-  max-width: 640px;
-  margin: 0 auto;
-  text-align: center;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
 }
 
 .camera-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   max-width: 640px;
   height: auto;
   border-radius: 8px;
   border: 2px solid #ccc;
   background-color: #f0f0f0;
-}
-
-.camera-controls {
-  margin-top: 15px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
 }
 
 button {
