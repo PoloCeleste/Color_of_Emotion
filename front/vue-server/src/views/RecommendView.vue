@@ -25,10 +25,18 @@
           prevEl: '.swiper-button-prev',
         }"
         :pagination="{ el: '.swiper-pagination' }"
-        :loop="true"
+        :loop="false"
       >
-        <SwiperSlide v-for="(card, index) in cards" :key="index" @click="openModal(card)">
-          <CardComponent :card="card" :useTransition="useTransition" />
+        <SwiperSlide 
+          class="swiper-slide"
+          v-for="card in cards" 
+          :key="card.id" 
+          @click="openModal(card)"
+        >
+          <CardComponent 
+            :card="card" 
+            :useTransition="useTransition"
+          />
         </SwiperSlide>
         <!-- 다시하기 카드 -->
         <SwiperSlide>
@@ -52,6 +60,9 @@
 </template>
 
 <script setup>
+// 최상단에 import 추가
+import dummyMovies from '@/data/dummymovies.json'
+
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
@@ -65,21 +76,22 @@ import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 
 const router = useRouter()
-const cards = ref([])
 const isModalOpen = ref(false)
 const selectedCard = ref(null)
 const useTransition = ref(true)
 
+const cards = ref([])
+
 onMounted(() => {
-  // 백엔드에서 데이터를 받아오는 것을 시뮬레이션
-  setTimeout(() => {
-    cards.value = Array(10).fill().map((_, i) => ({
-      title: `Card ${i + 1}`,
-      subtitle: 'Recommendation',
-      description: `Description for card ${i + 1}`,
-      image: `https://picsum.photos/id/${i + 1}/450/800`
-    }))
-  }, 1000)
+  cards.value = dummyMovies.map(movie => ({
+    id: movie.movie_id,
+    title: movie.title,
+    subtitle: movie.release_date,
+    description: movie.overview,
+    image: movie.poster_path,
+    vote_average: movie.tmdb_vote_average,
+    genre_ids: movie.genre_ids
+  }))
 })
 
 const goBackToStart = () => {
@@ -96,18 +108,21 @@ const closeModal = () => {
 }
 </script>
 
-
-
 <style scoped>
 .carousel-3D-swiper-section {
   /* 기존 스타일 유지 */
 }
 
+.swiper-slide {
+  width: 500px;  /* 원하는 카드 너비 */
+  height: 1000px; /* 원하는 카드 높이 */
+}
+
 .card {
-  transition: none;
+  width: 100%;
+  height: 100%;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .card.with-transition {
@@ -119,8 +134,15 @@ const closeModal = () => {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
+.image-wrapper {
+  width: 100%;
+  height: 70%;  /* 이미지 영역 비율 조정 */
+}
+
 .image-wrapper img {
-  transition: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .card.with-transition .image-wrapper img {

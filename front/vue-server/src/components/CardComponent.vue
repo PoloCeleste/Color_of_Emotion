@@ -14,8 +14,23 @@
 <script setup>
 import { defineProps } from 'vue';
 defineProps({
-  card: Object,
-  useTransition: Boolean
+  card: {
+    type: Object,
+    required: true,
+    default: () => ({
+      id: null,
+      title: '',
+      subtitle: '',
+      description: '',
+      image: '',
+      vote_average: 0,
+      genre_ids: []
+    })
+  },
+  useTransition: {
+    type: Boolean,
+    default: true
+  }
 })
 </script>
 
@@ -27,18 +42,21 @@ defineProps({
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.card.with-transition:hover {
-  transform: translateY(-5px);
+/* .card.with-transition:hover {
+  transform: translate(-10px);
+  width: 105%;
+  height: 105%;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
+} */
 
 .image-wrapper img {
   transition: transform 0.3s ease;
+  width: 100%;
 }
 
-.card.with-transition:hover .image-wrapper img {
+/* .card.with-transition:hover .image-wrapper img {
   transform: scale(1.1);
-}
+} */
 
 /* ... (기타 필요한 스타일) */
 </style>
