@@ -26,10 +26,10 @@ class Movie(models.Model):
     tmdb_vote_average = models.FloatField()
     watch_providers = models.ManyToManyField(Provider, related_name='movies')
     movie_id = models.IntegerField()
-    picture_url = models.JSONField()
-    video_url = models.JSONField()
-    reviews = models.JSONField()
-    poster_palette = models.JSONField()
+    picture_url = models.JSONField(null=True)
+    video_url = models.JSONField(null=True)
+    reviews = models.JSONField(null=True)
+    poster_palette = models.JSONField(null=True)
 
     def __str__(self):
         return self.title
