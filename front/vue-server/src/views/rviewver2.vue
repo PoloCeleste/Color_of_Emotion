@@ -62,7 +62,7 @@ import { ref, onMounted } from 'vue'
 // import { useRouter } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { EffectCoverflow, Navigation, Pagination } from 'swiper/modules'
-import CardModal from '@/components/CardModal.vue'
+import CardModal from '@/components/CardComponentCardModal.vue'
 
 // 카드 데이터 상태 관리
 const cards = ref([])

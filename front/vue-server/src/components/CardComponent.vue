@@ -16,16 +16,7 @@ import { defineProps } from 'vue';
 defineProps({
   card: {
     type: Object,
-    required: true,
-    default: () => ({
-      id: null,
-      title: '',
-      subtitle: '',
-      description: '',
-      image: '',
-      vote_average: 0,
-      genre_ids: []
-    })
+    required: true
   },
   useTransition: {
     type: Boolean,
@@ -36,27 +27,26 @@ defineProps({
 
 <style scoped>
 .card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  height: 100%;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* .card.with-transition:hover {
-  transform: translate(-10px);
-  width: 105%;
-  height: 105%;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-} */
+.image-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
 
 .image-wrapper img {
-  transition: transform 0.3s ease;
   width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
-/* .card.with-transition:hover .image-wrapper img {
+.with-transition:hover .image-wrapper img {
   transform: scale(1.1);
-} */
-
-/* ... (기타 필요한 스타일) */
+}
 </style>

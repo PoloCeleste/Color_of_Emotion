@@ -25,7 +25,7 @@
           prevEl: '.swiper-button-prev',
         }"
         :pagination="{ el: '.swiper-pagination' }"
-        :loop="false"
+        :loop="true"
       >
         <SwiperSlide 
           class="swiper-slide"
@@ -34,6 +34,7 @@
           @click="openModal(card)"
         >
           <CardComponent 
+          v-if="cards"
             :card="card" 
             :useTransition="useTransition"
           />
@@ -41,7 +42,7 @@
         <!-- 다시하기 카드 -->
         <SwiperSlide>
           <div class="card restart-card" :class="{ 'with-transition': useTransition }">
-            <div class="image-wrapper aspect-video">
+            <div class="image-wrapper aspect-video" @click="goBackToStart">
               <img class="aspect-video" src="https://picsum.photos/450/800?random=1" alt="Restart">
             </div>
             <div class="details">
@@ -55,7 +56,7 @@
         <div class="swiper-pagination"></div>
       </Swiper>
     </section>
-    <CardModal :isOpen="isModalOpen" :card="selectedCard" @close="closeModal" />
+    <CardComponentModal :isOpen="isModalOpen" :card="selectedCard" @close="closeModal" />
   </section>
 </template>
 
@@ -67,7 +68,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { EffectCoverflow, Navigation, Pagination } from 'swiper/modules'
-import CardModal from '@/components/CardModal.vue'  // CardModal 컴포넌트 import
+import CardComponentModal from '@/components/CardComponentModal.vue'  // CardComponentModal 컴포넌트 import
 import CardComponent from '@/components/CardComponent.vue'  // 새로운 카드 컴포넌트
 
 import 'swiper/css'
@@ -84,16 +85,27 @@ const cards = ref([])
 
 onMounted(() => {
   cards.value = dummyMovies.map(movie => ({
+    genre_ids: movie.genre_ids, 
+    language: movie.original_language,
     id: movie.movie_id,
     title: movie.title,
-    subtitle: movie.release_date,
+    original_title: movie.original_title,
+
+    release_date: movie.release_date,
     description: movie.overview,
     image: movie.poster_path,
     vote_average: movie.tmdb_vote_average,
-    genre_ids: movie.genre_ids
-  }))
-})
+    providers: movie.watch_providers,
 
+    picture_url: movie.picture_url,
+    video_url: movie.video_url,
+    reviews: movie.reviews,
+    watchapedia: movie.watchapedia,
+    poster_palette: movie.poster_palette
+  }))
+  console.log(cards)
+  console.log(cards.value)
+})
 const goBackToStart = () => {
   router.push('/')
 }
