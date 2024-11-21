@@ -128,7 +128,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = ['ws://127.0.0.1:8000/', 'ws://localhost:8000/', 'ws://0.0.0.0:8000/', 'ws://192.168.201.100:8000/']
+CSRF_TRUSTED_ORIGINS = ['ws://127.0.0.1:8000/', 'ws://localhost:8000/', 'ws://0.0.0.0:8000/', 'ws://192.168.201.100:8000/', 'ws://192.168.31.170:8000/']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https', 'ws')
 
 CHANNEL_LAYERS={

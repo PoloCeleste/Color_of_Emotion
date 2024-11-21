@@ -35,29 +35,18 @@ model.load_state_dict(model_state['model'])
 
 class VideoStreamConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.fps = 0
         self.prev = 0
         self.new = 0
         self.loop = asyncio.get_running_loop()
         await self.accept()
 
     async def disconnect(self, close_code):
-        self.fps = 0
         self.prev = 0
         self.new = 0
         raise StopConsumer()
 
-    async def fps_count(self):
-        try:
-            self.new = time.time()
-            self.fps = int(1/(self.new-self.prev))
-            self.prev = self.new
-        except cv2.error as e:
-            raise e
-    
     async def receive(self, bytes_data):
         if not (bytes_data):
-            self.fps = 0
             self.prev = 0
             self.new = 0
             print('Closed connection')
@@ -82,7 +71,7 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
             
             asyncio.sleep(100/1000)
             await self.send(json.dumps(data))
-    
+
 
     def softmax(x):
         e_x = np.exp(x - np.max(x))
@@ -96,6 +85,8 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         domination=''
         prob=''
         emotion_data=''
+        label_position=(90, 10)
+        
         display_color = (255, 161, 54)
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x+w, y+h), display_color, 2)
@@ -119,10 +110,10 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
                     prob[p]=round(float(probs[p]),2)
                     if p==label:
                         domination = {label:prob[label]}
-                        label+=(' '+str(prob[label])+'%')
+                        label="Face Detected"
                 print(label)
                 print(prob)
-                label_position =(120, 10)
+                flag=True
 
                 # SUPPORT_UTF8 = True
                 # if SUPPORT_UTF8:
@@ -138,8 +129,8 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         else:
             if not label:
                 label='No Face Found'
-                label_position=(90, 10)
                 display_color = (0, 255, 0)
+                flag=False
                 # SUPPORT_UTF8 = True
                 # if SUPPORT_UTF8:
         font_path = pth.join(getcwd(), assets, 'NotoSansKR-Regular.otf')
@@ -154,6 +145,7 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         if domination:
             emotion_data = {
                 'domination':domination,
-                'emotion':prob
+                'emotion':prob,
+                'flag':flag
             }
         return frame, emotion_data
