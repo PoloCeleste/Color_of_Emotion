@@ -32,7 +32,6 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'daphne',
-    'movies',
     'channels',
     'corsheaders',
     'django.contrib.admin',
