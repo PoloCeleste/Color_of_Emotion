@@ -25,6 +25,7 @@ class Movie(models.Model):
     title = models.CharField(max_length=255)
     tmdb_vote_average = models.FloatField()
     watch_providers = models.ManyToManyField(Provider, related_name='movies')
+    movie_id = models.IntegerField()
     picture_url = models.JSONField()
     video_url = models.JSONField()
     reviews = models.JSONField()

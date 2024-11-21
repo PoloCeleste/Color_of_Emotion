@@ -41,6 +41,7 @@ class Command(BaseCommand):
                         'release_date': movie_data['release_date'],
                         'title': movie_data['title'],
                         'tmdb_vote_average': movie_data['tmdb_vote_average'],
+                        'movie_id': movie_data['movie_id'],
                         'picture_url': movie_data['picture_url'],
                         'video_url': movie_data['video_url'],
                         'reviews': movie_data['reviews'],
