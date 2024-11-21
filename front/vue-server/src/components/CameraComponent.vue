@@ -15,14 +15,14 @@
           class="camera-display"
           :src="frameData ? 'data:image/jpeg;base64,' + frameData : ''"
           alt="camera feed"
-          style="width: 100%; height: 100%;"
+          style="width: 100%; height: 100%; align-items: center;"
         />
-        <h1>{{ buttonText }}</h1>
+        <h1 class="button" style="text-align: center;">{{ buttonText }}</h1>
       </div>
     </div>
     <!-- <p v-if="emotions" class="emotion-text">감지된 감정: {{ emotions.emotion }}</p> -->
     <!-- 상태 메시지 수정 -->
-    <p class="emotion-text" style="height: 8px;">
+    <p class="emotion-text" style="height: 8px;width: 100%;">
       {{ showIntroMessages ? '측정 준비중' : emotions ? `측정중 (${Math.round(measurementProgress)}%)`  : '' }}
     </p>
 
@@ -271,13 +271,21 @@ button {
   color: white;
   cursor: pointer;
   transition: background-color 0.3s;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 button:hover {
-  background-color: #45a049;
+  transform: scale(1.1);
+  color: #4CAF50;
 }
 
 .emotion-text {
+  position: absolute;
+  top: 70%;
+  left: 50%;
   margin-top: 10px;
   font-size: 1.1em;
   color: #333;
