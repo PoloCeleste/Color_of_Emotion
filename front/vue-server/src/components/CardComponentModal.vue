@@ -4,7 +4,7 @@
       <!-- 영화 기본 정보 -->
       <div class="movie-header">
         <h1>{{ card.title }}</h1>
-        <h3>원제 : {{ card.original_title }}({{ card.language }})</h3>
+        <h3>{{ card.original_title }} ({{ card.language }})</h3>
         <div class="movie-meta">
           <span>개봉일: {{ card.release_date }}</span>
           <br>
@@ -28,23 +28,35 @@
       </div>
       <div v-if="card.reviews">
         <p>리뷰</p>
-        <p v-for="(review, index) in card.reviews" :key="index">{{ review }}</p>
+        <div v-for="(review, index) in card.reviews" :key="index">
+          <p v-if="showFullReviewIndex !== index && review.length > 100">
+            {{ review.substring(0, 100) }}...
+            <button @click="showFullReview(index)">더보기</button>
+          </p>
+          <p v-else-if="showFullReviewIndex === index">
+            {{ review }}
+            <button @click="hideFullReview(index)">줄이기</button>
+          </p>
+          <p v-else>{{ review }}</p>
+        </div>
       </div>
 
       <div v-if="card.picture_url">
         <p>갤러리</p>
-        <p v-for="(picture_url, index) in card.picture_url" :key="index">
-          <img :src="picture_url" alt="">
-        </p>
-        <!-- {{ card.picture_url }} -->
+        <div class="gallery-container">
+          <div v-for="(picture_url, index) in card.picture_url" :key="index" class="gallery-item">
+            <img :src="picture_url" alt="" />
+          </div>
+        </div>
       </div>
 
       <div v-if="card.video_url">
         <p>동영상</p>
-        <p v-for="(video_url, index) in card.video_url" :key="index">
-          <iframe :src= "video_url" frameborder="0"></iframe>
-        </p>
-        <!-- {{ card.video_url }} -->
+        <div class="video-container">
+          <div v-for="(video_url, index) in card.video_url" :key="index" class="video-item">
+            <iframe :src="video_url" frameborder="0"></iframe>
+          </div>
+        </div>
       </div>
       
       <div v-if="card.providers">
@@ -84,7 +96,7 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
+import { defineProps, ref } from 'vue'
 import genres from '@/data/genres.json'
 import providers from '@/data/providers.json'
 
@@ -109,6 +121,16 @@ const getProviderName = (providerId) => {
   const provider = providers.find(p => p.provider_id === providerId)
   console.log(provider)
   return provider ? provider.provider_name : ''
+}
+
+const showFullReviewIndex = ref(null)
+
+const showFullReview = (index) => {
+  showFullReviewIndex.value = index
+}
+
+const hideFullReview = () => {
+  showFullReviewIndex.value = null
 }
 </script>
 
@@ -161,5 +183,21 @@ const getProviderName = (providerId) => {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.gallery-container, .video-container {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.gallery-item, .video-item {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.gallery-item img, .video-item iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 </style>
