@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <Transition name="fade">
-      <h1 v-if="showTitle" class="title">Colors of Emotions</h1>
+      <h1 v-if="showTitle" class="title">Color of Emotion</h1>
     </Transition>
     <Transition name="fade">
       <RouterView v-if="showRouter" />
@@ -39,7 +39,7 @@ onMounted(() => {
 }
 
 .title {
-  font-size: 2rem;
+  font-size: 5rem;
   text-align: center;
 }
 

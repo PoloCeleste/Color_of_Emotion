@@ -8,7 +8,7 @@
             class="measure-button" 
             @click="openModal"
           >
-            Let's find your emotions
+            Let's find your emotion
           </button>
           <button 
             v-else 
@@ -203,7 +203,7 @@ const completeMeasurement = () => {
 
 .start-button {
   padding: 20px 40px;
-  font-size: 1.5rem;
+  font-size: 5rem;
   font-weight: bold;
   color: transparent;
   background: transparent;
@@ -215,7 +215,7 @@ const completeMeasurement = () => {
 
 .start-button {
   padding: 20px 40px;
-  font-size: 1.5rem;
+  font-size: 50px;
   font-weight: bold;
   background: transparent;
   border: none;
