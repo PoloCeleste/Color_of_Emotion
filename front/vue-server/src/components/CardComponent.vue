@@ -1,12 +1,7 @@
 <template>
     <div class="card" :class="{ 'with-transition': useTransition }">
       <div class="image-wrapper aspect-video">
-        <img class="aspect-video" :src="card.image" :alt="card.title">
-      </div>
-      <div class="details">
-        <h3>{{ card.title }}</h3>
-        <span>{{ card.subtitle }}</span>
-        <p>{{ card.description }}</p>
+        <img class="aspect-video" :src="card.poster_path" :alt="card.title">
       </div>
     </div>
   </template>

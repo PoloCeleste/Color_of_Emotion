@@ -1,6 +1,6 @@
 ﻿<template>
   <section class="my-10">
-    <h2 class="carousel-3D-swiper-title">Recommendations</h2>
+    <!-- <h2 class="carousel-3D-swiper-title">Recommendations</h2> -->
     <div class="transition-toggle">
       <label>
         <input type="checkbox" v-model="useTransition"> Action On
@@ -12,7 +12,7 @@
         :effect="useTransition ? 'coverflow' : 'slide'"
         :grabCursor="true"
         :centeredSlides="true"
-        :slidesPerView="5"
+        :slidesPerView="3"
         :spaceBetween="30"
         :coverflowEffect="{
           rotate: 0,
@@ -30,21 +30,23 @@
           clickable: true,
           dynamicBullets: true,
         }"
-        :loop="true"
+        :loop=true
         :keyboard="{
           enabled: true,
           onlyInViewport: true
         }"
         :mousewheel="true"
+        :preloadImages="false"
+        :watchSlidesProgress="true"
       >
         <SwiperSlide 
           class="swiper-slide"
-          v-for="card in cards" 
-          :key="card.id" 
+          v-for="(card, index) in cards" 
+          :key="index" 
           @click="openModal(card)"
         >
           <CardComponent 
-          v-if="cards"
+            v-if="card"
             :card="card" 
             :useTransition="useTransition"
           />
@@ -71,6 +73,7 @@
 </template>
 
 <script setup>
+// import dummyMovies from '@/data/dummymovies.json'
 import axios from 'axios'
 
 import { ref, onMounted } from 'vue'
@@ -97,13 +100,14 @@ const cards = ref([])
 onMounted(async () => {
   
   try {
-    const response = await axios.get(`http://${API_URL}/api/v1/movies`)
-    console.log(response)
+    const response = await axios.get(`http://${API_URL}/api/v1/movies/`)
+    // console.log(response)
     if (!response.data || response.data.length === 0) {
       console.error('데이터가 없습니다')
       return
     } 
     cards.value = response.data
+    console.log(cards.value)
   } catch (error) {
     console.error('데이터 로딩 실패:', error)
 
@@ -122,6 +126,31 @@ onMounted(async () => {
   }
 })
 
+// onMounted(() => {
+//   cards.value = dummyMovies.map(movie => ({
+//     genre_ids: movie.genre_ids, 
+//     language: movie.original_language,
+//     id: movie.movie_id,
+//     title: movie.title,
+//     original_title: movie.original_title,
+
+//     release_date: movie.release_date,
+//     description: movie.overview,
+//     image: movie.poster_path,
+//     vote_average: movie.tmdb_vote_average,
+//     providers: movie.watch_providers,
+
+//     picture_url: movie.picture_url,
+//     video_url: movie.video_url,
+//     reviews: movie.reviews,
+//     watchapedia: movie.watchapedia,
+//     poster_palette: movie.poster_palette
+//   }))
+//   console.log(cards)
+//   console.log(cards.value)
+// })
+
+
 const goBackToStart = () => {
   router.push('/')
 }
@@ -138,12 +167,13 @@ const closeModal = () => {
 
 <style scoped>
 .carousel-3D-swiper-section {
-  /* 기존 스타일 유지 */
+  max-width: 100vw;
+  overflow: hidden;
 }
 
 .swiper-slide {
-  width: 500px;  /* 원하는 카드 너비 */
-  height: 1000px; /* 원하는 카드 높이 */
+  width: 300px;  /* 원하는 카드 너비 */
+  height: 600px; /* 원하는 카드 높이 */
 }
 
 .card {
@@ -179,11 +209,6 @@ const closeModal = () => {
 
 .card.with-transition:hover .image-wrapper img {
   transform: scale(1.1);
-}
-
-.card-transition-enter-active,
-.card-transition-leave-active {
-  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 .card-transition-enter-from,

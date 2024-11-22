@@ -1,20 +1,20 @@
 ﻿<template>
-  <div class="modal" v-if="isOpen">
+  <div class="modal" v-if="isOpen" @click.self="$emit('close')">
     <div class="modal-content">
       <!-- 영화 기본 정보 -->
       <div class="movie-header">
         <h1>{{ card.title }}</h1>
-        <h3>{{ card.original_title }} ({{ card.language }})</h3>
+        <h3>{{ card.original_title }} ({{ card.original_language }})</h3>
         <div class="movie-meta">
           <span>개봉일: {{ card.release_date }}</span>
           <br>
-          <span>평점: {{ card.vote_average }}</span>
+          <span>평점: {{ card.tmdb_vote_average }}</span>
         </div>
       </div>
 
       <!-- 영화 상세 정보 -->
     <div class="movie-details">
-      <p class="overview">{{ card.description }}</p>
+      <p class="overview">{{ card.overview }}</p>
 
       <!-- 장르 정보 -->
       <div class="genre-list">
@@ -59,14 +59,16 @@
     </div>
     </div>
 
-    <div v-if="card.providers">
-    <p>보려면?</p>
-    <!-- {{ card.providers }} -->
-    <h4 v-for="(provider, index) in card.providers" 
-    :key="index" 
-    class="provider-tag">
-    {{ provider }}
-    </h4>
+    <div v-if="card.watch_providers">
+      <p>보려면?</p>
+      <!-- {{ card.providers }} -->
+      <h4 v-for="(provider, index) in card.watch_providers" 
+        :key="index" 
+        class="provider-tag"
+      >
+      <img :src="provider.logo_path" alt="">
+      {{ provider.provider_name }}
+      </h4>
     </div>
     <div>
     <a :href="card.watchapedia" target="_blank">더 알아보기</a>
@@ -74,11 +76,11 @@
     </div>
 
     <div>
-    <!-- {{ card.title }}<br> -->
-    <!-- {{ card.original_title }}<br> -->
-    <!-- {{ card.language }}<br> -->
-    <!-- {{ card.description }}<br> -->
-    <!-- {{ card.vote_average }}<br> -->
+    <!-- o{{ card.title }}<br> -->
+    <!-- o{{ card.original_title }}<br> -->
+    <!-- {{ card.original_language }}<br> -->
+    <!-- {{ card.overview }}<br> -->
+    <!-- {{ card.tmdb_vote_average }}<br> -->
     <!-- {{ card.genre_ids }}<br> -->
     <!-- {{ card.release_date }}<br> -->
     <!-- {{ card.description }}<br> -->
@@ -90,7 +92,13 @@
     </div>
 
     <!-- 닫기 버튼 -->
-    <button class="close-btn" @click="$emit('close')">닫기</button>
+    <button 
+      class="close-btn" 
+      @click="$emit('close')"
+      aria-label="모달 닫기"
+    >
+      닫기
+    </button>
     </div>
   </div>
 </template>
@@ -98,7 +106,7 @@
 <script setup>
 import { defineProps, ref } from 'vue'
 
-const props = defineProps({
+defineProps({
     isOpen: {
     type: Boolean,
     required: true
@@ -108,7 +116,6 @@ const props = defineProps({
     required: true
     }
 })
-console.log(props.card)
 
 const showFullReviewIndex = ref(null)
 
@@ -139,10 +146,11 @@ const hideFullReview = () => {
     background: white;
     padding: 20px;
     border-radius: 8px;
-    max-width: 500px;
+    max-width: 800px; /* 더 넓게 조정 */
     width: 90%;
-    max-height: 80vh;
+    max-height: 90vh; /* 높이 증가 */
     overflow-y: auto;
+    scrollbar-width: thin; /* 스크롤바 스타일링 */
 }
 
 .movie-header {
@@ -173,8 +181,10 @@ const hideFullReview = () => {
 }
 
 .gallery-container, .video-container {
-    overflow-x: auto;
-    white-space: nowrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin: 10px 0;
 }
 
 .gallery-item, .video-item {
@@ -184,7 +194,8 @@ const hideFullReview = () => {
 
 .gallery-item img, .video-item iframe {
     width: 100%;
-    height: 100%;
-    object-fit: contain;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 4px;
 }
 </style>

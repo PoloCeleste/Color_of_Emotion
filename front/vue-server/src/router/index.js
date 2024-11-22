@@ -1,23 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import StartView from '@/views/StartView.vue'
-import RecommendView from '@/views/RecommendView.vue'
-
-const routes = [
-  {
-    path: '/',
-    name: 'Start',
-    component: StartView
-  },
-  {
-    path: '/recommend',
-    name: 'Recommend',
-    component: RecommendView
-  }
-]
+import LoadingView from '../views/LoadingView.vue'
+import StartView from '../views/StartView.vue'
+import RecommendView from '../views/RecommendView.vue'
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-  routes
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/',
+      name: 'loading',
+      component: LoadingView
+    },
+    {
+      path: '/start',
+      name: 'start',
+      component: StartView
+    },
+    {
+      path: '/recommend',
+      name: 'recommend',
+      component: RecommendView
+    }
+  ]
 })
 
 export default router

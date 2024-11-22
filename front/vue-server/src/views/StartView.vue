@@ -38,7 +38,8 @@ import MeasureModal from '@/components/MeasureModal.vue';
 import { useRouter } from 'vue-router';
 const router = useRouter()
 
-const goToRecommend  = () => {
+const goToRecommend = () => {
+  sessionStorage.setItem('hasVisitedStart', 'true')
   router.push('/recommend')
 }
 
