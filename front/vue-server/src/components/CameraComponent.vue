@@ -120,8 +120,10 @@ const startStreaming = async () => {
       const delay = 100
       const jpegQuality = 0.7
 
+      const API_URL = process.env.VUE_APP_API_URL
+
       // WebSocket 연결
-      ws.value = new WebSocket("ws://192.168.201.124:8000/ws/stream/")
+      ws.value = new WebSocket(`ws://${API_URL}/ws/stream/`)
 
       ws.value.onopen = () => {
         console.log("WebSocket 연결됨")

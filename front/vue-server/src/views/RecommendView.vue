@@ -85,7 +85,7 @@ import 'swiper/css/effect-coverflow'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
 
-// const API_URL = process.env.VUE_APP_API_URL
+const API_URL = process.env.VUE_APP_API_URL
 
 const router = useRouter()
 const isModalOpen = ref(false)
@@ -97,7 +97,7 @@ const cards = ref([])
 onMounted(async () => {
   
   try {
-    const response = await axios.get(`${process.env.VUE_APP_API_URL}/api/v1/movies`)
+    const response = await axios.get(`http://${API_URL}/api/v1/movies`)
     console.log(response)
     if (!response.data || response.data.length === 0) {
       console.error('데이터가 없습니다')
