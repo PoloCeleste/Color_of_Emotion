@@ -30,7 +30,7 @@ else:
     print('GPU Off')
 
 model_state = torch.load(pth.join(getcwd(), assets, 'model.pth'), map_location=torch.device(device), weights_only=True)
-model = getModel('emotionnet')
+model = getModel('emotionnet', True)
 model.load_state_dict(model_state['model'])
 
 class VideoStreamConsumer(AsyncWebsocketConsumer):

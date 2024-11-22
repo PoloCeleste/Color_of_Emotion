@@ -1,6 +1,6 @@
 ﻿import json
 from django.core.management.base import BaseCommand
-from movies.models import Genre, Provider, Movie
+from movies.models import Genre, Provider, Movie, Emotion, EmotionColor
 
 class Command(BaseCommand):
     help = 'Load data from JSON files into the database'
@@ -9,6 +9,8 @@ class Command(BaseCommand):
         self.load_genres()
         self.load_providers()
         self.load_movies()
+        self.load_emotions()
+        self.load_emotion_colors()
 
     def load_genres(self):
         with open('genres.json', 'r', encoding='utf-8') as file:
@@ -33,19 +35,20 @@ class Command(BaseCommand):
             movies_data = json.load(file)
             for movie_data in movies_data:
                 movie, created = Movie.objects.get_or_create(
-                    original_title=movie_data['original_title'],
+                    movie_id=movie_data['movie_id'],
                     defaults={
                         'original_language': movie_data['original_language'],
+                        'original_title': movie_data['original_title'],
                         'overview': movie_data['overview'],
                         'poster_path': movie_data['poster_path'],
                         'release_date': movie_data['release_date'],
-                        'title': movie_data['title'],
+                        'title': movie_data['title'].split("'")[1] if "'" in movie_data['title'] else movie_data['title'],
                         'tmdb_vote_average': movie_data['tmdb_vote_average'],
-                        'movie_id': movie_data['movie_id'],
-                        'picture_url': movie_data['picture_url'],
-                        'video_url': movie_data['video_url'],
-                        'reviews': movie_data['reviews'],
-                        'poster_palette': movie_data['poster_palette'],
+                        'picture_url': movie_data.get('picture_url'),
+                        'video_url': movie_data.get('video_url'),
+                        'reviews': movie_data.get('reviews'),
+                        'poster_palette': movie_data.get('poster_palette'),
+                        'watchapedia': movie_data['watchapedia'],
                     }
                 )
 
@@ -58,3 +61,31 @@ class Command(BaseCommand):
                     movie.watch_providers.add(provider)
 
         self.stdout.write(self.style.SUCCESS('Successfully loaded movies'))
+
+    def load_emotions(self):
+        with open('emotions.json', 'r', encoding='utf-8') as file:
+            emotions_data = json.load(file)
+            for emotion in emotions_data:
+                Emotion.objects.get_or_create(id=emotion['id'], name=emotion['name'])
+        self.stdout.write(self.style.SUCCESS('Successfully loaded emotions'))
+
+    def load_emotion_colors(self):
+        with open('emotion_color.json', 'r', encoding='utf-8') as file:
+            emotion_colors_data = json.load(file)
+            for emotion_color_data in emotion_colors_data:
+                emotion_color, created = EmotionColor.objects.get_or_create(
+                    color_id=emotion_color_data['color_id'],
+                    defaults={
+                        'emotions_color': emotion_color_data['emotions_color'],
+                    }
+                )
+
+                for emotion_id in emotion_color_data['emotion_id']:
+                    emotion = Emotion.objects.get(id=emotion_id)
+                    emotion_color.emotion_id.add(emotion)
+
+                for genre_id in emotion_color_data['genres_id']:
+                    genre = Genre.objects.get(id=genre_id)
+                    emotion_color.genres_id.add(genre)
+
+        self.stdout.write(self.style.SUCCESS('Successfully loaded emotion colors'))
