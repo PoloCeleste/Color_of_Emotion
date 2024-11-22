@@ -17,6 +17,7 @@ daphne==4.1.2
 decorator==5.1.1
 Django==4.2.16
 django-cors-headers==4.6.0
+django-environ
 django-extensions==3.2.3
 djangorestframework==3.15.2
 executing==2.1.0
@@ -53,7 +54,6 @@ pyOpenSSL==24.2.1
 pypalette==0.1.6
 pyparsing==3.2.0
 python-dateutil==2.9.0.post0
-python-dotenv
 pytz==2024.2
 requests==2.32.3
 service-identity==24.2.0
