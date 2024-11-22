@@ -34,43 +34,76 @@ model = getModel('emotionnet', True)
 model.load_state_dict(model_state['model'])
 
 class VideoStreamConsumer(AsyncWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.first_phase_data = []
+        self.second_phase_data = []
+        self.is_analyzing = False
+        self.is_second_phase = False
+        self.emotion_model = model
+    
     async def connect(self):
-        self.prev = 0
-        self.new = 0
         self.loop = asyncio.get_running_loop()
         await self.accept()
 
     async def disconnect(self, close_code):
-        self.prev = 0
-        self.new = 0
         raise StopConsumer()
 
-    async def receive(self, bytes_data):
-        if not (bytes_data):
-            self.prev = 0
-            self.new = 0
+    async def receive(self, text_data):
+        if not (text_data):
             print('Closed connection')
             await self.close()
         else:
-            # 바이트 데이터를 numpy 배열로 변환
-            self.frame = await self.loop.run_in_executor(None, cv2.imdecode, np.frombuffer(bytes_data, dtype=np.uint8), cv2.IMREAD_COLOR)
-            # nparr = np.frombuffer(bytes_data, np.uint8)
-            # self.frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            # OpenCV를 사용한 이미지 처리
-            self.frame, self.emotion_data = await self.loop.run_in_executor(None, self.main, self.frame)
-            # cv2.imshow("dd", processed_frame)
-            # await self.fps_count()
-            # cv2.putText(self.frame, "FPS: {}".format((self.fps)), (50,40),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (54, 161, 255), 1)
-            # 처리된 프레임을 클라이언트로 다시 전송
-            self.buffer = await self.loop.run_in_executor(None, cv2.imencode, '.jpeg', self.frame)
-            self.b64_img = base64.b64encode(self.buffer[1]).decode('utf-8')
-            data={
-                'frame':self.b64_img,
-                'emotion':self.emotion_data
-            }
+            data = json.loads(text_data)
+            message_type = data.get('type')
+
+            if message_type == 'start_analysis':
+                self.is_analyzing = True
+                self.first_phase_data = []
+                self.second_phase_data = []
             
-            asyncio.sleep(100/1000)
-            await self.send(json.dumps(data))
+            elif message_type == 'frame':
+                if not self.is_analyzing: return
+                
+                self.frame = await self.loop.run_in_executor(None, base64.b64decode, data['data'].split(',')[1])
+                
+                self.frame, self.emotion_data = await self.loop.run_in_executor(None, self.main, self.frame)
+                
+                if self.is_second_phase:
+                    self.second_phase_data.append(self.emotion_data)
+                else:
+                    self.first_phase_data.append(self.emotion_data)
+                    
+            elif message_type == 'second_phase':
+                self.is_second_phase = True
+
+            elif message_type == 'stop_analysis':
+                self.is_analyzing = False
+                analysis_result = await self.process_final_results()
+                
+                await self.send(text_data=json.dumps({
+                    'type': 'analysis_result',
+                    'result': analysis_result
+                }))
+            # # 바이트 데이터를 numpy 배열로 변환
+            # self.frame = await self.loop.run_in_executor(None, cv2.imdecode, np.frombuffer(bytes_data, dtype=np.uint8), cv2.IMREAD_COLOR)
+            # # nparr = np.frombuffer(bytes_data, np.uint8)
+            # # self.frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            # # OpenCV를 사용한 이미지 처리
+            # self.frame, self.emotion_data = await self.loop.run_in_executor(None, self.main, self.frame)
+            # # cv2.imshow("dd", processed_frame)
+            # # await self.fps_count()
+            # # cv2.putText(self.frame, "FPS: {}".format((self.fps)), (50,40),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (54, 161, 255), 1)
+            # # 처리된 프레임을 클라이언트로 다시 전송
+            # self.buffer = await self.loop.run_in_executor(None, cv2.imencode, '.jpeg', self.frame)
+            # self.b64_img = base64.b64encode(self.buffer[1]).decode('utf-8')
+            # data={
+            #     'frame':self.b64_img,
+            #     'emotion':self.emotion_data
+            # }
+            
+            # asyncio.sleep(100/1000)
+            # await self.send(json.dumps(data))
 
 
     def softmax(x):

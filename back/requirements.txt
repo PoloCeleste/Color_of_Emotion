@@ -53,6 +53,7 @@ pyOpenSSL==24.2.1
 pypalette==0.1.6
 pyparsing==3.2.0
 python-dateutil==2.9.0.post0
+python-dotenv
 pytz==2024.2
 requests==2.32.3
 service-identity==24.2.0
