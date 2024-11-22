@@ -1,57 +1,87 @@
 ﻿<template>
-  <div class="modal-overlay" @click.self="closeModal">
-    <div class="modal-content">
-      <div class="camera-container">
-        <CameraComponent />
-      </div>
-      <div class="button-container">
-        <button @click="completeModal">COMPLETE</button>
-        <button @click="closeModal">CLOSE</button>
+  <Transition name="modal" :duration="transitionDuration">
+    <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
+      <div class="modal-content">
+        <div class="camera-container">
+          <CameraComponent />
+        </div>
+        <div class="button-container">
+          <button @click="completeModal">COMPLETE</button>
+        </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup>
-// 2. 측정 모달 띄우기
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, onMounted, onUnmounted, ref } from 'vue';
 import CameraComponent from './CameraComponent.vue';
+
 defineProps({
   isOpen: Boolean
-})
+});
 
-const emit = defineEmits(['close', 'complete'])
+const emit = defineEmits(['close', 'complete']);
+
+const transitionDuration = 500; // 트랜지션 시간 (밀리초)
+const backgroundTransitionDuration = 2000; // 배경색 트랜지션 시간 (밀리초)
+
+const originalColor = ref('');
+const originalBodyColor = ref('');
+
+onMounted(() => {
+  const startContainer = document.querySelector('.start-container');
+  originalColor.value = startContainer.style.backgroundColor;
+  originalBodyColor.value = document.body.style.backgroundColor;
+  
+  updateBackgroundColors('#929191');
+});
+
+const updateBackgroundColors = (color) => {
+  const startContainer = document.querySelector('.start-container');
+  [startContainer, document.body].forEach(el => {
+    el.style.transition = `background-color ${backgroundTransitionDuration}ms ease`;
+    el.style.backgroundColor = color;
+  });
+};
 
 const closeModal = () => {
-  emit('close')
-}
+  updateBackgroundColors(originalColor.value);
+  emit('close');
+};
 
-const completeModal = () => {
-  emit('complete')
-}
+const completeModal = () => emit('complete');
+
+onUnmounted(() => {
+  updateBackgroundColors(originalColor.value);
+});
 </script>
 
 <style scoped>
+:root {
+  --transition-duration: v-bind(transitionDuration);
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  /* background-color: rgba(0, 0, 0, 0.5); */
-  border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  /* background-color: rgba(0, 0, 0, 0.7); */
 }
 
 .modal-content {
+  z-index: 1001;
   background-color: whitesmoke;
   padding: 20px;
   border: 2px solid darkgray;
-  border-radius: 50%;  /* 원형으로 변경 */
-  width: 800px;  /* StartView의 원보다 더 크게 */
+  border-radius: 50%;
+  width: 800px;
   height: 800px;
   position: absolute;
   top: 50%;
@@ -64,7 +94,7 @@ const completeModal = () => {
 
 .camera-container {
   position: relative;
-  width: 90%;  /* 모달 내부 여백 확보 */
+  width: 90%;
   height: 90%;
   display: flex;
   flex-direction: column;
@@ -79,21 +109,13 @@ const completeModal = () => {
   margin-top: 20px;
 }
 
-/* 원형 테두리 애니메이션 */
 .modal-enter-active,
 .modal-leave-active {
-  transition: all 0.5s ease;
+  transition: opacity var(--transition-duration) ease;
 }
 
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.67);  /* StartView의 원 크기(400px)로 축소 */
-}
-
-.modal-enter-to,
-.modal-leave-from {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
 }
 </style>
