@@ -7,8 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import MovieSerializer, EmotionColorSerializer
 
-load_dotenv(find_dotenv())
-TMDB = os.getenv('tmdb')
+
 
 class MovieList(generics.ListAPIView):
     queryset = Movie.objects.all()
@@ -20,6 +19,9 @@ class EmotionColorList(generics.ListAPIView):
 
 @api_view(['GET'])
 def Actors(request, movie_id):
+    load_dotenv(find_dotenv())
+    TMDB = os.getenv('tmdb')
+    print(TMDB)
     url = f"https://api.themoviedb.org/3/movie/{movie_id}/credits"
     headers = {
         "accept": "application/json",
@@ -27,6 +29,7 @@ def Actors(request, movie_id):
     }
     try:
         response = requests.get(url, headers=headers)['cast']
+        print(response)
         if response:
             data={
                 'cast':response
