@@ -14,12 +14,14 @@ const router = createRouter({
     {
       path: '/start',
       name: 'start',
-      component: StartView
+      component: StartView,
+      meta: { transition: 'fade' }
     },
     {
       path: '/recommend',
       name: 'recommend',
-      component: RecommendView
+      component: RecommendView,
+      meta: { transition: 'fade' }
     }
   ]
 })
