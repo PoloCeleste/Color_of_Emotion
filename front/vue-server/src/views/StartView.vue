@@ -2,77 +2,89 @@
   <div class="start-container">
     <div class="content-wrapper">
       <Transition name="camera-body">
-        <div v-if="isModalOpen" class="camera-body"></div>
+        <div v-if="isModalOpen" class="camera-body">
+          <div class="shutter-button"></div>
+          <div class="flash-window"></div>
+        </div>
       </Transition>
       <div class="circle-container">
         <div class="circle" :class="[{ 'rainbow-shadow': measurementComplete }]">
-          <button 
-            v-if="!measurementComplete" 
-            class="measure-button" 
-            @click="openModal"
-          >
+          <button v-if="!measurementComplete" class="measure-button" @click="openModal">
             Let's find your emotion
           </button>
-          <button 
-            v-else 
-            class="start-button" 
-            @click="goToRecommend"
-          >
+          <button v-else class="start-button" @click="goToRecommend">
             START
           </button>
         </div>
       </div>
     </div>
-    <Transition name="modal-fade">
+    <Transition name="modal">
       <MeasureModal v-if="isModalOpen" :isOpen="isModalOpen" @close="closeModal" @complete="completeMeasurement" />
     </Transition>
   </div>
 </template>
 
 <script setup>
-// 1. start 버튼 누르면 추천으로 넘어가기
-import MeasureModal from '@/components/MeasureModal.vue';
-import { useRouter } from 'vue-router';
-const router = useRouter()
+import MeasureModal from '@/components/MeasureModal.vue'
+import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
 
+// 상수 정의
+const TRANSITION_DURATION = 500  // 기본 트랜지션 시간
+const DELAY_DURATION = 500      // 지연 시간
+const BACKGROUND_TRANSITION = 500  // 배경색 전환 시간
+
+document.documentElement.style.setProperty('--transition-duration', `${TRANSITION_DURATION}ms`)
+document.documentElement.style.setProperty('--delay-duration', `${DELAY_DURATION}ms`)
+
+// 상태 관리
+const router = useRouter()
+const isModalOpen = ref(false)
+const measurementComplete = ref(false)
+const originalColor = ref('')
+
+// 라우터 핸들러
 const goToRecommend = () => {
   sessionStorage.setItem('hasVisitedStart', 'true')
   router.push('/recommend')
 }
 
-// 2. 측정모달 띄우기
-import { ref } from 'vue';
-const isModalOpen = ref(false)
-const measurementComplete = ref(false)
-const originalColor = ref('')  // 추가
-const backgroundTransitionDuration = 2000
+// 모달 컨트롤
+const openModal = () => {
+  isModalOpen.value = true
+  // 모달이 나타나고 나서 배경색과 카메라 몸통이 등장하도록 지연
+  setTimeout(() => {
+    updateBackgroundColors('#929191')
+  }, TRANSITION_DURATION)
+}
 
 const updateBackgroundColors = (color) => {
   const startContainer = document.querySelector('.start-container')
-  if (startContainer) {
-    startContainer.style.transition = `background-color ${backgroundTransitionDuration}ms ease`
+  const body = document.body
+  
+  if (startContainer && body) {
+    startContainer.style.transition = `background-color ${BACKGROUND_TRANSITION}ms ease`
+    body.style.transition = `background-color ${BACKGROUND_TRANSITION}ms ease`
     startContainer.style.backgroundColor = color
+    body.style.backgroundColor = color
   }
-}
-
-const openModal = () => {
-  isModalOpen.value = true
 }
 
 const closeModal = () => {
-  // 먼저 카메라 몸통을 사라지게 함
-  const cameraBody = document.querySelector('.camera-body')
-  if (cameraBody) {
-    cameraBody.style.opacity = '0'
-    cameraBody.style.transform = 'translate(-50%, -50%) scale(0.8)'
-  }
+  // 배경색 변경과 카메라 몸통 퇴장을 동시에 실행
+  updateBackgroundColors(originalColor.value)
   
-  // 0.5초 후에 모달 닫기
+  // 배경색 변경과 카메라 몸통 퇴장이 완료된 후 모달 닫기
   setTimeout(() => {
     isModalOpen.value = false
-    updateBackgroundColors(originalColor.value)
-  }, 500)
+  }, TRANSITION_DURATION)  // 약간의 여유 시간 추가
 }
+
+// onMounted 훅 추가
+onMounted(() => {
+  const startContainer = document.querySelector('.start-container')
+  originalColor.value = startContainer.style.backgroundColor
+})
 
 const completeMeasurement = () => {
   isModalOpen.value = false
@@ -82,26 +94,35 @@ const completeMeasurement = () => {
 </script>
 
 <style scoped>
+/* 기본 레이아웃 */
+.start-container {
+  width: 100%;
+  height: 80vh;
+  background-color: whitesmoke;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* 카메라 몸통 스타일링 */
 .camera-body {
   position: absolute;
-  top: 65%;  /* 60%에서 65%로 수정하여 더 아래로 이동 */
+  top: 65%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 1200px;
   height: 600px;
   background: linear-gradient(145deg, #333333, #1a1a1a);
   border-radius: 20px;
+  border: 2px solid #444;
+  overflow: hidden;
   box-shadow: 
     inset 0 0 50px rgba(0, 0, 0, 0.5),
     0 10px 20px rgba(0, 0, 0, 0.3);
-  z-index: 1;
-  /* 카메라 장식 추가 */
-  border: 2px solid #444;
-  overflow: hidden;
-  position: relative;
 }
 
-/* 카메라 장식 요소 추가 */
+/* 카메라 장식 요소 */
 .camera-body::before {
   content: '';
   position: absolute;
@@ -127,86 +148,41 @@ const completeMeasurement = () => {
   border-radius: 2px;
 }
 
-.camera-body-enter-active,
-.camera-body-leave-active {
-  transition: all 0.5s ease;
-}
-
-.camera-body-enter-from {
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.8);
-}
-
-.camera-body-leave-to {
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.8);
-}
-
-.camera-mode .circle {
-  background: #404040;
-  border: none;
+.camera-body .shutter-button {
+  content: '';
+  position: absolute;
+  top: 30px;
+  right: 150px;
+  width: 40px;
+  height: 40px;
+  background: #555;
+  border-radius: 50%;
+  border: 2px solid #666;
   box-shadow: 
-    0 0 0 8px #505050,
-    inset 0 0 20px rgba(0, 0, 0, 0.5);
+    inset 0 0 10px rgba(0, 0, 0, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
 }
 
-.camera-mode .measure-button {
-  color: #e0e0e0;
+/* 플래시 창 추가 */
+.camera-body .flash-window {
+  content: '';
+  position: absolute;
+  top: 25px;
+  left: 200px;
+  width: 60px;
+  height: 30px;
+  background: linear-gradient(145deg, #ffffff, #e0e0e0);
+  border-radius: 4px;
+  border: 2px solid #444;
+  box-shadow: 
+    inset 0 0 15px rgba(255, 255, 255, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.start-container {
-  width: 100%;
-  height: 70vh;
-  background-color: whitesmoke;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-/* 모달 트랜지션 효과 */
-.modal-fade-enter-active {
-  transition: all 0.5s ease 0.5s;  /* 0.5초 지연 */
-}
-
-.modal-fade-leave-active {
-  transition: all 0.5s ease;
-}
-
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: all 0.5s ease;
-}
-
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-  transform: scale(0.67);
-}
-
-.modal-fade-enter-to,
-.modal-fade-leave-from {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.content-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2rem;
-}
-
-.title {
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 2rem;
-  font-weight: 500;
-}
-
-/* circle-container 위치 조정 */
+/* 원형 렌즈 스타일링 */
 .circle-container {
-  position: fixed; /* absolute에서 fixed로 변경 */
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -221,77 +197,30 @@ const completeMeasurement = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  box-sizing: border-box;
-  background-color: whitesmoke;
-  border: 2px solid darkgray;
   border-radius: 50%;
+  background: linear-gradient(145deg, #f0f0f0, #ffffff);
+  border: 2px solid darkgray;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2;
-  transition: transform 0.3s ease;
-  overflow: hidden;
   box-shadow: 
     inset 0 0 50px rgba(0, 0, 0, 0.1),
-    0 10px 20px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(145deg, #f0f0f0, #ffffff);
+    0 10px 20px rgba(0, 0, 0, 0.2);
   transform-style: preserve-3d;
   perspective: 1000px;
-}
-
-.circle.rainbow-shadow {
-  border: 0px solid transparent;
-  background-origin: border-box;
-  background-clip: content-box, border-box;
-  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.5));
-  filter: saturate(150%) drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
-  animation: move-shadow 5s linear infinite;
-  opacity: 0.8;
-}
-
-@keyframes move-shadow {
-  0% { filter: drop-shadow(10.00px 0.00px 6px rgba(255, 0, 0, 0.7)) drop-shadow(10.00px 0.00px 7px rgba(255, 0, 0, 0.4)); }
-  3.33% { filter: drop-shadow(9.66px 2.59px 6px rgba(255, 102, 0, 0.7)) drop-shadow(9.66px 2.59px 7px rgba(255, 102, 0, 0.4)); }
-  6.67% { filter: drop-shadow(8.66px 5.00px 6px rgba(255, 204, 0, 0.7)) drop-shadow(8.66px 5.00px 7px rgba(255, 204, 0, 0.4)); }
-  10% { filter: drop-shadow(7.07px 7.07px 6px rgba(255, 255, 0, 0.7)) drop-shadow(7.07px 7.07px 7px rgba(255, 255, 0, 0.4)); }
-  13.33% { filter: drop-shadow(5.00px 8.66px 6px rgba(102, 255, 0, 0.7)) drop-shadow(5.00px 8.66px 7px rgba(102, 255, 0, 0.4)); }
-  16.67% { filter: drop-shadow(2.59px 9.66px 6px rgba(0, 255, 0, 0.7)) drop-shadow(2.59px 9.66px 7px rgba(0, 255, 0, 0.4)); }
-  20% { filter: drop-shadow(0.00px 10.00px 6px rgba(0, 255, 102, 0.7)) drop-shadow(0.00px 10.00px 7px rgba(0, 255, 102, 0.4)); }
-  23.33% { filter: drop-shadow(-2.59px 9.66px 6px rgba(0, 255, 204, 0.7)) drop-shadow(-2.59px 9.66px 7px rgba(0, 255, 204, 0.4)); }
-  26.67% { filter: drop-shadow(-5.00px 8.66px 6px rgba(0, 255, 255, 0.7)) drop-shadow(-5.00px 8.66px 7px rgba(0, 255, 255, 0.4)); }
-  30% { filter: drop-shadow(-7.07px 7.07px 6px rgba(0, 204, 255, 0.7)) drop-shadow(-7.07px 7.07px 7px rgba(0, 204, 255, 0.4)); }
-  33.33% { filter: drop-shadow(-8.66px 5.00px 6px rgba(0, 102, 255, 0.7)) drop-shadow(-8.66px 5.00px 7px rgba(0, 102, 255, 0.4)); }
-  36.67% { filter: drop-shadow(-9.66px 2.59px 6px rgba(0, 0, 255, 0.7)) drop-shadow(-9.66px 2.59px 7px rgba(0, 0, 255, 0.4)); }
-  40% { filter: drop-shadow(-10.00px 0.00px 6px rgba(102, 0, 255, 0.7)) drop-shadow(-10.00px 0.00px 7px rgba(102, 0, 255, 0.4)); }
-  43.33% { filter: drop-shadow(-9.66px -2.59px 6px rgba(204, 0, 255, 0.7)) drop-shadow(-9.66px -2.59px 7px rgba(204, 0, 255, 0.4)); }
-  46.67% { filter: drop-shadow(-8.66px -5.00px 6px rgba(255, 0, 255, 0.7)) drop-shadow(-8.66px -5.00px 7px rgba(255, 0, 255, 0.4)); }
-  50% { filter: drop-shadow(0.00px -10.00px 6px rgba(255, 0, 204, 0.7)) drop-shadow(0.00px -10.00px 7px rgba(255, 0, 204, 0.4)); }
-  53.33% { filter: drop-shadow(2.59px -9.66px 6px rgba(255, 0, 102, 0.7)) drop-shadow(2.59px -9.66px 7px rgba(255, 0, 102, 0.4)); }
-  56.67% { filter: drop-shadow(5.00px -8.66px 6px rgba(255, 0, 0, 0.7)) drop-shadow(5.00px -8.66px 7px rgba(255, 0, 0, 0.4)); }
-  60% { filter: drop-shadow(7.07px -7.07px 6px rgba(255, 51, 0, 0.7)) drop-shadow(7.07px -7.07px 7px rgba(255, 51, 0, 0.4)); }
-  63.33% { filter: drop-shadow(8.66px -5.00px 6px rgba(255, 102, 0, 0.7)) drop-shadow(8.66px -5.00px 7px rgba(255, 102, 0, 0.4)); }
-  66.67% { filter: drop-shadow(9.66px -2.59px 6px rgba(255, 153, 0, 0.7)) drop-shadow(9.66px -2.59px 7px rgba(255, 153, 0, 0.4)); }
-  70% { filter: drop-shadow(10.00px 0.00px 6px rgba(255, 204, 0, 0.7)) drop-shadow(10.00px 0.00px 7px rgba(255, 204, 0, 0.4)); }
-  73.33% { filter: drop-shadow(9.66px 2.59px 6px rgba(255, 255, 0, 0.7)) drop-shadow(9.66px 2.59px 7px rgba(255, 255, 0, 0.4)); }
-  76.67% { filter: drop-shadow(8.66px 5.00px 6px rgba(255, 204, 0, 0.7)) drop-shadow(8.66px 5.00px 7px rgba(255, 204, 0, 0.4)); }
-  80% { filter: drop-shadow(7.07px 7.07px 6px rgba(255, 153, 0, 0.7)) drop-shadow(7.07px 7.07px 7px rgba(255, 153, 0, 0.4)); }
-  83.33% { filter: drop-shadow(5.00px 8.66px 6px rgba(255, 102, 0, 0.7)) drop-shadow(5.00px 8.66px 7px rgba(255, 102, 0, 0.4)); }
-  86.67% { filter: drop-shadow(2.59px 9.66px 6px rgba(255, 51, 0, 0.7)) drop-shadow(2.59px 9.66px 7px rgba(255, 51, 0, 0.4)); }
-  90% { filter: drop-shadow(0.00px 10.00px 6px rgba(255, 25, 0, 0.7)) drop-shadow(0.00px 10.00px 7px rgba(255, 25, 0, 0.4)); }
-  93.33% { filter: drop-shadow(-2.59px 9.66px 6px rgba(255, 13, 0, 0.7)) drop-shadow(-2.59px 9.66px 7px rgba(255, 13, 0, 0.4)); }
-  96.67% { filter: drop-shadow(-5.00px 8.66px 6px rgba(255, 6, 0, 0.7)) drop-shadow(-5.00px 8.66px 7px rgba(255, 6, 0, 0.4)); }
-  100% { filter: drop-shadow(10.00px 0.00px 6px rgba(255, 0, 0, 0.7)) drop-shadow(10.00px 0.00px 7px rgba(255, 0, 0, 0.4)); }
+  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .circle:hover {
-  transform: translateY(-5px) scale(1.02);
+  transform: translateY(-5px);
   box-shadow: 
-    inset 0 0 60px rgba(0, 0, 0, 0.1),
-    0 15px 25px rgba(0, 0, 0, 0.2),
+    inset 0 0 60px rgba(0, 0, 0, 0.15),
+    0 15px 25px rgba(0, 0, 0, 0.3),
     0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
+/* 버튼 스타일링 */
 .measure-button {
   padding: 20px 40px;
   font-size: 2rem;
@@ -312,23 +241,6 @@ const completeMeasurement = () => {
 
 .start-button {
   padding: 20px 40px;
-  font-size: 5rem;
-  font-weight: bold;
-  color: transparent;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: color 0.3s ease;
-  letter-spacing: 2px;
-  text-shadow: 
-    3px 3px 6px rgba(0, 0, 0, 0.2),
-    -2px -2px 4px rgba(255, 255, 255, 0.8);
-  transform: translateZ(10px);
-  transition: all 0.3s ease;
-}
-
-.start-button {
-  padding: 20px 40px;
   font-size: 50px;
   font-weight: bold;
   background: transparent;
@@ -336,52 +248,44 @@ const completeMeasurement = () => {
   cursor: pointer;
   letter-spacing: 2px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  /* 모든 속성에 대해 transition 적용 */
   transition: all 0.3s ease;
-}
-
-/* START 버튼일 때의 스타일 */
-.rainbow-shadow .start-button {
-  animation: text-color-change 5s linear infinite;
 }
 
 .start-button:hover {
   transform: scale(1.15);
 }
 
-@keyframes text-color-change {
-  0% { color: rgba(255, 0, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  3.33% { color: rgba(255, 102, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  6.67% { color: rgba(255, 204, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  10% { color: rgba(255, 255, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  13.33% { color: rgba(102, 255, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  16.67% { color: rgba(0, 255, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  20% { color: rgba(0, 255, 102, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  23.33% { color: rgba(0, 255, 204, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  26.67% { color: rgba(0, 255, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  30% { color: rgba(0, 204, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  33.33% { color: rgba(0, 102, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  36.67% { color: rgba(0, 0, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  40% { color: rgba(102, 0, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  43.33% { color: rgba(204, 0, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  46.67% { color: rgba(255, 0, 255, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  50% { color: rgba(255, 0, 204, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  53.33% { color: rgba(255, 0, 102, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  56.67% { color: rgba(255, 0, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  60% { color: rgba(255, 51, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  63.33% { color: rgba(255, 102, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  66.67% { color: rgba(255, 153, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  70% { color: rgba(255, 204, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  73.33% { color: rgba(255, 255, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  76.67% { color: rgba(255, 204, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  80% { color: rgba(255, 153, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  83.33% { color: rgba(255, 102, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  86.67% { color: rgba(255, 51, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  90% { color: rgba(255, 25, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  93.33% { color: rgba(255, 13, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  96.67% { color: rgba(255, 6, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
-  100% { color: rgba(255, 0, 0, 1); text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+.rainbow-shadow .start-button {
+  animation: text-color-change 5s linear infinite;
 }
 
+/* 트랜지션 효과 */
+/* 트랜지션 타이밍 수정 */
+.camera-body-enter-active {
+  transition: all var(--transition-duration) ease var(--delay-duration);  /* 0.5초 지연 후 0.5초 동안 등장 */
+}
 
+.camera-body-leave-active {
+  transition: all var(--transition-duration) ease;  /* 0.5초 동안 퇴장 */
+}
+
+.camera-body-enter-from,
+.camera-body-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.modal-enter-active {
+  transition: all var(--transition-duration) ease;  /* 0.5초 동안 등장 */
+}
+
+.modal-leave-active {
+  transition: all var(--transition-duration) ease var(--delay-duration);  /* 0.5초 동안 퇴장 */
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.67);
+}
 </style>
