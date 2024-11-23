@@ -11,6 +11,10 @@ import torch.nn.functional as F
 import torchvision.transforms as tt
 from .models import *
 
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+
 emotion={
     'Joy':1,
     'Sadness':2,
@@ -183,6 +187,114 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
             }
         return frame_base64, emotion_data
 
+
+
+    async def process_first_results(self, first_phase_data):
+        """첫 번째 단계의 감정 데이터 정규화 및 표준편차 계산"""
+        if not first_phase_data:
+            return {}
+        
+        # 감정 데이터가 있는 프레임만 필터링
+        valid_data = [data['emotion'] for data in first_phase_data if data and 'emotion' in data]
+        
+        if not valid_data:
+            return {}
+        
+        # 데이터프레임 생성
+        df = pd.DataFrame(valid_data)
+        
+        # MinMaxScaler를 사용하여 정규화
+        scaler = MinMaxScaler()
+        normalized_data = scaler.fit_transform(df)
+        df_normalized = pd.DataFrame(normalized_data, columns=df.columns)
+        
+        # 정규화된 데이터의 평균과 표준편차 계산
+        normalized_means = df_normalized.mean()
+        normalized_std = df_normalized.std()
+        
+        return {
+            'normalized_means': normalized_means.to_dict(),
+            'standard_deviation': normalized_std.to_dict(),
+            'total_frames': len(valid_data)
+        }
+
+    async def process_second_results(self, second_phase_data):
+        """두 번째 단계의 감정 데이터 정규화 및 표준편차 계산"""
+        if not second_phase_data:
+            return {}
+        
+        # 감정 데이터가 있는 프레임만 필터링
+        valid_data = [data['emotion'] for data in second_phase_data if data and 'emotion' in data]
+        
+        if not valid_data:
+            return {}
+        
+        # 데이터프레임 생성
+        df = pd.DataFrame(valid_data)
+        
+        # MinMaxScaler를 사용하여 정규화
+        scaler = MinMaxScaler()
+        normalized_data = scaler.fit_transform(df)
+        df_normalized = pd.DataFrame(normalized_data, columns=df.columns)
+        
+        # 정규화된 데이터의 평균과 표준편차 계산
+        normalized_means = df_normalized.mean()
+        normalized_std = df_normalized.std()
+        
+        return {
+            'normalized_means': normalized_means.to_dict(),
+            'standard_deviation': normalized_std.to_dict(),
+            'total_frames': len(valid_data)
+        }
+
+    async def process_final_results(self, first_analysis_result, second_analysis_result):
+        """두 단계의 감정 변화 분석 및 주/부감정 선정"""
+        if not first_analysis_result or not second_analysis_result:
+            return {
+                'status': 'error',
+                'message': '분석에 필요한 데이터가 부족합니다.'
+            }
+        
+        # 감정 변화량 계산 (2차 - 1차)
+        emotion_changes = {}
+        for emotion in class_labels:
+            first_value = first_analysis_result['normalized_means'].get(emotion, 0)
+            second_value = second_analysis_result['normalized_means'].get(emotion, 0)
+            emotion_changes[emotion] = round(second_value - first_value, 2)
+        
+        # 양수 변화량만 필터링하고 내림차순 정렬
+        positive_changes = {k: v for k, v in emotion_changes.items() if v > 0}
+        sorted_changes = sorted(positive_changes.items(), key=lambda x: x[1], reverse=True)
+        
+        result = {
+            'emotion_changes': emotion_changes,
+            'first_phase_std': first_analysis_result['standard_deviation'],
+            'second_phase_std': second_analysis_result['standard_deviation'],
+            'frames_analyzed': {
+                'first_phase': first_analysis_result['total_frames'],
+                'second_phase': second_analysis_result['total_frames']
+            }
+        }
+        
+        # 주감정 선정 (변화량이 가장 큰 양수 값)
+        if sorted_changes:
+            result['primary_emotion'] = {
+                sorted_changes[0][0]: sorted_changes[0][1]
+            }
+            
+            # 부감정 선정 (변화량이 양수인 것 중 상위 2개)
+            if len(sorted_changes) > 1:
+                secondary_emotions = []
+                for emotion, value in sorted_changes[1:3]:
+                    secondary_emotions.append({emotion: value})
+                if secondary_emotions:
+                    result['secondary_emotions'] = secondary_emotions
+        
+        return result
+
+'''
+
+
     async def process_first_results(self, first_phase_data):
         """첫 번째 단계의 감정 데이터 정규화"""
         if not first_phase_data:
@@ -277,7 +389,7 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
             result['secondary_emotions'] = secondary_emotions
         
         return result
-
+'''
 '''
     async def process_first_results(self, first_phase_data):
         """첫 번째 단계의 감정 데이터 처리"""
