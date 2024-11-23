@@ -17,21 +17,24 @@
         height="300px"
       ></canvas>
       <div :style="{ display: display_flag ? 'none' : 'block' }">
-        <div v-if="showIntroMessages" class="intro-messages">
-          <h2>{{ currentMessage }}</h2>
+        <div v-if="showIntroMessages" class="camera-display">
+          <div class="intro-messages">
+            <h2>{{ currentMessage }}</h2>
+          </div>
         </div>
 
         <div
           class="camera-display"
           v-else
-          :style="{ width: '400px', height: '300px' }"
           @click="startStreaming"
+          style="margin-bottom: 0px; top: 50% + 7px"
         >
           <img
             v-if="frameData"
             ref="imgElement"
             class="camera-display"
             :src="'data:image/jpeg;base64,' + frameData"
+            style="margin-bottom: 0px; top: 50% + 7px"
           />
           <h1 class="button" style="text-align: center">{{ buttonText }}</h1>
         </div>
@@ -52,18 +55,16 @@
           : ""
       }}
     </p>
-
     <div
       v-if="isFaceDetected && !showIntroMessages"
       class="progress-bar"
-      style="width: 400px"
+      style="width: 400px; height: 14px"
     >
       <div
         class="progress"
         :style="{
           width: `${Math.round(measurementProgress)}%`,
           'background-color': 'whitesmoke',
-          height: 7,
         }"
       ></div>
     </div>
@@ -102,6 +103,7 @@ const measurementProgress = ref(0);
 const isFaceDetected = ref(false);
 // 메세지 보여주기 및 2차 플래그 전송
 const showMessages = async () => {
+  // currentMessage.value = "준비하세요...";
   showIntroMessages.value = true;
   let messageIndex = 0;
 
@@ -170,12 +172,12 @@ const restartSecondPhase = () => {
 // 스트리밍 시작 함수
 const startStreaming = async () => {
   mode.value = !mode.value;
-  analyzing.value = true;
+  analyzing.value = !analyzing.value;
   frameCount.value = 0;
 
   if (!mode.value) {
     try {
-      buttonText.value = "카메라 중지";
+      buttonText.value = "";
 
       emotions.value = null;
       result.value = null;
@@ -191,8 +193,8 @@ const startStreaming = async () => {
         const delay = 100;
         const jpegQuality = 0.7;
 
-        // const URL = process.env.VUE_APP_API_URL;
-        const URL = "192.168.31.207:8000";
+        const URL = process.env.VUE_APP_API_URL;
+        // const URL = "192.168.31.207:8000";
 
         ws.value = new WebSocket(`ws://${URL}/ws/stream/`);
 
@@ -342,10 +344,9 @@ onUnmounted(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  max-width: 640px;
   width: 400px;
   height: 300px;
-  margin-top: 7px;
+  margin-bottom: 7px;
   align-items: center;
   border-radius: 8px;
   border: 2px solid #ccc;
@@ -355,7 +356,6 @@ onUnmounted(() => {
 button {
   padding: 8px 16px;
   border: none;
-  border-radius: 4px;
   background-color: #4caf50;
   color: white;
   cursor: pointer;
@@ -373,8 +373,8 @@ button:hover {
 
 .emotion-text {
   position: absolute;
-  top: 70%;
-  left: 50%;
+  top: 68%;
+  left: 41%;
   margin-top: 10px;
   font-size: 1.1em;
   color: #333;
@@ -391,7 +391,6 @@ button:hover {
   background-color: #f0f0f0;
   border-radius: 8px;
   border: 2px solid #ccc;
-  margin: 0 auto;
 }
 
 .intro-messages h2 {
