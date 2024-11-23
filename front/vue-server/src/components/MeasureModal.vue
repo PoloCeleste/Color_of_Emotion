@@ -1,12 +1,9 @@
 ﻿<template>
-  <Transition name="modal">
+  <Transition name="modal" :duration="transitionDuration">
     <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
       <div class="camera">
-        <div class="flash-overlay" ref="flashOverlay"></div>
         <div class="lens">
-          <div class="camera-container">
-            <CameraComponent />
-          </div>
+          <CameraComponent />
         </div>
         <div class="controls">
           <button class="complete-btn" @click="completeModal">COMPLETE</button>
@@ -17,56 +14,47 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, onMounted, onUnmounted, ref } from 'vue'
-import CameraComponent from './CameraComponent.vue'
-
-
+import { defineProps, defineEmits, onMounted, onUnmounted, ref } from "vue";
+import CameraComponent from "./CameraComponent.vue";
 
 defineProps({
-  isOpen: Boolean
-})
+  isOpen: Boolean,
+});
 
-const emit = defineEmits(['close', 'complete'])
-const originalColor = ref('')
+const emit = defineEmits(["close", "complete"]);
+
+const transitionDuration = 500; // 트랜지션 시간 (밀리초)
+const backgroundTransitionDuration = 2000; // 배경색 트랜지션 시간 (밀리초)
+
+const originalColor = ref("");
+const originalBodyColor = ref("");
 
 onMounted(() => {
-  const startContainer = document.querySelector('.start-container')
-  originalColor.value = startContainer.style.backgroundColor
-  updateBackgroundColors('#929191')
-})
+  const startContainer = document.querySelector(".start-container");
+  originalColor.value = startContainer.style.backgroundColor;
+  originalBodyColor.value = document.body.style.backgroundColor;
+
+  updateBackgroundColors("#929191");
+});
 
 const updateBackgroundColors = (color) => {
-  const startContainer = document.querySelector('.start-container')
-  const body = document.body
-  
-  if (startContainer && body) {
-    startContainer.style.backgroundColor = color
-    body.style.backgroundColor = color
-  }
-}
+  const startContainer = document.querySelector(".start-container");
+  [startContainer, document.body].forEach((el) => {
+    el.style.transition = `background-color ${backgroundTransitionDuration}ms ease`;
+    el.style.backgroundColor = color;
+  });
+};
 
 const closeModal = () => {
-  updateBackgroundColors(originalColor.value)
-  emit('close')
-}
+  updateBackgroundColors(originalColor.value);
+  emit("close");
+};
 
-const flashOverlay = ref(null)
-
-const completeModal = () => {
-  // 플래시 효과 실행
-  if (flashOverlay.value) {
-    flashOverlay.value.classList.add('flash')
-    // 플래시 효과가 끝난 후 complete 이벤트 발생
-    setTimeout(() => {
-      flashOverlay.value.classList.remove('flash')
-      emit('complete')
-    }, 300)
-  }
-}
+const completeModal = () => emit("complete");
 
 onUnmounted(() => {
-  updateBackgroundColors(originalColor.value)
-})
+  updateBackgroundColors(originalColor.value);
+});
 </script>
 
 <style scoped>
@@ -82,52 +70,14 @@ onUnmounted(() => {
   z-index: 1000;
 }
 
-.flash-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 0;
-  height: 0;
-  background: radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 70%);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 1000;
-}
-
-@keyframes flash {
-  0% {
-    width: 0;
-    height: 0;
-    opacity: 0;
-  }
-  10% {
-    width: 200%;
-    height: 200%;
-    opacity: 1;
-  }
-  100% {
-    width: 200%;
-    height: 200%;
-    opacity: 0;
-  }
-}
-
-.flash {
-  animation: flash 0.5s cubic-bezier(0.11, 0, 0.5, 0) forwards;
-}
-
 .camera {
   background: #2a2a2a;
   border-radius: 50%;
   width: 800px;
   height: 800px;
   position: relative;
-  box-shadow: 
-    0 0 0 8px #353535,
-    0 0 0 16px #454545,
-    0 0 0 24px #555555,
-    0 0 100px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 8px #353535, /* 간격 축소 */ 0 0 0 16px #454545,
+    0 0 0 24px #555555, 0 0 100px rgba(0, 0, 0, 0.5);
 }
 
 .lens {
@@ -137,20 +87,40 @@ onUnmounted(() => {
   transform: translate(-50%, -50%);
   width: 70%;
   height: 70%;
-  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1a; /* 더 어두운 색상 */
   border-radius: 50%;
-  box-shadow: 
-    0 0 0 8px #404040,
-    inset 0 0 40px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 0 8px #404040,
+    /* 간격 축소 */ inset 0 0 40px rgba(0, 0, 0, 0.7);
 }
 
-.camera-container {
-  position: relative;
+.camera-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%; /* 렌즈에 맞춰 크기 조정 */
+  height: 80%;
+  border-radius: 50%;
+  border: 2px solid #404040;
+  background-color: #1a1a1a;
+  overflow: hidden;
+}
+
+.camera-display img {
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  object-fit: cover;
+  filter: saturate(70%); /* grayscale 대신 채도 낮추기 */
+}
+
+.controls {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .complete-btn {
@@ -163,28 +133,50 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  position: absolute;
-  bottom: 10%;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .complete-btn:hover {
   background: #555555;
-  transform: translate(-50%, -2px);
+  transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
-.modal-enter-active {
-  transition: opacity var(--transition-duration) ease;
-}
-
+.modal-enter-active,
 .modal-leave-active {
-  transition: opacity var(--transition-duration) ease var(--delay-duration);
+  transition: opacity var(--transition-duration) ease;
 }
 
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
+}
+
+.intro-messages {
+  width: 400px;
+  height: 400px; /* 정사각형으로 변경 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2a2a2a;
+  border-radius: 50%;
+  border: 2px solid #555;
+  margin: 0 auto;
+  color: #e0e0e0;
+}
+
+.intro-messages h2 {
+  color: #e0e0e0;
+  text-align: center;
+  padding: 20px;
+  font-size: 1.5em;
+}
+
+.emotion-text {
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  margin-top: 10px;
+  font-size: 1.1em;
+  color: #e0e0e0;
 }
 </style>
