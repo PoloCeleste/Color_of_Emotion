@@ -73,6 +73,7 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
             message_type = data.get('type')
 
             if message_type == 'start_analysis':
+                print('Analysis Start.')
                 self.is_analyzing = True
                 self.first_phase_data = []
                 self.second_phase_data = []
@@ -97,10 +98,17 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
                 }))
 
             elif message_type == 'second_phase':
+                print('In Second Phase.')
                 self.is_second_phase = True
                 self.first_analysis_result = await self.process_first_results(self.first_phase_data)
 
+            elif message_type == 'restart_second_phase':
+                if self.is_second_phase:
+                    print('Second Phase Restart.')
+                    self.second_phase_data = []
+            
             elif message_type == 'stop_analysis':
+                print('Stop Analysis.')
                 self.is_analyzing = False
                 self.second_analysis_result = await self.process_second_results(self.second_phase_data)
                 
