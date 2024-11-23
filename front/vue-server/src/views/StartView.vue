@@ -133,6 +133,13 @@ const completeMeasurement = () => {
   z-index: 2;
   transition: transform 0.3s ease;
   overflow: hidden;
+  box-shadow: 
+    inset 0 0 50px rgba(0, 0, 0, 0.1),
+    0 10px 20px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(145deg, #f0f0f0, #ffffff);
+  transform-style: preserve-3d;
+  perspective: 1000px;
 }
 
 .circle.rainbow-shadow {
@@ -180,21 +187,24 @@ const completeMeasurement = () => {
 }
 
 .circle:hover {
-  transform: scale(1.05);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 
+    inset 0 0 60px rgba(0, 0, 0, 0.1),
+    0 15px 25px rgba(0, 0, 0, 0.2),
+    0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
 .measure-button {
   padding: 20px 40px;
-  font-size: 1.5rem;
+  font-size: 2rem;
   font-weight: bold;
   color: darkgray;
   background: transparent;
   border: none;
   cursor: pointer;
   letter-spacing: 2px;
-  overflow: hidden;
-  /* 모든 속성에 대해 transition 적용 */
-  transition: all 0.3s ease;
+  transform: scale(1);
+  transition: transform 0.3s ease, color 0.3s ease;
 }
 
 .measure-button:hover {
@@ -212,6 +222,11 @@ const completeMeasurement = () => {
   cursor: pointer;
   transition: color 0.3s ease;
   letter-spacing: 2px;
+  text-shadow: 
+    3px 3px 6px rgba(0, 0, 0, 0.2),
+    -2px -2px 4px rgba(255, 255, 255, 0.8);
+  transform: translateZ(10px);
+  transition: all 0.3s ease;
 }
 
 .start-button {

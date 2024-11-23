@@ -13,7 +13,7 @@
         :grabCursor="true"
         :centeredSlides="true"
         :slidesPerView="3"
-        :spaceBetween="30"
+        :spaceBetween="20"
         :coverflowEffect="{
           rotate: 0,
           stretch: 0,
@@ -152,7 +152,7 @@ onMounted(async () => {
 
 
 const goBackToStart = () => {
-  router.push('/')
+  router.push('/start')
 }
 
 const openModal = (card) => {
