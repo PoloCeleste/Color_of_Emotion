@@ -1,6 +1,9 @@
 ﻿<template>
   <div class="start-container">
     <div class="content-wrapper">
+      <Transition name="camera-body">
+        <div v-if="isModalOpen" class="camera-body"></div>
+      </Transition>
       <div class="circle-container">
         <div class="circle" :class="[{ 'rainbow-shadow': measurementComplete }]">
           <button 
@@ -20,15 +23,9 @@
         </div>
       </div>
     </div>
-    <!-- 모달 트랜지션 추가 -->
-    <transition name="modal-fade">
-      <MeasureModal
-        v-if="isModalOpen"
-        :isOpen="isModalOpen"
-        @close="closeModal"
-        @complete="completeMeasurement"
-      /> 
-    </transition>
+    <Transition name="modal-fade">
+      <MeasureModal v-if="isModalOpen" :isOpen="isModalOpen" @close="closeModal" @complete="completeMeasurement" />
+    </Transition>
   </div>
 </template>
 
@@ -47,13 +44,34 @@ const goToRecommend = () => {
 import { ref } from 'vue';
 const isModalOpen = ref(false)
 const measurementComplete = ref(false)
+const originalColor = ref('')  // 추가
+const backgroundTransitionDuration = 2000
+
+const updateBackgroundColors = (color) => {
+  const startContainer = document.querySelector('.start-container')
+  if (startContainer) {
+    startContainer.style.transition = `background-color ${backgroundTransitionDuration}ms ease`
+    startContainer.style.backgroundColor = color
+  }
+}
 
 const openModal = () => {
   isModalOpen.value = true
 }
 
 const closeModal = () => {
-  isModalOpen.value = false
+  // 먼저 카메라 몸통을 사라지게 함
+  const cameraBody = document.querySelector('.camera-body')
+  if (cameraBody) {
+    cameraBody.style.opacity = '0'
+    cameraBody.style.transform = 'translate(-50%, -50%) scale(0.8)'
+  }
+  
+  // 0.5초 후에 모달 닫기
+  setTimeout(() => {
+    isModalOpen.value = false
+    updateBackgroundColors(originalColor.value)
+  }, 500)
 }
 
 const completeMeasurement = () => {
@@ -64,6 +82,78 @@ const completeMeasurement = () => {
 </script>
 
 <style scoped>
+.camera-body {
+  position: absolute;
+  top: 65%;  /* 60%에서 65%로 수정하여 더 아래로 이동 */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1200px;
+  height: 600px;
+  background: linear-gradient(145deg, #333333, #1a1a1a);
+  border-radius: 20px;
+  box-shadow: 
+    inset 0 0 50px rgba(0, 0, 0, 0.5),
+    0 10px 20px rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  /* 카메라 장식 추가 */
+  border: 2px solid #444;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 카메라 장식 요소 추가 */
+.camera-body::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: #222;
+  border-radius: 50%;
+  box-shadow: 
+    inset 0 0 10px rgba(0, 0, 0, 0.8),
+    0 0 0 2px #444;
+}
+
+.camera-body::after {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  width: 100px;
+  height: 4px;
+  background: #444;
+  border-radius: 2px;
+}
+
+.camera-body-enter-active,
+.camera-body-leave-active {
+  transition: all 0.5s ease;
+}
+
+.camera-body-enter-from {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.camera-body-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+.camera-mode .circle {
+  background: #404040;
+  border: none;
+  box-shadow: 
+    0 0 0 8px #505050,
+    inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.camera-mode .measure-button {
+  color: #e0e0e0;
+}
+
 .start-container {
   width: 100%;
   height: 70vh;
@@ -75,6 +165,14 @@ const completeMeasurement = () => {
 }
 
 /* 모달 트랜지션 효과 */
+.modal-fade-enter-active {
+  transition: all 0.5s ease 0.5s;  /* 0.5초 지연 */
+}
+
+.modal-fade-leave-active {
+  transition: all 0.5s ease;
+}
+
 .modal-fade-enter-active,
 .modal-fade-leave-active {
   transition: all 0.5s ease;
