@@ -11,7 +11,7 @@ const routes = [
     path: '/start',
     name: 'start-view',
     component: () => import('../views/StartView.vue'),
-    meta: { transition: 'slide' }
+    meta: { transition: 'fade' }
   },
   {
     path: '/recommend',

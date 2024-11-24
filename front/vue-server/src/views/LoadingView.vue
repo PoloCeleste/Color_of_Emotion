@@ -1,33 +1,34 @@
 <template>
   <div
-    class="d-flex flex-column justify-content-center align-items-center vh-100"
+    class="loading-container d-flex flex-column justify-content-center align-items-center vh-100"
     @click="skipLoading"
   >
-    <!-- 타이핑 텍스트 -->
-    <h1 v-if="showTitle" class="typewriter">{{ typedText }}</h1>
+    <Transition name="fade">
+      <h1 v-if="showTitle" class="typewriter">{{ typedText }}</h1>
+    </Transition>
 
-    <!-- 로딩 점 애니메이션 -->
-    <div v-if="showTitle" class="loading-dots mt-4">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
+    <Transition name="fade">
+      <div v-if="showTitle" class="loading-dots mt-4">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
-// 라우터와 상태 관리
 const router = useRouter()
 const showTitle = ref(false)
 const typedText = ref('')
 const fullText = 'Color of Emotion'
-const typingSpeed = 200
-let typingInterval = null // 타이핑 인터벌 ID
+const typingSpeed = 150 // 타이핑 속도 최적화
 
-// 텍스트 출력 함수
+let typingInterval = null
+
 function typeText() {
   let currentIndex = 0
   typingInterval = setInterval(() => {
@@ -37,81 +38,88 @@ function typeText() {
     } else {
       clearInterval(typingInterval)
       setTimeout(() => {
-        showTitle.value = false
-        router.push('/start') // 타이핑 완료 후 페이지 이동
-      }, 2000)
+        router.push({ 
+          path: '/start',
+          query: { transition: 'fade' }
+        })
+      }, 1500)
     }
   }, typingSpeed)
 }
 
-// 로딩 스킵 함수
 function skipLoading() {
-  clearInterval(typingInterval) // 타이핑 애니메이션 중단
-  router.push('/start') // 즉시 다음 페이지로 이동
+  clearInterval(typingInterval)
+  router.push('/start')
 }
 
-// 컴포넌트가 마운트될 때 실행
 onMounted(() => {
   setTimeout(() => {
     showTitle.value = true
     typeText()
-  }, 1000)
+  }, 800)
+})
+
+onBeforeUnmount(() => {
+  clearInterval(typingInterval)
 })
 </script>
 
 <style scoped>
-/* 타이틀 스타일 */
+.loading-container {
+  /* background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%); */
+  cursor: pointer;
+}
+
 .typewriter {
-  font-family: "Courier New", Courier, monospace;
-  font-size: 3rem;
-  color: black;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: #2c3e50;
   white-space: nowrap;
   overflow: hidden;
-  border-right: 2px solid black; /* 깜박이는 커서 */
-  animation: blink-caret 0.7s step-end infinite; /* 커서 깜박임 */
+  border-right: 3px solid #2c3e50;
+  animation: blink-caret 0.75s step-end infinite;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
-/* 커서 깜박임 애니메이션 */
 @keyframes blink-caret {
-  from, to {
-    border-color: transparent;
-  }
-  50% {
-    border-color: black;
-  }
+  from, to { border-color: transparent }
+  50% { border-color: #2c3e50 }
 }
 
-/* 로딩 점 애니메이션 */
 .loading-dots {
   display: flex;
+  gap: 8px;
 }
 
 .loading-dots span {
-  width: 10px;
-  height: 10px;
-  margin: 0 5px;
-  background-color: black;
+  width: 12px;
+  height: 12px;
+  background-color: #2c3e50;
   border-radius: 50%;
-  animation: bounce-dots 1.5s infinite ease-in-out;
+  animation: bounce-dots 1.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
 }
 
-.loading-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.loading-dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s }
 
 @keyframes bounce-dots {
   0%, 80%, 100% {
-    transform: scale(0);
+    transform: scale(0.3);
     opacity: 0.5;
   }
-  
   40% {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
