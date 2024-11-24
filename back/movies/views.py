@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Movie, EmotionColor
 from .serializers import MovieSerializer
 from skimage import color as skcolor
-import json
+import json, random
 import numpy as np
 
 def rgb_to_lab(rgb):
@@ -152,7 +152,8 @@ def recommend_movies(request):
                 movie_scores.append((movie, avg_similarity * weighted_dominance))
         
         # 점수로 정렬하고 상위 10개 선택
-        sorted_movies = [movie for movie, _ in sorted(movie_scores, key=lambda x: x[1])][:10]
+        sorted_movies = [movie for movie, _ in sorted(movie_scores, key=lambda x: x[1])][:50]
+        random.shuffle(sorted_movies)
         
         serializer = MovieSerializer(sorted_movies, many=True)
         return JsonResponse(serializer.data, safe=False)
