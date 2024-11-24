@@ -403,7 +403,7 @@ button:hover {
   font-size: 1.1em;
   color: #333;
   height: 10px;
-  width: 20%;
+  width: 22%;
 }
 
 .intro-messages {
