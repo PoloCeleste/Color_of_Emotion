@@ -55,7 +55,7 @@
           : ""
       }}
     </p>
-    <div
+    <!-- <div
       v-if="isFaceDetected && !showIntroMessages"
       class="progress-bar"
       style="width: 400px; height: 14px"
@@ -67,7 +67,7 @@
           'background-color': 'whitesmoke',
         }"
       ></div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -176,13 +176,13 @@ const startStreaming = async () => {
   frameCount.value = 0;
 
   if (!canvasElement.value) {
-    console.error('Canvas element not found');
+    console.error("Canvas element not found");
     return;
   }
 
   const context = canvasElement.value.getContext("2d");
   if (!context) {
-    console.error('Failed to get canvas context');
+    console.error("Failed to get canvas context");
     return;
   }
 
@@ -350,8 +350,7 @@ onUnmounted(() => {
   gap: 20px;
 }
 
-video, 
-.intro-messages,
+video,
 img {
   position: absolute;
   top: 0;
@@ -372,9 +371,9 @@ img {
   border: 2px solid #333;
   background-color: #1a1a1a;
   overflow: hidden;
-  display: flex;  /* 추가 */
-  justify-content: center;  /* 추가 */
-  align-items: center;  /* 추가 */
+  display: flex; /* 추가 */
+  justify-content: center; /* 추가 */
+  align-items: center; /* 추가 */
 }
 
 button {
@@ -388,7 +387,7 @@ button {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 2;  /* 추가 */
+  z-index: 2; /* 추가 */
 }
 
 button:hover {
@@ -404,12 +403,12 @@ button:hover {
   font-size: 1.1em;
   color: #333;
   height: 10px;
-  width: 100%;
+  width: 20%;
 }
 
 .intro-messages {
-  width: 400px;
-  height: 300px;
+  width: 500px;
+  height: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
