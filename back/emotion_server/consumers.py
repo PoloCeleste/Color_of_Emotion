@@ -29,21 +29,25 @@ class_labels = ['Joy', 'Embarrassment', 'Anger', 'Anxiety', 'Pain', 'Sadness', '
 # class_labels = ['기쁨', '당황', '분노', '불안', '상처', '슬픔', '중립']
 class_labels_dict = {'기쁨': 0, '당황': 1, '분노': 2, '불안': 3, '상처': 4, '슬픔': 5, '중립': 6}
 
-face_classifier = cv2.CascadeClassifier(pth.join(getcwd(), assets,'face_classifier.xml'))
-
-
 display_color = (86, 189, 246)
 
-if torch.cuda.is_available():
-    device = 'cuda'
-    # print('GPU On')
-else:
-    device = 'cpu'
-    print('GPU Off')
+model=None
+face_classifier=None
 
-model_state = torch.load(pth.join(getcwd(), assets, 'model.pth'), map_location=torch.device(device), weights_only=True)
-model = getModel('emotionnet', True)
-model.load_state_dict(model_state['model'])
+def load_model():
+    global model, face_classifier
+    face_classifier = cv2.CascadeClassifier(pth.join(getcwd(), assets,'face_classifier.xml'))
+
+    if torch.cuda.is_available():
+        device = 'cuda'
+        # print('GPU On')
+    else:
+        device = 'cpu'
+        print('GPU Off')
+
+    model_state = torch.load(pth.join(getcwd(), assets, 'model.pth'), map_location=torch.device(device), weights_only=True)
+    model = getModel('emotionnet', True)
+    model.load_state_dict(model_state['model'])
 
 class VideoStreamConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):

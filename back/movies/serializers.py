@@ -14,6 +14,7 @@ class ProviderSerializer(serializers.ModelSerializer):
 class MovieSerializer(serializers.ModelSerializer):
     genre_ids = GenreSerializer(many=True, read_only=True)
     watch_providers = ProviderSerializer(many=True, read_only=True)
+    color_score = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Movie
@@ -21,7 +22,7 @@ class MovieSerializer(serializers.ModelSerializer):
             'original_language', 'original_title', 'overview', 'poster_path',
             'release_date', 'title', 'tmdb_vote_average', 'movie_id',
             'picture_url', 'video_url', 'reviews', 'watchapedia',
-            'poster_palette', 'genre_ids', 'watch_providers'
+            'poster_palette', 'genre_ids', 'watch_providers', 'color_score'
         ]
 
     def to_representation(self, instance):
