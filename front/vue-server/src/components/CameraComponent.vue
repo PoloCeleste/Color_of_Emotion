@@ -16,6 +16,7 @@
         width="400"
         height="300"
       ></canvas>
+
       <div :style="{ display: display_flag ? 'none' : 'block' }">
         <div v-if="showIntroMessages" class="camera-display">
           <div class="intro-messages">
@@ -37,6 +38,43 @@
             style="margin-bottom: 0px; top: 50% + 7px"
           />
           <h1 class="button" style="text-align: center">{{ buttonText }}</h1>
+          <svg
+            class="progress-circle absolute z-10 -rotate-90"
+            width="500"
+            height="500"
+            viewBox="0 0 500 500"
+          >
+            <circle
+              class="progress-circle-bg"
+              cx="250"
+              cy="250"
+              r="240"
+              fill="none"
+              stroke="#ddd"
+              stroke-width="20"
+            />
+            <circle
+              ref="progressCircle"
+              class="progress-circle-bar"
+              cx="250"
+              cy="250"
+              r="240"
+              fill="none"
+              stroke="url(#progressGradient)"
+              stroke-width="20"
+              :stroke-dasharray="circumference"
+              :stroke-dashoffset="dashOffset"
+            />
+            <defs>
+              <linearGradient
+                id="progressGradient"
+                gradientTransform="rotate(135)"
+              >
+                <stop offset="0%" stop-color="#1853FF" />
+                <stop offset="100%" stop-color="#18FF59" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
       </div>
     </div>
@@ -55,29 +93,23 @@
           : ""
       }}
     </p>
-    <!-- <div
-      v-if="isFaceDetected && !showIntroMessages"
-      class="progress-bar"
-      style="width: 400px; height: 14px"
-    >
-      <div
-        class="progress"
-        :style="{
-          width: `${Math.round(measurementProgress)}%`,
-          'background-color': 'whitesmoke',
-        }"
-      ></div>
-    </div> -->
   </div>
 </template>
 
 <script setup>
 // import { defineEmits } from "vue";
-import { ref, onUnmounted } from "vue";
+import { ref, onUnmounted, computed } from "vue";
 
 const videoElement = ref(null);
 const canvasElement = ref(null);
 const imgElement = ref(null);
+
+const radius = 240;
+const circumference = computed(() => 2 * Math.PI * radius);
+const dashOffset = computed(() => {
+  return circumference.value * (1 - measurementProgress.value / 100);
+});
+
 const mode = ref(true);
 const ws = ref(null);
 const intervalId = ref(null);
@@ -348,6 +380,17 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   gap: 20px;
+}
+
+.progress-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.progress-circle-bar {
+  transition: stroke-dashoffset 0.3s ease;
 }
 
 video,
