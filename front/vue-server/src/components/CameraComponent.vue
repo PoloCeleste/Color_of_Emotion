@@ -187,9 +187,6 @@ const startStreaming = async () => {
       display_flag.value = true;
       setTimeout(() => {
         display_flag.value = false;
-        const context = canvasElement.value.getContext("2d");
-        const width = videoElement.value.width;
-        const height = videoElement.value.height;
         const delay = 100;
         const jpegQuality = 0.7;
 
@@ -239,6 +236,10 @@ const startStreaming = async () => {
             clearInterval(intervalId.value);
             return;
           }
+
+          const context = canvasElement.value.getContext("2d");
+          const width = videoElement.value.width;
+          const height = videoElement.value.height;
 
           frameCount.value++;
 
