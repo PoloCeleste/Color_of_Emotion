@@ -1,7 +1,7 @@
 <template>
   <RouterView v-slot="{ Component, route }">
     <Transition
-      :name="$route.meta.transition || 'fade'"
+      :name="$route.meta.transition"
       mode="out-in"
       @before-enter="beforeEnter"
       @after-leave="afterLeave"
@@ -50,7 +50,6 @@ html, body {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateY(20px);
 }
 
 /* 슬라이드 효과 */
