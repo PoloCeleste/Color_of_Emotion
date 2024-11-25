@@ -31,3 +31,11 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 #### DB 로드
 
 - py manage.py loaddata movies/movies.json movies/genres.json movies/providers.json movies/emotions.json movies/emotioncolors.json
+
+#### cucim 설치
+
+##### 일단 python 3.12 설치 / cuda 12 설치되야 함
+
+- git clone https://github.com/rapidsai/cucim.git
+- cd cucim
+- python -m pip install python/cucim
