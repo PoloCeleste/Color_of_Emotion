@@ -1,27 +1,31 @@
 <template>
   <div class="about">
-    <div class="circle-container" v-if="!showFilm">
-      <div
-        class="circle"
-        :class="{
-          'rainbow-shadow': measurementComplete,
-          'hover-effect': !isModalOpen,
-        }"
-      >
-        <button
-          class="start-button"
-          @click="startAnimation"
-          style="background-color: whitesmoke"
+    <Transition name="fade">
+      <div class="circle-container" v-if="!showFilm">
+        <div
+          class="circle"
+          :class="{
+            'rainbow-shadow': measurementComplete,
+            'hover-effect': !isModalOpen,
+          }"
         >
-          START
-        </button>
+          <button
+            class="start-button"
+            @click="startAnimation"
+            style="background-color: whitesmoke"
+          >
+            START
+          </button>
+        </div>
       </div>
-    </div>
-    <FilmAnimation
-      v-if="showFilm && recommendedMovies.length > 0"
-      :movies="recommendedMovies"
-      :emotionData="emotionData"
-    />
+    </Transition>
+    <Transition name="fade">
+      <FilmAnimation
+        v-if="showFilm && recommendedMovies.length > 0"
+        :movies="recommendedMovies"
+        :emotionData="emotionData"
+      />
+    </Transition>
   </div>
 </template>
 
@@ -92,6 +96,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 /* 원형 렌즈 스타일링 */
 .circle-container {
   position: fixed;
@@ -131,6 +145,7 @@ onMounted(() => {
 .about {
   min-height: 100vh;
   display: flex;
+  background-color: whitesmoke;
   justify-content: center;
   align-items: center;
 }

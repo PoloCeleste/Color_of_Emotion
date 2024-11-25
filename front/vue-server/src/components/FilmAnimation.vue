@@ -16,13 +16,15 @@
           부감정: {{ secondaryEmotions.join(", ") }}
         </div>
       </div>
-      <div class="movie-cards" v-if="expansionComplete">
-        <MovieCard
-          v-for="(movie, index) in movies"
-          :key="movie.movie_id"
-          :movie="movie"
-          :delay="index * 0.2"
-        />
+      <div class="movie-scroll-container" v-if="expansionComplete">
+        <div class="movie-cards">
+          <MovieCard
+            v-for="(movie, index) in movies"
+            :key="movie.movie_id"
+            :movie="movie"
+            :delay="index * 0.2"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -209,12 +211,32 @@ onMounted(() => {
   transform: translate(-50%, -50%);
 }
 
+.movie-scroll-container {
+  width: 100%;
+  height: 60vh;
+  overflow-y: auto;
+  margin-top: 2rem;
+  padding: 0 2rem;
+}
+
+.movie-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.movie-scroll-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.movie-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
 .movie-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 2rem;
-  padding: 2rem;
-  width: 100%;
-  max-width: 1200px;
+  padding: 1rem;
 }
 </style>
