@@ -27,8 +27,8 @@ import axios from "axios";
 const recommendedMovies = ref([]);
 const loading = ref(false);
 const error = ref(null);
-// const URL = process.env.VUE_APP_API_URL;
-const URL = "192.168.201.124:8000";
+const URL = process.env.VUE_APP_API_URL;
+// const URL = "192.168.201.124:8000";
 
 const api = axios.create({
   baseURL: `http://${URL}`,
