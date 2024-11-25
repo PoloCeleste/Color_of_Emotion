@@ -1,21 +1,20 @@
 <template>
-    <div class="circle-container">
-      <div class="circle"></div>
+  <div class="circle-container">
+    <div class="circle">
+      <button @click="handleClick">START</button>
     </div>
-  </template>
-  
-  <script setup>
-import { onMounted, defineEmits } from 'vue';
+  </div>
+</template>
+
+<script setup>
+import { defineEmits } from 'vue';
 
 const emit = defineEmits(['complete']);
 
-onMounted(() => {
-  // 애니메이션이 끝나면 complete 이벤트를 발생시킵니다
-  setTimeout(() => {
-    emit('complete');
-  }, 3000); // 예: 3초 후에 완료
-});
-  </script>
+function handleClick() {
+  emit('complete');
+}
+</script>
   
   <style scoped>
   .circle-container {
