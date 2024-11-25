@@ -7,41 +7,25 @@
           <div class="flash-window" :class="{ glow: isModalOpen }"></div>
         </div>
       </Transition>
-
       <div class="circle-container">
-        <div
-          class="circle"
-          :class="{
-            'rainbow-shadow': measurementComplete,
-            'hover-effect': !isModalOpen,
-          }"
-        >
+        <div class="circle" :class="{ 'hover-effect': !isModalOpen }">
           <Transition name="button" mode="out-in">
-            <button
-              v-if="!measurementComplete"
-              class="measure-button"
-              @click="openModal"
+            <button 
+              class="measure-button" 
+              @click="openModal" 
               :disabled="isModalOpen"
             >
               Let's find your emotion
-            </button>
-            <button
-              v-else
-              class="start-button"
-              style="background-color: whitesmoke"
-            >
-              START
             </button>
           </Transition>
         </div>
       </div>
     </div>
-
     <Transition name="modal">
-      <MeasureModal
-        v-if="isModalOpen"
-        :isOpen="isModalOpen"
-        @close="closeModal"
+      <MeasureModal 
+        v-if="isModalOpen" 
+        :isOpen="isModalOpen" 
+        @close="closeModal" 
         @complete="completeMeasurement"
       />
     </Transition>
@@ -51,10 +35,10 @@
 <script setup>
 import MeasureModal from "@/components/MeasureModal.vue";
 import { useRouter } from "vue-router";
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted } from "vue";
 
 // 상수 정의
-const TRANSITION_DURATION = 800; // 기본 트랜지션 시간
+const TRANSITION_DURATION = 500; // 기본 트랜지션 시간
 const DELAY_DURATION = 800; // 지연 시간
 const BACKGROUND_TRANSITION = 800; // 배경색 전환 시간
 
@@ -70,18 +54,18 @@ document.documentElement.style.setProperty(
 // 상태 관리
 const router = useRouter();
 const isModalOpen = ref(false);
-const measurementComplete = ref(false);
+// const measurementComplete = ref(false);
 const originalColor = ref("");
 
 // 라우터 핸들러
-const goToRecommend = () => {
-  setTimeout(() => {
-    router.push({
-      path: "/recommend",
-      replace: true,
-    });
-  }, 800); // 모달 트랜지션 시간과 동일하게 설정
-};
+// const goToRecommend = () => {
+//   setTimeout(() => {
+//     router.push({
+//       path: "/recommend",
+//       replace: true,
+//     });
+//   }, 800); // 모달 트랜지션 시간과 동일하게 설정
+// };
 
 // 모달 컨트롤
 const openModal = () => {
@@ -105,13 +89,19 @@ const updateBackgroundColors = (color) => {
 };
 
 const closeModal = () => {
-  // 배경색 변경과 카메라 몸통 퇴장을 동시에 실행
+  // 1. 배경색 변경과 카메라 몸통 퇴장을 동시에 실행
   updateBackgroundColors(originalColor.value);
+  
+  // 카메라 몸통에 페이드아웃 클래스 추가
+  const cameraBody = document.querySelector(".camera-body");
+  if (cameraBody) {
+    cameraBody.classList.add("fade-out");
+  }
 
-  // 배경색 변경과 카메라 몸통 퇴장이 완료된 후 모달 닫기
+  // 2. 배경색과 카메라 몸통 트랜지션이 완료된 후 모달 닫기
   setTimeout(() => {
     isModalOpen.value = false;
-  }, TRANSITION_DURATION); // 약간의 여유 시간 추가
+  }, TRANSITION_DURATION);
 };
 
 // onMounted 훅 추가
@@ -127,19 +117,34 @@ const completeMeasurement = () => {
   flash.className = "camera-flash";
   document.querySelector(".camera-body").appendChild(flash);
 
-  // 2. 플래시 효과 후 배경색 변경과 카메라 몸통 퇴장
-  setTimeout(async () => {
+  // 2. 플래시 효과 후 순차적 트랜지션 시작
+  setTimeout(() => {
+    // 배경색 변경, 카메라 몸통 퇴장, circle 퇴장을 동시에 시작
     updateBackgroundColors(originalColor.value);
     flash.remove();
 
-    // 3. 모달창 퇴장과 측정 완료 상태 변경
-    setTimeout(async () => {
+    const cameraBody = document.querySelector(".camera-body");
+    const circleContainer = document.querySelector(".circle-container");
+
+    if (cameraBody) {
+      cameraBody.classList.add("fade-out");
+    }
+    if (circleContainer) {
+      circleContainer.classList.add("fade-out");
+    }
+
+    // 첫 번째 트랜지션 그룹이 완료된 후
+    setTimeout(() => {
+      // 모달 퇴장 시작
       isModalOpen.value = false;
-      measurementComplete.value = true;
-      await nextTick();
-      goToRecommend();
+
+      // 모달 퇴장이 완료된 후 라우터 전환
+      setTimeout(() => {
+        router.push("/recommend");
+      }, TRANSITION_DURATION);
     }, TRANSITION_DURATION);
-  }, 300); // 플래시 지속 시간
+
+  });
 };
 </script>
 
@@ -147,7 +152,7 @@ const completeMeasurement = () => {
 /* 기존 스타일 유지하면서 모달 트랜지션 스타일 수정 */
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity var(--transition-duration) ease,
+  transition: all var(--transition-duration) ease,
     transform var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -158,7 +163,7 @@ const completeMeasurement = () => {
 
 .modal-leave-to {
   opacity: 0;
-  transform: scale(1.05) translateY(-10px);
+  transform: scale(1.05);
 }
 
 .modal-enter-to,
@@ -193,6 +198,13 @@ const completeMeasurement = () => {
   border: 2px solid #444;
   overflow: hidden;
   box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5), 0 10px 20px rgba(0, 0, 0, 0.3);
+  opacity: 1;
+  transition: all var(--transition-duration) ease;
+}
+
+.camera-body.fade-out {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.95);
 }
 
 /* 카메라 장식 요소 */
@@ -292,9 +304,16 @@ const completeMeasurement = () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  opacity: 1;
+  transition: all var(--transition-duration) ease;
   width: 400px;
   height: 400px;
   z-index: 2;
+}
+
+.circle-container.fade-out {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.95);
 }
 
 .circle {

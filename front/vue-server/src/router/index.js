@@ -4,7 +4,7 @@ const routes = [
   {
     path: '/',
     name: 'loading-view',
-    component: () => import('../views/LoadingView.vue'), // 동적 임포트
+    component: () => import('../views/LoadingView.vue'),
     meta: { transition: 'fade' }
   },
   {
@@ -14,9 +14,16 @@ const routes = [
     meta: { transition: 'fade' }
   },
   {
+    path: '/animation',
+    name: 'animation-view',
+    component: () => import('../views/AnimationView.vue'),
+    meta: { transition: 'fade' }
+  },
+  {
     path: '/recommend',
     name: 'recommend-view',
     component: () => import('../views/RecommendView.vue'),
+    meta: { transition: 'fade' }
   }
 ]
 
