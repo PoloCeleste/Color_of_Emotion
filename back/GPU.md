@@ -30,4 +30,4 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 
 #### DB 로드
 
-- py manage.py loaddata movies/movies.json movies/genres.json providers.json emotions.json emotioncolors.json
+- py manage.py loaddata movies/movies.json movies/genres.json movies/providers.json movies/emotions.json movies/emotioncolors.json
