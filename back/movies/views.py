@@ -9,11 +9,12 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from .models import Movie, EmotionColor
-from .serializers import MovieSerializer
 from skimage import color as skcolor
 import json, random
-import numpy as np
 
+
+## CPU 사용
+import numpy as np
 def rgb_to_lab(rgb):
     # RGB 값을 0-1 사이로 정규화
     rgb_normalized = np.array(rgb) / 255.0
