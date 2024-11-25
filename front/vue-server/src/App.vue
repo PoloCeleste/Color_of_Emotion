@@ -9,12 +9,12 @@
         class="movie-card"
       >
         <img :src="movie.poster_path" :alt="movie.title" />
-        <!-- <h3>{{ movie.title }}</h3>
+        <h3>{{ movie.title }}</h3>
         <p>{{ movie.overview }}</p>
         <div class="movie-info">
           <span>평점: {{ movie.tmdb_vote_average }}</span>
           <span>개봉일: {{ movie.release_date }}</span>
-        </div> -->
+        </div>
       </div>
     </div>
   </div>
@@ -27,8 +27,8 @@ import axios from "axios";
 const recommendedMovies = ref([]);
 const loading = ref(false);
 const error = ref(null);
-// const URL = process.env.VUE_APP_API_URL;
-const URL = "192.168.201.124:8000";
+const URL = process.env.VUE_APP_API_URL;
+// const URL = "192.168.201.124:8000";
 
 const api = axios.create({
   baseURL: `http://${URL}`,
