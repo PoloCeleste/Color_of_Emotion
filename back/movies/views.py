@@ -153,7 +153,7 @@ def recommend_movies(request):
         
         # 점수로 정렬하고 상위 10개 선택
         sorted_movies = [movie for movie, _ in sorted(movie_scores, key=lambda x: x[1])][:50]
-        random.shuffle(sorted_movies)
+        # random.shuffle(sorted_movies)
         
         serializer = MovieSerializer(sorted_movies, many=True)
         return JsonResponse(serializer.data, safe=False)
