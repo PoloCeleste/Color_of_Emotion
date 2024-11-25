@@ -1,23 +1,28 @@
 <template>
   <div class="film-reel-container">
-    <div class="film-reel" :class="{ 'rotated': isRotated }">
+    <div class="film-reel" :class="{ rotated: isRotated }">
       <div class="top"></div>
       <div class="bottom"></div>
-      <div class="side" :class="{ 'expanded': isSideExpanded }"></div>
+      <div class="side" :class="{ expanded: isSideExpanded }"></div>
       <div class="film" :class="{ 'move-right': isSideExpanded }"></div>
     </div>
-    <div class="black-overlay" :class="{ 'visible': isExpanded, 'expand': isExpanded }"></div>
+    <div
+      class="black-overlay"
+      :class="{ visible: isExpanded, expand: isExpanded }"
+    >
+      <div class="text-box">니 감정</div>
+      <div class="text-box">니 색상</div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted } from "vue";
 
 const isRotated = ref(false);
 const isExpanded = ref(false);
 const isSideExpanded = ref(false);
-const expansionComplete = ref(false)
-
+const expansionComplete = ref(false);
 
 onMounted(() => {
   setTimeout(() => {
@@ -32,7 +37,7 @@ onMounted(() => {
     isExpanded.value = true; // 이 시점에 블랙 오버레이가 나타남
   }, 4500);
 
-    setTimeout(() => {
+  setTimeout(() => {
     expansionComplete.value = true;
   }, 6000);
 });
@@ -61,7 +66,8 @@ onMounted(() => {
   transform: rotateX(90deg);
 }
 
-.top, .bottom {
+.top,
+.bottom {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -92,28 +98,20 @@ onMounted(() => {
 
 .film {
   position: absolute;
-  width: calc(100% + 3px);
+  width: 100%;
   height: 100px;
   transform: rotateX(90deg) translateZ(0);
   top: calc(50% - 50px);
-  right: -3px;
+  right: 5;
   z-index: 1;
   opacity: 0;
   transition: opacity 1.5s ease-out;
 
+  /* 필름 스트립 패턴 복원 */
   --s: 8px;
   --c: #222;
-  background: 
-    /* 필름 구멍 패턴 */
-    radial-gradient(circle at center, transparent 30%, var(--c) 30%, var(--c) 40%, transparent 40%) 
-    0 50%/calc(2*var(--s)) 100% repeat-x,
-    /* 필름 스트립 배경 */
-    linear-gradient(90deg, 
-      var(--c) var(--s), 
-      #333 var(--s), 
-      #333 calc(100% - var(--s)), 
-      var(--c) calc(100% - var(--s))
-    );
+  background: conic-gradient(at 50% var(--s), var(--c) 75%, #0000 0) 0 0 /
+    calc(2 * var(--s)) calc(100% - var(--s)) padding-box;
   border: var(--s) solid var(--c);
   box-sizing: border-box;
 }
@@ -139,6 +137,10 @@ onMounted(() => {
   animation: moveRight 1.5s ease-out forwards;
 }
 
+.film.move-right {
+  animation: moveRight 1.5s ease-out forwards;
+}
+
 .black-overlay {
   position: absolute;
   top: 0;
@@ -151,23 +153,24 @@ onMounted(() => {
   background-color: #1a1a1a;
 }
 
-
 .black-overlay.visible {
-  transform: translateX(-100%);
-  --s: 32px; /* 더 큰 패턴 */
-  --c: #1a1a1a;
-  background: 
-    /* 필름 구멍 패턴 */
-    radial-gradient(circle at center, transparent 30%, var(--c) 30%, var(--c) 40%, transparent 40%) 
-    0 50%/calc(2*var(--s)) 100% repeat-x,
-    /* 필름 스트립 배경 */
-    linear-gradient(90deg, 
-      var(--c) var(--s), 
-      #222 var(--s), 
-      #222 calc(100% - var(--s)), 
-      var(--c) calc(100% - var(--s))
-    );
+  transform: translateX(-100%); /* 왼쪽으로 이동하여 화면을 덮음 */
+  --s: 20px;
+  --c: #222;
+  background: conic-gradient(at 50% var(--s), var(--c) 75%, #0000 0) 0 0 /
+    calc(2 * var(--s)) calc(100% - var(--s)) padding-box;
   border: var(--s) solid var(--c);
   box-sizing: border-box;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.text-box {
+  color: whitesmoke;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 </style>
