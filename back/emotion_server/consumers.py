@@ -148,7 +148,7 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         domination = False
         prob = ''
         emotion_data = ''
-        label_position = (90, 10)
+        # label_position = (90, 10)
         
         display_color = (255, 161, 54)
         for (x, y, w, h) in faces:
@@ -181,12 +181,12 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
                 display_color = (0, 255, 0)
                 flag = False
 
-        font_path = pth.join(getcwd(), assets, 'NotoSansKR-Regular.otf')
-        font = ImageFont.truetype(font_path, 32)
-        img_pil = Image.fromarray(frame)
-        draw = ImageDraw.Draw(img_pil)
-        draw.text(label_position, label, font=font, fill=display_color)
-        frame = np.array(img_pil)
+        # font_path = pth.join(getcwd(), assets, 'NotoSansKR-Regular.otf')
+        # font = ImageFont.truetype(font_path, 32)
+        # img_pil = Image.fromarray(frame)
+        # draw = ImageDraw.Draw(img_pil)
+        # draw.text(label_position, label, font=font, fill=display_color)
+        # frame = np.array(img_pil)
 
         # 프레임을 base64로 인코딩
         _, buffer = cv2.imencode('.jpg', frame)
