@@ -9,12 +9,12 @@
         class="movie-card"
       >
         <img :src="movie.poster_path" :alt="movie.title" />
-        <h3>{{ movie.title }}</h3>
+        <!-- <h3>{{ movie.title }}</h3>
         <p>{{ movie.overview }}</p>
         <div class="movie-info">
           <span>평점: {{ movie.tmdb_vote_average }}</span>
           <span>개봉일: {{ movie.release_date }}</span>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -120,7 +120,7 @@ onMounted(() => {
 
 .movie-card img {
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: cover;
 }
 
