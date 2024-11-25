@@ -1,0 +1,1 @@
+default_app_config = 'emotion_server.apps.EmotionServerConfig'

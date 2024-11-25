@@ -15,6 +15,13 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import environ
+
+env = environ.Env(DEBUG=(bool, True))
+
+environ.Env.read_env()
+
+API_KEY = env('tmdb')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -32,6 +39,7 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'daphne',
+    'movies',
     'channels',
     'corsheaders',
     'django.contrib.admin',
@@ -40,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'emotion_server.apps.EmotionServerConfig',
 ]
 
 MIDDLEWARE = [
@@ -127,7 +136,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = ['ws://127.0.0.1:8000/', 'ws://localhost:8000/', 'ws://0.0.0.0:8000/', 'ws://192.168.201.100:8000/']
+CSRF_TRUSTED_ORIGINS = ['ws://127.0.0.1:8000/', 'ws://localhost:8000/', 'ws://0.0.0.0:8000/', 'ws://192.168.201.100:8000/', 'ws://192.168.31.170:8000/', 'ws://180.229.58.136:8000/']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https', 'ws')
 
 CHANNEL_LAYERS={
