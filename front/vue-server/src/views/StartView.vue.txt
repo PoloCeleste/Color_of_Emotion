@@ -28,6 +28,8 @@
             <button
               v-else
               class="start-button"
+              @click="goToRecommend"
+              :class="{ ready: measurementComplete }"
               style="background-color: whitesmoke"
             >
               START
@@ -51,7 +53,7 @@
 <script setup>
 import MeasureModal from "@/components/MeasureModal.vue";
 import { useRouter } from "vue-router";
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted } from "vue";
 
 // 상수 정의
 const TRANSITION_DURATION = 800; // 기본 트랜지션 시간
@@ -75,12 +77,8 @@ const originalColor = ref("");
 
 // 라우터 핸들러
 const goToRecommend = () => {
-  setTimeout(() => {
-    router.push({
-      path: "/recommend",
-      replace: true,
-    });
-  }, 800); // 모달 트랜지션 시간과 동일하게 설정
+  sessionStorage.setItem("hasVisitedStart", "true");
+  router.push("/recommend");
 };
 
 // 모달 컨트롤
@@ -128,15 +126,14 @@ const completeMeasurement = () => {
   document.querySelector(".camera-body").appendChild(flash);
 
   // 2. 플래시 효과 후 배경색 변경과 카메라 몸통 퇴장
-  setTimeout(async () => {
+  setTimeout(() => {
     updateBackgroundColors(originalColor.value);
     flash.remove();
 
     // 3. 모달창 퇴장과 측정 완료 상태 변경
-    setTimeout(async () => {
+    setTimeout(() => {
       isModalOpen.value = false;
       measurementComplete.value = true;
-      await nextTick();
       goToRecommend();
     }, TRANSITION_DURATION);
   }, 300); // 플래시 지속 시간
@@ -365,7 +362,7 @@ const completeMeasurement = () => {
 }
 
 /* rainbow-shadow 클래스가 활성화될 때 start-button 스타일 */
-/* .rainbow-shadow .start-button {
+.rainbow-shadow .start-button {
   background: linear-gradient(
     to right,
     #ff0000,
@@ -379,7 +376,7 @@ const completeMeasurement = () => {
   background-clip: text;
   color: transparent;
   animation: gradient-shift 5s linear infinite;
-} */
+}
 
 @keyframes gradient-shift {
   0% {
@@ -456,8 +453,23 @@ const completeMeasurement = () => {
 } */
 
 /* rainbow-shadow 클래스가 활성화될 때 start-button 스타일 */
+.rainbow-shadow .start-button {
+  background: linear-gradient(
+    to right,
+    #ff0000,
+    #ff8000,
+    #ffff00,
+    #00ff00,
+    #0000ff,
+    #ff0000
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rotate-colors 5s linear infinite;
+}
 
-/* .rainbow-shadow {
+.rainbow-shadow {
   border: 4px solid transparent;
   background-image: linear-gradient(white, white),
     linear-gradient(
@@ -473,7 +485,7 @@ const completeMeasurement = () => {
   background-clip: padding-box, border-box;
   box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
   animation: rotate-colors 5s linear infinite;
-} */
+}
 
 @keyframes rotate-colors {
   0% {

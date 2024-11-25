@@ -18,50 +18,50 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from "vue-router";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 
-const router = useRouter()
-const showTitle = ref(false)
-const typedText = ref('')
-const fullText = 'Color of Emotion'
-const typingSpeed = 150 // 타이핑 속도 최적화
+const router = useRouter();
+const showTitle = ref(false);
+const typedText = ref("");
+const fullText = "Color of Emotion";
+const typingSpeed = 150; // 타이핑 속도 최적화
 
-let typingInterval = null
+let typingInterval = null;
 
 function typeText() {
-  let currentIndex = 0
+  let currentIndex = 0;
   typingInterval = setInterval(() => {
     if (currentIndex < fullText.length) {
-      typedText.value += fullText[currentIndex]
-      currentIndex++
+      typedText.value += fullText[currentIndex];
+      currentIndex++;
     } else {
-      clearInterval(typingInterval)
+      clearInterval(typingInterval);
       setTimeout(() => {
-        router.push({ 
-          path: '/start',
-          query: { transition: 'fade' }
-        })
-      }, 1500)
+        router.push({
+          path: "/start",
+          query: { transition: "fade" },
+        });
+      }, 1500);
     }
-  }, typingSpeed)
+  }, typingSpeed);
 }
 
 function skipLoading() {
-  clearInterval(typingInterval)
-  router.push('/start')
+  clearInterval(typingInterval);
+  router.push("/start");
 }
 
 onMounted(() => {
   setTimeout(() => {
-    showTitle.value = true
-    typeText()
-  }, 800)
-})
+    showTitle.value = true;
+    typeText();
+  }, 800);
+});
 
 onBeforeUnmount(() => {
-  clearInterval(typingInterval)
-})
+  clearInterval(typingInterval);
+});
 </script>
 
 <style scoped>
@@ -71,19 +71,24 @@ onBeforeUnmount(() => {
 }
 
 .typewriter {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: clamp(2rem, 5vw, 3.5rem);
   color: #2c3e50;
   white-space: nowrap;
   overflow: hidden;
   border-right: 3px solid #2c3e50;
   animation: blink-caret 0.75s step-end infinite;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes blink-caret {
-  from, to { border-color: transparent }
-  50% { border-color: #2c3e50 }
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #2c3e50;
+  }
 }
 
 .loading-dots {
@@ -99,11 +104,17 @@ onBeforeUnmount(() => {
   animation: bounce-dots 1.4s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
 }
 
-.loading-dots span:nth-child(2) { animation-delay: 0.2s }
-.loading-dots span:nth-child(3) { animation-delay: 0.4s }
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 @keyframes bounce-dots {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0.3);
     opacity: 0.5;
   }
