@@ -18,12 +18,7 @@ class MovieSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = [
-            'original_language', 'original_title', 'overview', 'poster_path',
-            'release_date', 'title', 'tmdb_vote_average', 'movie_id',
-            'picture_url', 'video_url', 'reviews', 'watchapedia',
-            'poster_palette', 'genre_ids', 'watch_providers', 'color_score'
-        ]
+        fields = '__all__'
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
