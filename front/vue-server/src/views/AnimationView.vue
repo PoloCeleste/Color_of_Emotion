@@ -1,8 +1,14 @@
 ﻿<template>
   <div class="animation-container">
     <!-- 인풋 애니메이션 원 -->
-    <div class="circle-container" v-show="!animationStarted">
-      <div class="circle" @click="startAnimation"></div>
+    <div
+      class="circle-container"
+      v-show="!animationStarted"
+      @click="startAnimation"
+    >
+      <div class="circle">
+        <h1>START</h1>
+      </div>
     </div>
 
     <!-- 필름 애니메이션 -->
@@ -118,11 +124,14 @@ onMounted(() => {
 
 .circle {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: -1%;
+  left: -1%;
+  width: 102%;
+  height: 102%;
   border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: linear-gradient(145deg, #f0f0f0, #ffffff);
   border: 2px solid darkgray;
   box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.2);
@@ -130,6 +139,24 @@ onMounted(() => {
   perspective: 1000px;
   transition: all 0.3s ease;
   cursor: pointer;
+}
+.circle:hover {
+  transform: scale(1.02);
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.15), 0 15px 25px rgba(0, 0, 0, 0.3),
+    0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 50px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  will-change: transform;
+  transition: transform 0.3s ease;
 }
 
 .film-reel-container {
