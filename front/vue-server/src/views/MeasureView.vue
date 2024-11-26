@@ -16,12 +16,13 @@
             >
               Let's find your emotion
             </h1>
-            <h1
-              v-else
-              class="emotion-info"
-            >
-              {{ emotionInfo }}
-            </h1>
+            <Transition name="out-in">
+              <h1 v-if="emotionStage > 0" 
+                  class="emotion-info" 
+                  :style="{ fontSize: `${emotionSize}em`, whiteSpace: 'pre-line' }">
+                {{ emotionInfo }}
+              </h1>
+            </Transition>
           </div>
         </div>
       </Transition>
@@ -118,8 +119,56 @@ onMounted(() => {
 });
 
 const emotionInfo = ref('');
+const emotionStage = ref(0);
+const emotionSize = ref(1);
 
-// 측정 완료
+const showEmotionSequentially = async (emotionData) => {
+  const primaryEmotion = Object.keys(emotionData.primary_emotion)[0];
+  const secondaryEmotions = emotionData.secondary_emotions.map(emotion => Object.keys(emotion)[0]);
+
+  // 1. "Your emotions" 표시 후 사라짐
+  emotionInfo.value = 'Your emotions';
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  emotionInfo.value = '';
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  // 2. 감정 표시 로직
+  if (secondaryEmotions.length === 0) {
+    emotionInfo.value = primaryEmotion;
+    emotionStage.value = 1;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    emotionSize.value = 1.5;
+    emotionStage.value = 2;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    emotionSize.value = 2;
+    emotionStage.value = 3;
+  } else if (secondaryEmotions.length === 1) {
+    emotionInfo.value = primaryEmotion;
+    emotionStage.value = 1;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    emotionSize.value = 1.5;
+    emotionStage.value = 2;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    emotionInfo.value = `${primaryEmotion}\n${secondaryEmotions[0]}`;
+    emotionSize.value = 1;
+    emotionStage.value = 3;
+  } else {
+    emotionInfo.value = primaryEmotion;
+    emotionStage.value = 1;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    emotionInfo.value = `${primaryEmotion}\n${secondaryEmotions[0]}`;
+    emotionStage.value = 2;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    emotionInfo.value = `${primaryEmotion}\n${secondaryEmotions[0]}\n${secondaryEmotions[1]}`;
+    emotionStage.value = 3;
+  }
+
+  // 3. 감정 정보 사라짐
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  emotionSize.value = 1;
+  emotionStage.value = 0;
+};
+
 const completeMeasurement = () => {
   // 1. 플래시 효과 추가
   const flash = document.createElement("div");
@@ -137,16 +186,17 @@ const completeMeasurement = () => {
       measurementComplete.value = true;
 
       const emotionData = JSON.parse(localStorage.getItem("emotionAnalysis"));
-      if (emotionData) {
-        const primaryEmotion = Object.keys(emotionData.primary_emotion)[0];
-        const secondaryEmotions = emotionData.secondary_emotions.map(emotion => Object.keys(emotion)[0]).join(", ");
-        emotionInfo.value = `Primary: ${primaryEmotion}, Secondary: ${secondaryEmotions}`;
+      if (emotionData && !("error" in emotionData)) {
+        await showEmotionSequentially(emotionData);
       }
 
       await nextTick();
-      goToRecommend();
+
+      setTimeout(() => {
+        goToRecommend();
+      }, TRANSITION_DURATION * 2);
     }, TRANSITION_DURATION);
-  }, 300); // 플래시 지속 시간
+  }, 300);
 };
 </script>
 
@@ -438,6 +488,17 @@ const completeMeasurement = () => {
   font-size: 1.5rem;
   text-align: center;
   color: #333;
+  white-space: pre-line;
+  transition: all 0.5s ease;
+}
+
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
