@@ -49,10 +49,11 @@ const closeModal = () => {
   display: flex;
   width: 90%;
   height: 90%;
-  background-color: white;
+  background-color: transparent;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border: whitesmoke;
 }
 
 .card-modal__image {

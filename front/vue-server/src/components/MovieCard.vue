@@ -75,12 +75,13 @@ const closeModal = () => {
   cursor: pointer;
   flex: 0 0 auto;
   width: 390px;
-  height: 585px;
+  height: 520px;
   margin: 15px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
 .movie-card:hover {
@@ -118,7 +119,7 @@ const closeModal = () => {
 }
 
 .movie-card__inner::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -128,9 +129,34 @@ const closeModal = () => {
   z-index: 1;
   transition: opacity 0.3s ease;
 }
-
+.movie-card__inner::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  background: conic-gradient(
+    from 180deg at 50% 50%,
+    #e4ff00 0deg,
+    #29ffc6 72deg,
+    #ff99cc 144deg,
+    #ff8f8f 216deg,
+    #e4ff00 360deg
+  );
+  border-radius: 8px;
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
 .movie-card:hover .movie-card__inner::before {
   opacity: 0;
+}
+.movie-card:hover .movie-card__inner::after {
+  opacity: 0.5;
+}
+.movie-card:hover .movie-card__inner {
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3),
+    0 0 30px rgba(255, 255, 255, 0.2), 0 0 45px rgba(255, 255, 255, 0.1);
+  transform: translateY(-5px);
 }
 
 .movie-card__image {
@@ -155,7 +181,9 @@ const closeModal = () => {
   object-position: center center;
   transition: transform 0.3s;
 }
-
+.movie-card:hover .movie-card__image > img {
+  transform: scale(1.05);
+}
 .modal-overlay {
   position: fixed;
   top: 0;
