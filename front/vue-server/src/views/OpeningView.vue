@@ -39,7 +39,7 @@ function typeText() {
       clearInterval(typingInterval);
       setTimeout(() => {
         router.push({
-          path: "/start",
+          path: "/measure",
           query: { transition: "fade" },
         });
       }, 1500);
@@ -49,7 +49,7 @@ function typeText() {
 
 function skipLoading() {
   clearInterval(typingInterval);
-  router.push("/start");
+  router.push("/measure");
 }
 
 onMounted(() => {

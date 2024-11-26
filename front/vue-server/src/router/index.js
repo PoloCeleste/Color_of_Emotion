@@ -3,14 +3,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   {
     path: '/',
-    name: 'loading-view',
-    component: () => import('../views/LoadingView.vue'),
+    name: 'opening-view',
+    component: () => import('../views/OpeningView.vue'),
     meta: { transition: 'fade' }
   },
   {
-    path: '/start',
-    name: 'start-view',
-    component: () => import('../views/StartView.vue'),
+    path: '/measure',
+    name: 'measure-view',
+    component: () => import('../views/MeasureView.vue'),
     meta: { transition: 'fade' }
   },
   {
