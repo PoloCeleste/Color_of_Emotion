@@ -33,7 +33,7 @@ const selectedMovies = ref([]);
 const selectedMovie = ref(null);
 const isModalActive = ref(false);
 const showRetryButton = ref(false);
-const router = useRouter()
+const router = useRouter();
 
 watch(
   () => movieStore.recommendedMovies,
@@ -62,7 +62,7 @@ const closeModal = () => {
 };
 
 const handleRetry = () => {
-  router.push('/measure')
+  router.push("/measure");
 };
 </script>
 
@@ -348,8 +348,8 @@ const handleRetry = () => {
   transform: translateX(-50%);
   top: calc(100% + 30px);
   padding: 10px 20px;
-  font-size: 16px;
-  background-color: #007bff;
+  font-size: 20px;
+  background-color: #3c3c3c2b;
   color: white;
   border: none;
   border-radius: 5px;
@@ -360,7 +360,7 @@ const handleRetry = () => {
 }
 
 .retry-button:hover {
-  background-color: #0056b3;
+  background-color: #222325b3;
 }
 
 @keyframes fadeIn {
