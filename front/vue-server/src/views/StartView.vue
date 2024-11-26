@@ -25,13 +25,6 @@
             >
               Let's find your emotion
             </button>
-            <button
-              v-else
-              class="start-button"
-              style="background-color: whitesmoke"
-            >
-              START
-            </button>
           </Transition>
         </div>
       </div>
