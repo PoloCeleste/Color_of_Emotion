@@ -1,14 +1,7 @@
 <template>
   <div class="start-container">
     <div class="content-wrapper">
-      <Transition name="camera-body" mode="out-in">
-        <div v-if="isModalOpen" class="camera-body">
-          <div class="shutter-button" :class="{ pulse: isModalOpen }"></div>
-          <div class="flash-window" :class="{ glow: isModalOpen }"></div>
-        </div>
-      </Transition>
-
-      <Transition name="button" mode="fade">
+      <Transition name="button" mode="out-in">
         <div class="circle-container" @click="openModal">
           <div
             class="circle"
@@ -23,7 +16,20 @@
             >
               Let's find your emotion
             </h1>
+            <h1
+              v-else
+              class="emotion-info"
+            >
+              {{ emotionInfo }}
+            </h1>
           </div>
+        </div>
+      </Transition>
+
+      <Transition name="camera-body" mode="out-in">
+        <div v-if="isModalOpen" class="camera-body">
+          <div class="shutter-button" :class="{ pulse: isModalOpen }"></div>
+          <div class="flash-window" :class="{ glow: isModalOpen }"></div>
         </div>
       </Transition>
     </div>
@@ -111,6 +117,8 @@ onMounted(() => {
   originalColor.value = startContainer.style.backgroundColor;
 });
 
+const emotionInfo = ref('');
+
 // 측정 완료
 const completeMeasurement = () => {
   // 1. 플래시 효과 추가
@@ -127,6 +135,14 @@ const completeMeasurement = () => {
     setTimeout(async () => {
       isModalOpen.value = false;
       measurementComplete.value = true;
+
+      const emotionData = JSON.parse(localStorage.getItem("emotionAnalysis"));
+      if (emotionData) {
+        const primaryEmotion = Object.keys(emotionData.primary_emotion)[0];
+        const secondaryEmotions = emotionData.secondary_emotions.map(emotion => Object.keys(emotion)[0]).join(", ");
+        emotionInfo.value = `Primary: ${primaryEmotion}, Secondary: ${secondaryEmotions}`;
+      }
+
       await nextTick();
       goToRecommend();
     }, TRANSITION_DURATION);
@@ -290,10 +306,10 @@ const completeMeasurement = () => {
 
 .circle {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: -1%;
+  left: -1%;
+  width: 102%;
+  height: 102%;
   border-radius: 50%;
   background: linear-gradient(145deg, #f0f0f0, #ffffff);
   border: 2px solid darkgray;
@@ -308,7 +324,7 @@ const completeMeasurement = () => {
 }
 
 .circle:hover {
-  transform: translateY(-5px);
+  transform: scale(1.02);
   box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.15), 0 15px 25px rgba(0, 0, 0, 0.3),
     0 0 0 2px rgba(0, 0, 0, 0.1);
 }
@@ -416,5 +432,12 @@ const completeMeasurement = () => {
   transform: translateY(-5px);
   box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.15), 0 15px 25px rgba(0, 0, 0, 0.3),
     0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.emotion-info {
+  font-size: 1.5rem;
+  text-align: center;
+  color: #333;
+  transition: opacity 0.5s ease;
 }
 </style>
