@@ -46,9 +46,11 @@
 
 <script setup>
 import { ref, computed, onMounted, defineProps } from "vue";
+import { useRouter } from "vue-router";
 import MovieCard from "@/components/MovieCard.vue";
 import { useMovieStore } from "@/store/stores";
 
+const router = useRouter()
 const store = useMovieStore();
 
 defineProps({
@@ -98,12 +100,15 @@ const startAnimation = () => {
 
   setTimeout(() => {
     expansionComplete.value = true;
+    // 애니메이션 완료 후 상태 저장 및 다음 뷰로 이동
+    store.setAnimationComplete(true);
+    router.push({ name: 'recommend-view', query: { animationComplete: 'true' } });
   }, 6000);
 };
 
 onMounted(() => {
   emotionData.value = JSON.parse(localStorage.getItem("emotionAnalysis"));
-  store.setEmotionData(emotionData);
+  store.setEmotionData(emotionData.value);
 });
 </script>
 

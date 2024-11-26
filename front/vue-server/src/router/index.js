@@ -22,7 +22,6 @@ const routes = [
     path: '/recommend',
     name: 'recommend-view',
     component: () => import('../views/RecommendView.vue'),
-    meta: { transition: 'fade' }
   }
 ]
 
