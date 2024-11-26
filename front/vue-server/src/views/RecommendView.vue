@@ -87,10 +87,21 @@ const animate = (timestamp) => {
       // 애니메이션 정지
       cancelAnimationFrame(animationId);
       isAnimating.value = false;
+
+      // 애니메이션이 멈춘 후 flowing 포스터 사라지게 하기
+      setTimeout(() => {
+        const flowingPosters = filmStrip.value.querySelectorAll('.movie-poster.flowing');
+        flowingPosters.forEach((poster) => {
+          poster.style.opacity = '0';
+        });
+      }, 500); // 0.5초 후에 사라지기 시작
     } else {
       filmStrip.value.style.transform = `translateX(${translateX}%)`;
       filmStrip.value.querySelectorAll('.movie-poster').forEach((poster) => {
         poster.style.transform = 'none';
+        if (poster.classList.contains('flowing')) {
+          poster.style.opacity = '1';
+        }
       });
     }
   }
@@ -193,7 +204,7 @@ watch(() => movieStore.recommendedMovies, (newMovies) => {
 }
 
 .movie-poster.flowing {
-  transition: transform 0.5s ease;
+  transition: transform 0.5s ease, opacity 0.5s ease;
 }
 
 .movie-poster.static {
