@@ -137,10 +137,12 @@ onMounted(() => {
   transform-style: preserve-3d;
   perspective: 1000px;
   transition: all 0.3s ease;
+  color: gray;
   cursor: pointer;
 }
 .circle:hover {
   transform: scale(1.02);
+  color: #222;
   box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.15), 0 15px 25px rgba(0, 0, 0, 0.3),
     0 0 0 2px rgba(0, 0, 0, 0.1);
 }
