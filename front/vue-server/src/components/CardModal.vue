@@ -7,12 +7,18 @@
         </div>
         <div class="card-modal__content">
           <h2 class="content__heading">{{ movie.title }}</h2>
-          <span class="content__description">{{ movie.original_title }} ({{ movie.original_language }})</span>
-          <span class="content__description">{{ movie.release_date }} / {{ movie.tmdb_vote_average }}</span><br>
-          <span class="content__category">{{ movie.genre_ids.join(", ") }}</span>
+          <span class="content__description"
+            >{{ movie.original_title }} ({{ movie.original_language }})</span
+          >
+          <span class="content__description"
+            >{{ movie.release_date }} / {{ movie.tmdb_vote_average }}</span
+          ><br />
+          <span class="content__category">{{
+            movie.genre_ids.join(", ")
+          }}</span>
           <p class="content__description">{{ movie.overview }}</p>
           <button class="close-button" @click="closeModal">×</button>
-          
+
           <div v-if="movie.reviews">
             <h3>리뷰</h3>
             <div v-for="(review, index) in movie.reviews" :key="index">
@@ -31,39 +37,65 @@
           <div v-if="movie.picture_url">
             <h3>갤러리</h3>
             <div class="gallery-container">
-              <button class="nav-button prev" @click="prevImage">&#10094;</button>
-              <div class="gallery-item" v-if="currentImageIndex < movie.picture_url.length">
-                <img :src="movie.picture_url[currentImageIndex]" alt="" @click="openLightbox(movie.picture_url[currentImageIndex])" />
+              <button class="nav-button prev" @click="prevImage">
+                &#10094;
+              </button>
+              <div
+                class="gallery-item"
+                v-if="currentImageIndex < movie.picture_url.length"
+              >
+                <img
+                  :src="movie.picture_url[currentImageIndex]"
+                  alt=""
+                  @click="openLightbox(movie.picture_url[currentImageIndex])"
+                />
               </div>
-              <button class="nav-button next" @click="nextImage">&#10095;</button>
+              <button class="nav-button next" @click="nextImage">
+                &#10095;
+              </button>
             </div>
           </div>
 
           <div v-if="movie.video_url">
             <h3>동영상</h3>
             <div class="video-container">
-              <button class="nav-button prev" @click="prevVideo">&#10094;</button>
-              <div class="video-item" v-if="currentVideoIndex < movie.video_url.length">
-                <img :src="getYoutubeThumbnail(movie.video_url[currentVideoIndex])" alt="Video thumbnail" @click="openVideoModal(movie.video_url[currentVideoIndex])" />
-                <div class="play-button"></div>
+              <button class="nav-button prev" @click="prevVideo">
+                &#10094;
+              </button>
+              <div
+                class="video-item"
+                v-if="currentVideoIndex < movie.video_url.length"
+              >
+                <img
+                  :src="getYoutubeThumbnail(movie.video_url[currentVideoIndex])"
+                  alt="Video thumbnail"
+                  @click="openVideoModal(movie.video_url[currentVideoIndex])"
+                />
+                <div
+                  class="play-button"
+                  @click="openVideoModal(movie.video_url[currentVideoIndex])"
+                ></div>
               </div>
-              <button class="nav-button next" @click="nextVideo">&#10095;</button>
+              <button class="nav-button next" @click="nextVideo">
+                &#10095;
+              </button>
             </div>
           </div>
 
           <div v-if="movie.watch_providers">
             <h3>보려면?</h3>
             <div class="provider-container">
-              <h4 v-for="(provider, index) in movie.watch_providers" 
-                :key="index" 
+              <h4
+                v-for="(provider, index) in movie.watch_providers"
+                :key="index"
                 class="provider-tag"
               >
-                <img :src="provider.logo_path" alt="">
+                <img :src="provider.logo_path" alt="" />
                 {{ provider.provider_name }}
               </h4>
             </div>
           </div>
-          
+
           <div class="more-info">
             <a :href="movie.watchapedia" target="_blank">더 알아보기</a>
           </div>
@@ -72,8 +104,8 @@
     </div>
   </Transition>
 
-<!-- Lightbox for images -->
-<div v-if="lightboxImage" class="lightbox" @click="closeLightbox">
+  <!-- Lightbox for images -->
+  <div v-if="lightboxImage" class="lightbox" @click="closeLightbox">
     <img :src="lightboxImage" alt="" />
   </div>
 
@@ -86,19 +118,19 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref } from 'vue';
+import { defineProps, defineEmits, ref } from "vue";
 
 const props = defineProps({
   movie: Object,
   isActive: Boolean,
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(["close"]);
 
 const showFullReviewIndex = ref(null);
 
 const closeModal = () => {
-  emit('close');
+  emit("close");
 };
 
 const showFullReview = (index) => {
@@ -129,7 +161,7 @@ const closeVideoModal = () => {
 };
 
 const getYoutubeThumbnail = (url) => {
-  const videoId = url.split('v=')[1];
+  const videoId = url.split("/").pop();
   return `https://img.youtube.com/vi/${videoId}/0.jpg`;
 };
 
@@ -262,7 +294,8 @@ const prevVideo = () => {
   z-index: 10;
 }
 
-.gallery-container, .video-container {
+.gallery-container,
+.video-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -270,13 +303,15 @@ const prevVideo = () => {
   margin-top: 10px;
 }
 
-.gallery-item, .video-item {
+.gallery-item,
+.video-item {
   width: calc(100% - 80px);
   aspect-ratio: 16 / 9;
   overflow: hidden;
 }
 
-.gallery-item img, .video-item iframe {
+.gallery-item img,
+.video-item iframe {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -324,7 +359,7 @@ const prevVideo = () => {
 }
 
 .more-info a {
-  color: #4CAF50;
+  color: #4caf50;
   text-decoration: none;
 }
 
@@ -361,12 +396,14 @@ const prevVideo = () => {
     font-size: 32px;
   }
 
-  .gallery-item, .video-item {
+  .gallery-item,
+  .video-item {
     width: calc(50% - 10px);
   }
 }
 
-.gallery-container, .video-container {
+.gallery-container,
+.video-container {
   display: flex;
   overflow-x: auto;
   gap: 10px;
@@ -376,7 +413,8 @@ const prevVideo = () => {
   flex-wrap: nowrap; /* 줄바꿈 방지 */
 }
 
-.gallery-item, .video-item {
+.gallery-item,
+.video-item {
   flex: 0 0 auto;
   width: 200px;
   height: 150px;
@@ -385,7 +423,8 @@ const prevVideo = () => {
   position: relative;
 }
 
-.gallery-item img, .video-item img {
+.gallery-item img,
+.video-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -403,7 +442,8 @@ const prevVideo = () => {
   border-bottom: 20px solid transparent;
 }
 
-.lightbox, .video-modal {
+.lightbox,
+.video-modal {
   position: fixed;
   top: 0;
   left: 0;
