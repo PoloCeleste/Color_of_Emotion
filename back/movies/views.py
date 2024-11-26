@@ -152,9 +152,9 @@ def recommend_movies(request):
                 movie_scores.append((movie, avg_similarity * weighted_dominance))
         
         # 점수로 정렬하고 상위 50개 선택 -> 랜덤 -> 31개 잘라서 전송
-        sorted_movies = [movie for movie, _ in sorted(movie_scores, key=lambda x: x[1])][:50]
+        sorted_movies = [movie for movie, _ in sorted(movie_scores, key=lambda x: x[1])][:30]
         random.shuffle(sorted_movies)
-        sorted_movies = sorted_movies[:31]
+        sorted_movies = sorted_movies[:15]
         
         serializer = MovieSerializer(sorted_movies, many=True)
         return JsonResponse(serializer.data, safe=False)
