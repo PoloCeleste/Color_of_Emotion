@@ -52,12 +52,10 @@ const props = defineProps({
   isAnimating: Boolean,
 });
 
-// 부모 컴포넌트에서 애니메이션 상태 감시
 watch(
   () => props.isAnimating,
   (newValue) => {
     if (!newValue) {
-      // 애니메이션이 멈추면 0.5초 후에 카드 표시
       setTimeout(() => {
         isBackgroundAnimationComplete.value = true;
       }, 500);
@@ -131,7 +129,6 @@ const closeModal = () => {
   }));
 };
 
-// ESC 키로 모달 닫기 추가
 onMounted(() => {
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && anyCardActive.value) {
@@ -142,7 +139,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 기본 카드 레이아웃 */
 .movie-cards {
   margin: auto 0;
   width: 90%;
@@ -161,23 +157,46 @@ onMounted(() => {
   }
 }
 
-/* 기본 카드 스타일 */
 .movie-card {
   cursor: pointer;
   flex: 0 0 auto;
   width: 300px;
   height: 400px;
   margin: 10px;
+  transition: transform 0.3s ease;
 }
+
+.movie-card:hover {
+  transform: scale(1.05);
+}
+
 .movie-card__inner {
   width: 100%;
   height: 100%;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  background-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  background-color: rgba(255, 255, 255, 0.85);
   border-radius: 8px;
   overflow: hidden;
   will-change: transform;
   transition: border-radius 0.3s ease;
+  position: relative;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.movie-card__inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+.movie-card:hover .movie-card__inner::before {
+  opacity: 0;
 }
 
 .movie-card__image {
@@ -186,6 +205,7 @@ onMounted(() => {
   overflow: hidden;
   position: relative;
   transition: all 0.3s ease;
+  z-index: 2;
 }
 
 .movie-card__image > img {
@@ -202,7 +222,6 @@ onMounted(() => {
   transition: transform 0.3s;
 }
 
-/* 모달 오버레이 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -216,7 +235,6 @@ onMounted(() => {
   z-index: 98;
 }
 
-/* 모달 컨텐츠 레이아웃 */
 .content {
   position: fixed;
   top: 0;
@@ -252,7 +270,6 @@ onMounted(() => {
   z-index: 191;
 }
 
-/* 모달 이미지 영역 */
 .modal-image {
   flex: 0 0 50%;
   height: 100%;
@@ -264,7 +281,6 @@ onMounted(() => {
   object-fit: cover;
 }
 
-/* 모달 정보 영역 */
 .modal-info {
   flex: 1;
   padding: 4rem;
@@ -286,7 +302,6 @@ onMounted(() => {
   color: rgba(0, 0, 0, 0.9);
 }
 
-/* 닫기 버튼 */
 .close-button {
   position: absolute;
   top: 1.5rem;
@@ -313,7 +328,6 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.4);
 }
 
-/* 스크롤바 스타일링 */
 .modal-info::-webkit-scrollbar {
   width: 8px;
 }
