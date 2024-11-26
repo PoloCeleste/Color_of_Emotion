@@ -8,7 +8,12 @@
         @click="startAnimation"
       >
         <div class="circle">
-          <h1>START</h1>
+          <TypingComponent
+            text="START"
+            :typing-speed="100"
+            @complete="onComplete"
+            @skip="skipAnimation"
+          />
         </div>
       </div>
     </Transition>
@@ -24,9 +29,7 @@
         <div
           class="black-overlay"
           :class="{ visible: isExpanded, expand: isExpanded }"
-        >
-        
-        </div>
+        ></div>
       </div>
     </Transition>
   </div>
@@ -37,6 +40,7 @@ import { ref, onMounted, defineProps } from "vue";
 import { useRouter } from "vue-router";
 // import MovieCard from "@/components/MovieCard.vue";
 import { useMovieStore } from "@/store/stores";
+import TypingComponent from "@/components/TypingComponent.vue";
 
 const router = useRouter();
 const store = useMovieStore();
