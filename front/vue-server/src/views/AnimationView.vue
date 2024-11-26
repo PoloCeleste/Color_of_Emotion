@@ -1,46 +1,49 @@
 ﻿<template>
   <div class="animation-container">
     <!-- 인풋 애니메이션 원 -->
-    <div
-      class="circle-container"
-      v-show="!animationStarted"
-      @click="startAnimation"
-    >
-      <div class="circle">
-        <h1>START</h1>
-      </div>
-    </div>
-
-    <!-- 필름 애니메이션 -->
-    <div class="film-reel-container">
-      <div class="film-reel" :class="{ rotated: isRotated }">
-        <div class="top"></div>
-        <div class="bottom"></div>
-        <div class="side" :class="{ expanded: isSideExpanded }"></div>
-        <div class="film" :class="{ 'move-right': isSideExpanded }"></div>
-      </div>
+    <Transition name="fade">
       <div
-        class="black-overlay"
-        :class="{ visible: isExpanded, expand: isExpanded }"
+        class="circle-container"
+        v-show="!animationStarted"
+        @click="startAnimation"
       >
-        <div class="text-box">
-          <div>주감정: {{ primaryEmotion }}</div>
-          <div v-if="secondaryEmotions.length">
-            부감정: {{ secondaryEmotions.join(", ") }}
-          </div>
+        <div class="circle">
+          <h1>START</h1>
         </div>
-        <div class="movie-scroll-container" v-if="expansionComplete">
-          <div class="movie-cards">
-            <MovieCard
-              v-for="(movie, index) in store.recommendedMovies"
-              :key="movie.movie_id"
-              :movie="movie"
-              :delay="index * 0.2"
-            />
+      </div>
+    </Transition>
+    <Transition name="fade">
+      <!-- 필름 애니메이션 -->
+      <div class="film-reel-container">
+        <div class="film-reel" :class="{ rotated: isRotated }">
+          <div class="top"></div>
+          <div class="bottom"></div>
+          <div class="side" :class="{ expanded: isSideExpanded }"></div>
+          <div class="film" :class="{ 'move-right': isSideExpanded }"></div>
+        </div>
+        <div
+          class="black-overlay"
+          :class="{ visible: isExpanded, expand: isExpanded }"
+        >
+          <div class="text-box">
+            <div>주감정: {{ primaryEmotion }}</div>
+            <div v-if="secondaryEmotions.length">
+              부감정: {{ secondaryEmotions.join(", ") }}
+            </div>
+          </div>
+          <div class="movie-scroll-container" v-if="expansionComplete">
+            <div class="movie-cards">
+              <MovieCard
+                v-for="(movie, index) in store.recommendedMovies"
+                :key="movie.movie_id"
+                :movie="movie"
+                :delay="index * 0.2"
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -50,7 +53,7 @@ import { useRouter } from "vue-router";
 import MovieCard from "@/components/MovieCard.vue";
 import { useMovieStore } from "@/store/stores";
 
-const router = useRouter()
+const router = useRouter();
 const store = useMovieStore();
 
 defineProps({
@@ -100,7 +103,7 @@ const startAnimation = () => {
 
   setTimeout(() => {
     expansionComplete.value = true;
-    router.push('/recommend')
+    router.push("/recommend");
   }, 6000);
 };
 
