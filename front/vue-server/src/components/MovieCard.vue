@@ -12,6 +12,7 @@
         </div>
       </div>
     </div>
+    <button class="retry-button" @click="handleRetry">Retry</button>
     <CardModal
       v-show="selectedMovie"
       :movie="selectedMovie"
@@ -22,7 +23,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import { ref, watch, onMounted } from "vue";
 import { useMovieStore } from "@/store/stores";
 import CardModal from "./CardModal.vue";
 
@@ -30,6 +32,8 @@ const movieStore = useMovieStore();
 const selectedMovies = ref([]);
 const selectedMovie = ref(null);
 const isModalActive = ref(false);
+const showRetryButton = ref(false);
+const router = useRouter()
 
 watch(
   () => movieStore.recommendedMovies,
@@ -38,6 +42,12 @@ watch(
   },
   { immediate: true }
 );
+
+onMounted(() => {
+  setTimeout(() => {
+    showRetryButton.value = true;
+  }, 2000);
+});
 
 const openModal = (movie) => {
   selectedMovie.value = movie;
@@ -48,7 +58,11 @@ const closeModal = () => {
   isModalActive.value = false;
   setTimeout(() => {
     selectedMovie.value = null;
-  }, 300); // 애니메이션 종료 후 선택된 영화 초기화
+  }, 300);
+};
+
+const handleRetry = () => {
+  router.push('/measure')
 };
 </script>
 
@@ -59,7 +73,17 @@ const closeModal = () => {
   max-width: 1560px; /* 1200px에서 1800px로 증가 */
   display: flex;
   justify-content: center;
-  gap: 3rem; /* 2rem에서 3rem으로 증가하여 카드 간 간격 확대 */
+  gap: 6rem; /* 2rem에서 3rem으로 증가하여 카드 간 간격 확대 */
+  align-items: center;
+}
+
+.movie-card:nth-child(1),
+.movie-card:nth-child(3) {
+  transform: translateY(50px); /* 첫 번째와 세 번째 카드를 20px 아래로 이동 */
+}
+
+.movie-card:nth-child(2) {
+  transform: translateY(-60px); /* 두 번째 카드를 20px 위로 이동 */
 }
 
 @keyframes fadeIn {
@@ -316,5 +340,43 @@ const closeModal = () => {
 .movie-card.is-active .movie-card__image {
   width: 50vw;
   height: 100vh;
+}
+
+.retry-button {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(100% + 30px);
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, opacity 0.3s;
+  opacity: 0;
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.retry-button:hover {
+  background-color: #0056b3;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.movie-cards {
+  position: relative;
+}
+
+.movie-card:nth-child(2) {
+  position: relative;
 }
 </style>
