@@ -31,6 +31,7 @@ export const useMovieStore = defineStore("movie", {
   actions: {
     setEmotionData(data) {
       this.emotionData = data;
+      this.selectedColors = [];
       this.getMovieRecommendations();
     },
 
@@ -52,7 +53,7 @@ export const useMovieStore = defineStore("movie", {
         this.recommendedMovies = [...staticPart, ...shufflePart];
 
         // 영화 추천 후 색상 데이터 요청
-        await this.getEmotionColors();
+        if (!this.selectedColors) await this.getEmotionColors();
       } catch (err) {
         this.error = "영화 추천을 가져오는 중 오류가 발생했습니다.";
         console.error("Error:", err);
