@@ -100,9 +100,7 @@ const startAnimation = () => {
 
   setTimeout(() => {
     expansionComplete.value = true;
-    // 애니메이션 완료 후 상태 저장 및 다음 뷰로 이동
-    store.setAnimationComplete(true);
-    router.push({ name: 'recommend-view', query: { animationComplete: 'true' } });
+    router.push('/recommend')
   }, 6000);
 };
 
@@ -195,7 +193,7 @@ h1 {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: #1a1a1a;
+  background: #222;
   border-radius: 50%;
 }
 
@@ -212,7 +210,7 @@ h1 {
   position: absolute;
   width: 100%;
   height: 100px;
-  background: #1a1a1a;
+  background: #222;
   transform: rotateX(90deg) translateZ(0);
   top: calc(50% - 50px);
   right: 0;
@@ -274,7 +272,6 @@ h1 {
   transform: translateX(0);
   transition: transform 1.5s ease-out;
   z-index: 10;
-  background-color: #1a1a1a;
 }
 
 .black-overlay.visible {

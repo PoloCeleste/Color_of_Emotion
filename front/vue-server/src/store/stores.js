@@ -17,7 +17,6 @@ export const useMovieStore = defineStore("movie", {
     selectedColors: [],
     loading: false,
     error: null,
-    animationComplete: false,
     lastAnimationState: null,
   }),
 
@@ -104,10 +103,6 @@ export const useMovieStore = defineStore("movie", {
         Neutral: 7,
       };
       return emotionMap[emotionName];
-    },
-
-    setAnimationComplete(value) {
-      this.animationComplete = value;
     },
 
     setLastAnimationState(state) {
