@@ -9,6 +9,14 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+const shuffleArray = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
+
 export const useMovieStore = defineStore("movie", {
   state: () => ({
     recommendedMovies: [],
@@ -36,7 +44,12 @@ export const useMovieStore = defineStore("movie", {
         const response = await api.post("/api/v1/recommend_movies/", {
           emotions: this.emotionsArray,
         });
-        this.recommendedMovies = response.data;
+
+        const movies = response.data;
+        const staticPart = shuffleArray(movies.slice(0, -10)); // 앞부분 유지
+        const shufflePart = shuffleArray([...movies.slice(-10)]);
+
+        this.recommendedMovies = [...staticPart, ...shufflePart];
 
         // 영화 추천 후 색상 데이터 요청
         await this.getEmotionColors();
