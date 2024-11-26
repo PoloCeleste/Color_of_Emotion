@@ -274,7 +274,7 @@ h1 {
 
 .side {
   position: absolute;
-  width: 100%;
+  width: 98%;
   height: 100px;
   background: #222;
   transform: rotateX(90deg) translateZ(0);
