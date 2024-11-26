@@ -75,12 +75,28 @@ let startTime = null;
 const duration = 50000; // 속도제어
 const showMovieCard = ref(false);
 
-const firstRow18 = computed(() => movieStore.recommendedMovies.slice(0, 18));
-const firstRow6 = computed(() => movieStore.recommendedMovies.slice(18, 24));
-const secondRow18 = computed(() => movieStore.recommendedMovies.slice(24, 42));
-const secondRow6 = computed(() => movieStore.recommendedMovies.slice(42, 48));
+const firstRow18 = computed(() =>
+  shuffleArray(movieStore.recommendedMovies.slice(0, 18))
+);
+const firstRow6 = computed(() =>
+  shuffleArray(movieStore.recommendedMovies.slice(36, 42))
+);
+const secondRow18 = computed(() =>
+  shuffleArray(movieStore.recommendedMovies.slice(18, 36))
+);
+const secondRow6 = computed(() =>
+  shuffleArray(movieStore.recommendedMovies.slice(42, 48))
+);
 
 const isCentered = ref(false);
+
+const shuffleArray = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
 
 const checkCentered = () => {
   if (!filmStrip.value) return;
