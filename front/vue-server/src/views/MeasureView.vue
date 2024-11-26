@@ -2,12 +2,13 @@
   <div class="start-container">
     <div class="content-wrapper">
       <Transition name="button" mode="out-in">
-        <div class="circle-container" @click="openModal">
+        <div class="circle-container">
           <div class="circle" :class="{ 'hover-effect': !isModalOpen }">
             <h1
               v-if="!measurementComplete"
               class="measure-button"
               :disabled="isModalOpen"
+              @click="openModal"
             >
               Let's find your emotion
             </h1>

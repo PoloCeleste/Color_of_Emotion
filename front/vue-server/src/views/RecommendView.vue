@@ -161,6 +161,9 @@ const animate = (timestamp) => {
 };
 
 onMounted(() => {
+  movieStore.setEmotionData(
+    JSON.parse(localStorage.getItem("emotionAnalysis"))
+  );
   if (movieStore.recommendedMovies.length === 0) {
     movieStore.getMovieRecommendations();
   }
