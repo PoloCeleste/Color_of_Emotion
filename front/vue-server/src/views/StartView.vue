@@ -68,7 +68,7 @@ const originalColor = ref("");
 const goToRecommend = () => {
   setTimeout(() => {
     router.push({
-      path: "/recommend",
+      path: "/animation",
       replace: true,
     });
   }, 800); // 모달 트랜지션 시간과 동일하게 설정
