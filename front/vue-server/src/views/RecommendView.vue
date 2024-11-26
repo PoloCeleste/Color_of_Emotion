@@ -3,6 +3,10 @@
     <div class="film-container" ref="filmStrip">
       <div class="film-strip-container">
         <div class="film-strip-row">
+          <!-- 10개의 빈 포스터 카드 추가 -->
+          <div v-for="i in 10" :key="`empty1-${i}`" class="movie-poster empty">
+            <div style="width: 100%; height: 100%"></div>
+          </div>
           <div
             v-for="movie in firstRow18"
             :key="movie.id"
@@ -19,6 +23,10 @@
           </div>
         </div>
         <div class="film-strip-row">
+          <!-- 10개의 빈 포스터 카드 추가 -->
+          <div v-for="i in 10" :key="`empty2-${i}`" class="movie-poster empty">
+            <div style="width: 100%; height: 100%"></div>
+          </div>
           <div
             v-for="movie in secondRow18"
             :key="movie.id"
@@ -50,7 +58,7 @@ const filmStrip = ref(null);
 const isAnimating = ref(true);
 let animationId = null;
 let startTime = null;
-const duration = 30000; // 속도제어
+const duration = 50000; // 속도제어
 
 const firstRow18 = computed(() => movieStore.recommendedMovies.slice(0, 18));
 const firstRow6 = computed(() => movieStore.recommendedMovies.slice(18, 24));
@@ -111,21 +119,29 @@ const animate = (timestamp) => {
       cancelAnimationFrame(animationId);
       isAnimating.value = false;
 
-      // 애니메이션이 멈춘 후 flowing 포스터 사라지게 하기
+      // flowing 포스터 사라지게 하기
+      const flowingPosters = filmStrip.value.querySelectorAll(
+        ".movie-poster.flowing"
+      );
+      flowingPosters.forEach((poster) => {
+        poster.style.opacity = "0";
+      });
+
+      // flowing 포스터가 완전히 사라진 후 static 포스터 어둡게 하기
       setTimeout(() => {
-        const flowingPosters = filmStrip.value.querySelectorAll(
-          ".movie-poster.flowing"
-        );
-        flowingPosters.forEach((poster) => {
-          poster.style.opacity = "0";
+        staticPosters.forEach((poster) => {
+          poster.classList.add("dimmed");
         });
-      }, 500); // 0.5초 후에 사라지기 시작
+      }, 500); // flowing 포스터가 사라지는 시간(0.5초) 후에 실행
     } else {
       filmStrip.value.style.transform = `translateX(${translateX}%)`;
       filmStrip.value.querySelectorAll(".movie-poster").forEach((poster) => {
         poster.style.transform = "none";
         if (poster.classList.contains("flowing")) {
           poster.style.opacity = "1";
+        }
+        if (poster.classList.contains("static")) {
+          poster.classList.remove("dimmed");
         }
       });
     }
@@ -175,7 +191,7 @@ watch(
   position: absolute;
   top: 0;
   left: 0;
-  width: 400%;
+  width: 700%;
   height: 100%;
 
   --s: 20px;
@@ -184,13 +200,15 @@ watch(
     calc(2 * var(--s)) calc(100% - var(--s)) padding-box;
   border: var(--s) solid var(--c);
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
 }
 
 .film-strip-container {
   position: absolute;
   top: 10%;
   left: 0;
-  width: 200%; /* 너비를 늘려 모든 포스터가 표시되도록 함 */
+  width: 300%; /* 너비를 늘려 모든 포스터가 표시되도록 함 */
   height: 80%;
   display: flex;
   flex-direction: column;
@@ -231,11 +249,20 @@ watch(
 }
 
 .movie-poster.flowing {
-  transition: transform 0.5s ease, opacity 0.5s ease;
+  transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1),
+    opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .movie-poster.static {
-  transition: none;
+  transition: filter 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.movie-poster.static.dimmed {
+  filter: brightness(0.6);
+}
+
+.movie-poster.empty {
+  background-color: transparent;
 }
 
 button {
