@@ -109,21 +109,27 @@ const emotions = ref(null);
 const buttonText = ref("카메라 시작");
 const analyzing = ref(false);
 const result = ref(null);
+const stopflag = ref(false);
 
 const showIntroMessages = ref(false);
 const currentMessage = ref("");
 
 onMounted(() => {
-  const startMessage = ["안녕", "여길 봐", "3... 2... 1...", ""];
+  const startMessage = [
+    "지금의 감정을 알아내볼게요.",
+    "카메라 정면을 보고 바르게 앉아주세요.",
+    "우선 지금의 표정을 볼까요?",
+    "",
+  ];
   showMessages(startMessage, false);
 });
 
 const messages = [
-  "카메라를 통해 감정을 측정합니다",
-  "편안한 자세로 정면을 바라봐주세요",
-  "자연스러운 표정을 지어주세요",
-  "잠시 후 카메라가 시작됩니다",
-  "준비하세요...",
+  "오늘 어떤 일이 있었나요?",
+  "가장 기억에 남는 일은 무엇인가요?",
+  "오늘의 기억을 되돌아보아요.",
+  "기억의 감정을 갖고",
+  "여러분을 다시 봅시다.",
 ];
 const display_flag = ref(false);
 
@@ -135,30 +141,33 @@ const showMessages = async (messages, flag) => {
   showIntroMessages.value = true;
   let messageIndex = 0;
 
-  const messageInterval = setInterval(() => {
-    if (messageIndex < messages.length) {
-      currentMessage.value = messages[messageIndex];
-      messageIndex++;
-    } else if (flag) {
-      setTimeout(() => {
-        if (analyzing.value) {
-          isSecondPhase.value = true;
-          secondPhaseFrameCount.value = 0;
-          ws.value.send(
-            JSON.stringify({
-              type: "second_phase",
-            })
-          );
-        }
-      }, 1000);
-      clearInterval(messageInterval);
-      showIntroMessages.value = false;
-    } else {
-      clearInterval(messageInterval);
-      showIntroMessages.value = false;
-      startStreaming();
-    }
-  }, 1000);
+  const messageInterval = setInterval(
+    () => {
+      if (messageIndex < messages.length) {
+        currentMessage.value = messages[messageIndex];
+        messageIndex++;
+      } else if (flag) {
+        setTimeout(() => {
+          if (analyzing.value) {
+            isSecondPhase.value = true;
+            secondPhaseFrameCount.value = 0;
+            ws.value.send(
+              JSON.stringify({
+                type: "second_phase",
+              })
+            );
+          }
+        }, 1000);
+        clearInterval(messageInterval);
+        showIntroMessages.value = false;
+      } else {
+        clearInterval(messageInterval);
+        showIntroMessages.value = false;
+        startStreaming();
+      }
+    },
+    flag ? 1200 : 1500
+  );
 };
 
 const firstPhaseFrameCount = ref(0); // 1차 촬영 프레임 수
@@ -268,6 +277,7 @@ const startStreaming = async () => {
 
           // 2차 촬영 완료시 분석 종료
           if (
+            !stopflag.value &&
             isSecondPhase.value &&
             secondPhaseFrameCount.value >= firstPhaseFrameCount.value
           ) {
@@ -276,6 +286,7 @@ const startStreaming = async () => {
                 type: "stop_analysis",
               })
             );
+            stopflag.value = true;
           }
         };
 

@@ -142,12 +142,14 @@ const typeEmotion = (emotion) => {
     }
   }, typingSpeed);
 };
-
+const secondaryEmotions = ref([]);
 const showEmotionSequentially = async (emotionData) => {
   const primaryEmotion = Object.keys(emotionData.primary_emotion)[0];
-  const secondaryEmotions = emotionData.secondary_emotions.map(
-    (emotion) => Object.keys(emotion)[0]
-  );
+  if ("secondary_emotions" in emotionData) {
+    secondaryEmotions.value = emotionData.secondary_emotions.map(
+      (emotion) => Object.keys(emotion)[0]
+    );
+  }
 
   // 시작 문구
   currentEmotion.value = "Your emotions";
@@ -161,25 +163,25 @@ const showEmotionSequentially = async (emotionData) => {
   typeEmotion(primaryEmotion);
 
   // 주감정이 마지막인 경우
-  if (secondaryEmotions.length === 0) return;
+  if (secondaryEmotions.value.length === 0) return;
 
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   // 첫 번째 부감정 표시
   emotionStage.value = 3;
-  currentEmotion.value = secondaryEmotions[0];
-  typeEmotion(secondaryEmotions[0]);
+  currentEmotion.value = secondaryEmotions.value[0];
+  typeEmotion(secondaryEmotions.value[0]);
 
   // 첫 번째 부감정이 마지막인 경우
-  if (secondaryEmotions.length === 1) return;
+  if (secondaryEmotions.value.length === 1) return;
 
   await new Promise((resolve) => setTimeout(resolve, 2000));
 
   // 두 번째 부감정 표시 (존재하는 경우)
-  if (secondaryEmotions.length > 1) {
+  if (secondaryEmotions.value.length > 1) {
     emotionStage.value = 4;
-    currentEmotion.value = secondaryEmotions[1];
-    typeEmotion(secondaryEmotions[1]);
+    currentEmotion.value = secondaryEmotions.value[1];
+    typeEmotion(secondaryEmotions.value[1]);
   }
 };
 
