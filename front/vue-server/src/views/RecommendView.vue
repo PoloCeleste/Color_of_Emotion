@@ -12,14 +12,20 @@
             :key="movie.id"
             class="movie-poster flowing"
           >
-            <img :src="movie.poster_path" :alt="movie.title" />
+            <img
+              :src="replaceImagePath(movie.poster_path)"
+              :alt="movie.title"
+            />
           </div>
           <div
             v-for="movie in firstRow6"
             :key="movie.id"
             class="movie-poster static"
           >
-            <img :src="movie.poster_path" :alt="movie.title" />
+            <img
+              :src="replaceImagePath(movie.poster_path)"
+              :alt="movie.title"
+            />
           </div>
         </div>
         <div class="film-strip-row">
@@ -32,14 +38,20 @@
             :key="movie.id"
             class="movie-poster flowing"
           >
-            <img :src="movie.poster_path" :alt="movie.title" />
+            <img
+              :src="replaceImagePath(movie.poster_path)"
+              :alt="movie.title"
+            />
           </div>
           <div
             v-for="movie in secondRow6"
             :key="movie.id"
             class="movie-poster static"
           >
-            <img :src="movie.poster_path" :alt="movie.title" />
+            <img
+              :src="replaceImagePath(movie.poster_path)"
+              :alt="movie.title"
+            />
           </div>
         </div>
       </div>
@@ -89,6 +101,10 @@ const checkCentered = () => {
   const tolerance = 5; // 더 정확한 중앙 정렬을 위해 이 값을 조정하세요
 
   isCentered.value = Math.abs(postersCenter - viewportCenter) < tolerance;
+};
+
+const replaceImagePath = (imagePath) => {
+  return imagePath?.replace("original", "w200") || "";
 };
 
 const animate = (timestamp) => {
@@ -161,10 +177,10 @@ const animate = (timestamp) => {
 };
 
 onMounted(() => {
-  movieStore.setEmotionData(
-    JSON.parse(localStorage.getItem("emotionAnalysis"))
-  );
   if (movieStore.recommendedMovies.length === 0) {
+    movieStore.setEmotionData(
+      JSON.parse(localStorage.getItem("emotionAnalysis"))
+    );
     movieStore.getMovieRecommendations();
   }
   animationId = requestAnimationFrame(animate);
