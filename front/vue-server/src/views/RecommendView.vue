@@ -44,9 +44,9 @@
         </div>
       </div>
     </div>
-    <transition mode="fade">
-      <MovieCard v-show="three" />
-    </transition>
+    <Transition name="fade">
+      <MovieCard v-if="showMovieCard" />
+    </Transition>
   </div>
 </template>
 
@@ -61,7 +61,7 @@ const isAnimating = ref(true);
 let animationId = null;
 let startTime = null;
 const duration = 50000; // 속도제어
-const three = ref(false);
+const showMovieCard = ref(false);
 
 const firstRow18 = computed(() => movieStore.recommendedMovies.slice(0, 18));
 const firstRow6 = computed(() => movieStore.recommendedMovies.slice(18, 24));
@@ -136,8 +136,10 @@ const animate = (timestamp) => {
       setTimeout(() => {
         staticPosters.forEach((poster) => {
           poster.classList.add("dimmed");
-          three.value = true;
         });
+        setTimeout(() => {
+          showMovieCard.value = true;
+        }, 1000);
       }, 1500); // flowing 포스터가 사라지는 시간(0.5초) 후에 실행
     } else {
       filmStrip.value.style.transform = `translateX(${translateX}%)`;
@@ -197,7 +199,7 @@ watch(
   position: absolute;
   top: 0;
   left: 0;
-  width: 700%;
+  width: 700vw;
   height: 100%;
 
   --s: 20px;
@@ -280,5 +282,15 @@ button {
   font-size: 16px;
   cursor: pointer;
   z-index: 10;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
