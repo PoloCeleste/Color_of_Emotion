@@ -74,7 +74,7 @@ const selectedMovies = ref([]);
 watch(
   () => movieStore.recommendedMovies,
   (newMovies) => {
-    selectedMovies.value = newMovies.slice(0, 3).map((movie) => ({
+    selectedMovies.value = newMovies.slice(48, 51).map((movie) => ({
       ...movie,
       isActive: false,
     }));
