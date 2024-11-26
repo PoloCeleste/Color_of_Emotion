@@ -192,8 +192,80 @@ h1 {
 }
 
 .top {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #d4d4d4, #f0f0f0);
   transform: translateZ(50px);
-  border: 20px dashed #f0f0f0;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.top::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 90%;
+  height: 90%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg,
+    #222 0deg 8deg,
+    #444 8deg 10deg,
+    transparent 10deg 18deg
+  );
+  opacity: 0.7;
+}
+
+.top::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 25%;
+  height: 25%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #111;
+  box-shadow: 0 0 0 10px #f0f0f0, 0 0 0 15px #222, 0 0 0 25px #f0f0f0, 0 0 20px rgba(0,0,0,0.5);
+}
+
+.top .sprocket-holes {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80%;
+  height: 80%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.top .sprocket-holes::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 8%;
+  height: 8%;
+  transform: translateX(-50%);
+  background: #222;
+  border-radius: 50%;
+  box-shadow: 0 100% 0 #222, 100% 50% 0 #222, -100% 50% 0 #222;
+}
+
+.top .reflection {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 60%);
+  transform: rotate(-30deg);
+  pointer-events: none;
 }
 
 .bottom {
