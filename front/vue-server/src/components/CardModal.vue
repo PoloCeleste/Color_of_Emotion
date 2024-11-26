@@ -28,7 +28,7 @@
             </div>
           </div>
 
-          <<div v-if="movie.picture_url">
+          <div v-if="movie.picture_url">
             <h3>갤러리</h3>
             <div class="gallery-container">
               <button class="nav-button prev" @click="prevImage">&#10094;</button>
