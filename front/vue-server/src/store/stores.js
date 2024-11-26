@@ -13,6 +13,8 @@ export const useMovieStore = defineStore("movie", {
   state: () => ({
     recommendedMovies: [],
     emotionData: null,
+    emotionsArray: [],
+    selectedColors: [],
     loading: false,
     error: null,
   }),
@@ -28,17 +30,51 @@ export const useMovieStore = defineStore("movie", {
 
       try {
         this.loading = true;
-        const emotions = this.getEmotionsArray();
+        this.emotionsArray = this.getEmotionsArray();
 
         const response = await api.post("/api/v1/recommend_movies/", {
-          emotions: emotions,
+          emotions: this.emotionsArray,
         });
         this.recommendedMovies = response.data;
+
+        // 영화 추천 후 색상 데이터 요청
+        await this.getEmotionColors();
       } catch (err) {
         this.error = "영화 추천을 가져오는 중 오류가 발생했습니다.";
         console.error("Error:", err);
       } finally {
         this.loading = false;
+      }
+    },
+
+    async getEmotionColors() {
+      try {
+        const response = await api.post("/api/v1/emotion-colors/", {
+          emotions: this.emotionsArray,
+        });
+
+        // 랜덤으로 3개 색상 선택
+        const colors = response.data.emotions_color;
+        const selectedColors = [];
+        while (selectedColors.length < 3) {
+          const randomIndex = Math.floor(Math.random() * colors.length);
+          const color = colors[randomIndex];
+          if (
+            !selectedColors.some(
+              (selected) =>
+                selected[0] === color[0] &&
+                selected[1] === color[1] &&
+                selected[2] === color[2]
+            )
+          ) {
+            selectedColors.push(color);
+          }
+        }
+
+        this.selectedColors = selectedColors;
+        this.emotionsArray = []; // emotionsArray 초기화
+      } catch (err) {
+        console.error("Error fetching emotion colors:", err);
       }
     },
 

@@ -1,6 +1,5 @@
 import requests
 from django.conf import settings
-from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import MovieSerializer, EmotionColorSerializer
@@ -164,17 +163,36 @@ def recommend_movies(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+@csrf_exempt
+@require_POST
+def emotion_colors(request):
+    try:
+        emotion_ids = json.loads(request.body)['emotions']
+        
+        # emotion_id 리스트로 EmotionColor 검색
+        color_set = None
+        for i in range(len(emotion_ids), 0, -1):
+            current_emotions = emotion_ids[:i]
+            try:
+                color_set = EmotionColor.objects.filter(
+                    emotion_id__in=current_emotions
+                ).first()
+                if color_set:
+                    break
+            except EmotionColor.DoesNotExist:
+                continue
+        
+        if not color_set:
+            return JsonResponse({'error': 'No matching color set found'}, status=400)
+        
+        serializer = EmotionColorSerializer(color_set)
+        return JsonResponse(serializer.data, safe=False)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 tmdb = settings.API_KEY
-
-class MovieList(generics.ListAPIView):
-    queryset = Movie.objects.all()
-    serializer_class = MovieSerializer
-
-class EmotionColorList(generics.ListAPIView):
-    queryset = EmotionColor.objects.all()
-    serializer_class = EmotionColorSerializer
 
 @api_view(['GET'])
 def Actors(request, movie_id):
