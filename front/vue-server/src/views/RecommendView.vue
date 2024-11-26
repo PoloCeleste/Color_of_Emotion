@@ -1,7 +1,7 @@
 <template>
   <div class="about">
     <Transition name="fade">
-      <div class="circle-container" v-if="!showFilm">
+      <div class="circle-container" v-if="!showFilm" @click="startAnimation">
         <div
           class="circle"
           :class="{
@@ -9,13 +9,7 @@
             'hover-effect': !isModalOpen,
           }"
         >
-          <button
-            class="start-button"
-            @click="startAnimation"
-            style="background-color: whitesmoke"
-          >
-            START
-          </button>
+          <h1>START</h1>
         </div>
       </div>
     </Transition>
@@ -150,8 +144,7 @@ onMounted(() => {
   align-items: center;
 }
 
-.start-button {
-  padding: 20px 40px;
+h1 {
   font-size: 50px;
   font-weight: bold;
   border: none;
