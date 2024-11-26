@@ -16,19 +16,24 @@
           <span class="content__category">{{
             movie.genre_ids.join(", ")
           }}</span>
-          
+
           <p class="content__description">{{ movie.overview }}</p>
           <button class="close-button" @click="closeModal">×</button>
 
           <div v-if="movie.reviews">
             <h3>리뷰</h3>
             <div v-for="(review, index) in movie.reviews" :key="index">
-              <p v-if="showFullReviewIndex !== index && review.length > 100" @click="showFullReview(index)">
+              <p
+                v-if="showFullReviewIndex !== index && review.length > 100"
+                @click="showFullReview(index)"
+              >
                 {{ review.substring(0, 100) }}...더보기
               </p>
               <p v-else-if="showFullReviewIndex === index">
-                {{ review }}<br>
-                <button class="button" @click="hideFullReview(index)">줄이기</button>
+                {{ review }}<br />
+                <button class="button" @click="hideFullReview(index)">
+                  줄이기
+                </button>
               </p>
               <p v-else>{{ review }}</p>
             </div>
@@ -194,7 +199,9 @@ const prevVideo = () => {
 
 <style scoped>
 /* 공통 스타일 */
-.card-modal, .lightbox, .video-modal {
+.card-modal,
+.lightbox,
+.video-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -221,7 +228,8 @@ const prevVideo = () => {
   border: whitesmoke 1px solid;
 }
 
-.card-modal__image, .card-modal__content {
+.card-modal__image,
+.card-modal__content {
   flex: 1;
   overflow: hidden;
 }
@@ -287,7 +295,8 @@ const prevVideo = () => {
 }
 
 /* 버튼 스타일 */
-.close-button, .nav-button {
+.close-button,
+.nav-button {
   background: none;
   border: none;
   color: white;
@@ -314,7 +323,8 @@ const prevVideo = () => {
 }
 
 /* 갤러리 및 비디오 컨테이너 */
-.gallery-container, .video-container {
+.gallery-container,
+.video-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -327,7 +337,8 @@ const prevVideo = () => {
   flex-wrap: nowrap;
 }
 
-.gallery-item, .video-item {
+.gallery-item,
+.video-item {
   flex: 0 0 auto;
   width: calc(100% - 80px);
   aspect-ratio: 16 / 9;
@@ -337,7 +348,9 @@ const prevVideo = () => {
   scroll-snap-align: start;
 }
 
-.gallery-item img, .video-item img, .video-item iframe {
+.gallery-item img,
+.video-item img,
+.video-item iframe {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -382,11 +395,13 @@ const prevVideo = () => {
 }
 
 /* 트랜지션 애니메이션 */
-.modal-enter-active, .modal-leave-active {
+.modal-enter-active,
+.modal-leave-active {
   transition: opacity 0.3s, transform 0.3s;
 }
 
-.modal-enter-from, .modal-leave-to {
+.modal-enter-from,
+.modal-leave-to {
   opacity: 0;
   transform: scale(0.9);
 }
@@ -409,13 +424,15 @@ const prevVideo = () => {
     font-size: 32px;
   }
 
-  .gallery-item, .video-item {
+  .gallery-item,
+  .video-item {
     width: calc(50% - 10px);
   }
 }
 
 /* 라이트박스 및 비디오 모달 */
-.lightbox, .video-modal {
+.lightbox,
+.video-modal {
   background-color: rgba(0, 0, 0, 0.9);
   z-index: 2000;
 }
@@ -443,7 +460,8 @@ const prevVideo = () => {
 }
 
 /* 2. 갤러리와 동영상의 가로 스크롤 제거 */
-.gallery-container, .video-container {
+.gallery-container,
+.video-container {
   overflow-x: hidden;
   flex-wrap: nowrap;
   justify-content: center;

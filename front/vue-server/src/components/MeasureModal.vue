@@ -4,9 +4,7 @@
       <div class="lens">
         <CameraComponent @measurement-complete="handleMeasurementComplete" />
       </div>
-      <div class="controls">
-        <button class="complete-btn" @click="completeModal">COMPLETE</button>
-      </div>
+      <div class="controls"></div>
     </div>
   </div>
 </template>
@@ -48,8 +46,6 @@ const closeModal = () => {
   updateBackgroundColors(originalColor.value);
   emit("close");
 };
-
-const completeModal = () => emit("complete");
 
 onUnmounted(() => {
   updateBackgroundColors(originalColor.value);
