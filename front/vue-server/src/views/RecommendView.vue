@@ -1,106 +1,284 @@
 <template>
-  <div class="about">
-    <Transition name="fade">
-      <div class="circle-container" v-if="!showFilm" @click="startAnimation">
-        <div class="circle">
-          <h1>START</h1>
+  <div class="recommend-container">
+    <div class="film-container" ref="filmStrip">
+      <div class="film-strip-container">
+        <div class="film-strip-row">
+          <!-- 10개의 빈 포스터 카드 추가 -->
+          <div v-for="i in 10" :key="`empty1-${i}`" class="movie-poster empty">
+            <div style="width: 100%; height: 100%"></div>
+          </div>
+          <div
+            v-for="movie in firstRow18"
+            :key="movie.id"
+            class="movie-poster flowing"
+          >
+            <img :src="movie.poster_path" :alt="movie.title" />
+          </div>
+          <div
+            v-for="movie in firstRow6"
+            :key="movie.id"
+            class="movie-poster static"
+          >
+            <img :src="movie.poster_path" :alt="movie.title" />
+          </div>
+        </div>
+        <div class="film-strip-row">
+          <!-- 10개의 빈 포스터 카드 추가 -->
+          <div v-for="i in 10" :key="`empty2-${i}`" class="movie-poster empty">
+            <div style="width: 100%; height: 100%"></div>
+          </div>
+          <div
+            v-for="movie in secondRow18"
+            :key="movie.id"
+            class="movie-poster flowing"
+          >
+            <img :src="movie.poster_path" :alt="movie.title" />
+          </div>
+          <div
+            v-for="movie in secondRow6"
+            :key="movie.id"
+            class="movie-poster static"
+          >
+            <img :src="movie.poster_path" :alt="movie.title" />
+          </div>
         </div>
       </div>
-    </Transition>
-    <Transition name="fade">
-      <FilmAnimation
-        v-if="showFilm && store.recommendedMovies.length > 0"
-        :movies="store.recommendedMovies"
-        :emotionData="store.emotionData"
-      />
-    </Transition>
+    </div>
+    <transition mode="fade">
+      <MovieCard v-show="three" />
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import FilmAnimation from "@/components/FilmAnimation.vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useMovieStore } from "@/store/stores";
+import MovieCard from "@/components/MovieCard.vue";
 
-const showFilm = ref(false);
-const store = useMovieStore();
+const movieStore = useMovieStore();
+const filmStrip = ref(null);
+const isAnimating = ref(true);
+let animationId = null;
+let startTime = null;
+const duration = 50000; // 속도제어
+const three = ref(false);
 
-const startAnimation = () => {
-  showFilm.value = true;
+const firstRow18 = computed(() => movieStore.recommendedMovies.slice(0, 18));
+const firstRow6 = computed(() => movieStore.recommendedMovies.slice(18, 24));
+const secondRow18 = computed(() => movieStore.recommendedMovies.slice(24, 42));
+const secondRow6 = computed(() => movieStore.recommendedMovies.slice(42, 48));
+
+const isCentered = ref(false);
+
+const checkCentered = () => {
+  if (!filmStrip.value) return;
+
+  const staticPosters = filmStrip.value.querySelectorAll(
+    ".movie-poster.static"
+  );
+  const firstStaticPoster = staticPosters[0];
+  const lastStaticPoster = staticPosters[staticPosters.length - 1];
+
+  if (!firstStaticPoster || !lastStaticPoster) return;
+
+  const firstPosterRect = firstStaticPoster.getBoundingClientRect();
+  const lastPosterRect = lastStaticPoster.getBoundingClientRect();
+  const viewportCenter = window.innerWidth / 2;
+  const postersCenter = (firstPosterRect.left + lastPosterRect.right) / 2;
+
+  const tolerance = 5; // 더 정확한 중앙 정렬을 위해 이 값을 조정하세요
+
+  isCentered.value = Math.abs(postersCenter - viewportCenter) < tolerance;
+};
+
+const animate = (timestamp) => {
+  if (!startTime) startTime = timestamp;
+  const elapsed = timestamp - startTime;
+  const progress = (elapsed % duration) / duration;
+
+  if (filmStrip.value) {
+    checkCentered();
+
+    let translateX = -progress * 100;
+
+    if (isCentered.value) {
+      // 정적 포스터를 뷰포트 중앙에 맞추기 위해 위치 조정
+      const staticPosters = filmStrip.value.querySelectorAll(
+        ".movie-poster.static"
+      );
+      const firstStaticPoster = staticPosters[0];
+      const lastStaticPoster = staticPosters[staticPosters.length - 1];
+      const firstPosterRect = firstStaticPoster.getBoundingClientRect();
+      const lastPosterRect = lastStaticPoster.getBoundingClientRect();
+      const viewportCenter = window.innerWidth / 2;
+      const postersCenter = (firstPosterRect.left + lastPosterRect.right) / 2;
+      const adjustment =
+        ((viewportCenter - postersCenter) / filmStrip.value.offsetWidth) * 100;
+      translateX += adjustment;
+
+      filmStrip.value.style.transform = `translateX(${translateX}%)`;
+
+      // 애니메이션 정지
+      cancelAnimationFrame(animationId);
+      isAnimating.value = false;
+
+      // flowing 포스터 사라지게 하기
+      setTimeout(() => {
+        const flowingPosters = filmStrip.value.querySelectorAll(
+          ".movie-poster.flowing"
+        );
+        flowingPosters.forEach((poster) => {
+          poster.style.opacity = "0";
+        });
+      }, 500);
+
+      // flowing 포스터가 완전히 사라진 후 static 포스터 어둡게 하기
+      setTimeout(() => {
+        staticPosters.forEach((poster) => {
+          poster.classList.add("dimmed");
+          three.value = true;
+        });
+      }, 1500); // flowing 포스터가 사라지는 시간(0.5초) 후에 실행
+    } else {
+      filmStrip.value.style.transform = `translateX(${translateX}%)`;
+      filmStrip.value.querySelectorAll(".movie-poster").forEach((poster) => {
+        poster.style.transform = "none";
+        if (poster.classList.contains("flowing")) {
+          poster.style.opacity = "1";
+        }
+        if (poster.classList.contains("static")) {
+          poster.classList.remove("dimmed");
+        }
+      });
+    }
+  }
+
+  if (isAnimating.value) {
+    animationId = requestAnimationFrame(animate);
+  }
 };
 
 onMounted(() => {
-  if (store.emotionData) {
-    store.getMovieRecommendations();
+  if (movieStore.recommendedMovies.length === 0) {
+    movieStore.getMovieRecommendations();
   }
+  animationId = requestAnimationFrame(animate);
 });
+
+onUnmounted(() => {
+  cancelAnimationFrame(animationId);
+});
+
+watch(
+  () => movieStore.recommendedMovies,
+  (newMovies) => {
+    if (newMovies.length > 0) {
+      // 영화 데이터가 로드되면 애니메이션 재시작
+      cancelAnimationFrame(animationId);
+      startTime = null;
+      animationId = requestAnimationFrame(animate);
+    }
+  }
+);
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
+.recommend-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* 원형 렌즈 스타일링 */
-.circle-container {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 400px;
-  height: 400px;
-  z-index: 2;
-}
-
-.circle {
+.film-container {
   position: absolute;
-  top: -1%;
-  left: -1%;
-  width: 102%;
-  height: 102%;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #f0f0f0, #ffffff);
-  border: 2px solid darkgray;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.2);
-  transform-style: preserve-3d;
-  perspective: 1000px;
-  transition: transform 0.3s ease;
-  transition: all 0.3s ease;
-}
+  top: 0;
+  left: 0;
+  width: 700%;
+  height: 100%;
 
-.circle:hover {
-  transform: scale(1.02);
-  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.15), 0 15px 25px rgba(0, 0, 0, 0.3),
-    0 0 0 2px rgba(0, 0, 0, 0.1);
-}
-
-.about {
-  min-height: 100vh;
+  --s: 20px;
+  --c: #222;
+  background: conic-gradient(at 50% var(--s), var(--c) 75%, #0000 0) 0 0 /
+    calc(2 * var(--s)) calc(100% - var(--s)) padding-box;
+  border: var(--s) solid var(--c);
+  box-sizing: border-box;
   display: flex;
-  background-color: whitesmoke;
-  justify-content: center;
   align-items: center;
 }
 
-h1 {
-  font-size: 50px;
-  font-weight: bold;
-  border: none;
+.film-strip-container {
+  position: absolute;
+  top: 10%;
+  left: 0;
+  width: 300%; /* 너비를 늘려 모든 포스터가 표시되도록 함 */
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.film-strip-row {
+  width: 100%;
+  height: 40vh;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: hidden;
+  margin: 0.25vh;
+}
+
+.film-strip-row:first-child {
+  top: 10vh; /* 첫 번째 줄 위치 조정 */
+}
+
+.film-strip-row:last-child {
+  bottom: 10vh; /* 두 번째 줄 위치 조정 */
+}
+
+.movie-poster {
+  width: calc(40vh * 9 / 16); /* 3:4 비율 유지 */
+  height: 40vh;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  margin: 0.25vh;
+}
+
+.movie-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.movie-poster.flowing {
+  transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1),
+    opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.movie-poster.static {
+  transition: filter 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.movie-poster.static.dimmed {
+  filter: brightness(0.6);
+}
+
+.movie-poster.empty {
+  background-color: transparent;
+}
+
+button {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  font-size: 16px;
   cursor: pointer;
-  letter-spacing: 2px;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-font-smoothing: antialiased;
-  will-change: transform;
-  transition: transform 0.3s ease;
+  z-index: 10;
 }
 </style>

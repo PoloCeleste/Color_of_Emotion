@@ -1,56 +1,44 @@
 ﻿<template>
   <div class="animation-container">
     <!-- 인풋 애니메이션 원 -->
-    <div
-      class="circle-container"
-      v-show="!animationStarted"
-      @click="startAnimation"
-    >
-      <div class="circle">
-        <h1>START</h1>
-      </div>
-    </div>
-
-    <!-- 필름 애니메이션 -->
-    <div class="film-reel-container">
-      <div class="film-reel" :class="{ rotated: isRotated }">
-        <div class="top"></div>
-        <div class="bottom"></div>
-        <div class="side" :class="{ expanded: isSideExpanded }"></div>
-        <div class="film" :class="{ 'move-right': isSideExpanded }"></div>
-      </div>
+    <Transition name="fade">
       <div
-        class="black-overlay"
-        :class="{ visible: isExpanded, expand: isExpanded }"
+        class="circle-container"
+        v-show="!animationStarted"
+        @click="startAnimation"
       >
-        <div class="text-box">
-          <div>주감정: {{ primaryEmotion }}</div>
-          <div v-if="secondaryEmotions.length">
-            부감정: {{ secondaryEmotions.join(", ") }}
-          </div>
-        </div>
-        <div class="movie-scroll-container" v-if="expansionComplete">
-          <div class="movie-cards">
-            <MovieCard
-              v-for="(movie, index) in store.recommendedMovies"
-              :key="movie.movie_id"
-              :movie="movie"
-              :delay="index * 0.2"
-            />
-          </div>
+        <div class="circle">
+          <h1>START</h1>
         </div>
       </div>
-    </div>
+    </Transition>
+    <Transition name="fade">
+      <!-- 필름 애니메이션 -->
+      <div class="film-reel-container">
+        <div class="film-reel" :class="{ rotated: isRotated }">
+          <div class="top"></div>
+          <div class="bottom"></div>
+          <div class="side" :class="{ expanded: isSideExpanded }"></div>
+          <div class="film" :class="{ 'move-right': isSideExpanded }"></div>
+        </div>
+        <div
+          class="black-overlay"
+          :class="{ visible: isExpanded, expand: isExpanded }"
+        >
+        
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, defineProps } from "vue";
+import { ref, onMounted, defineProps } from "vue";
 import { useRouter } from "vue-router";
-import MovieCard from "@/components/MovieCard.vue";
+// import MovieCard from "@/components/MovieCard.vue";
 import { useMovieStore } from "@/store/stores";
 
-const router = useRouter()
+const router = useRouter();
 const store = useMovieStore();
 
 defineProps({
@@ -67,21 +55,21 @@ const isSideExpanded = ref(false);
 const expansionComplete = ref(false);
 const emotionData = ref(null);
 
-const primaryEmotion = computed(() => {
-  if (emotionData.value && emotionData.value.primary_emotion) {
-    return Object.keys(emotionData.value.primary_emotion)[0];
-  }
-  return "";
-});
+// const primaryEmotion = computed(() => {
+//   if (emotionData.value && emotionData.value.primary_emotion) {
+//     return Object.keys(emotionData.value.primary_emotion)[0];
+//   }
+//   return "";
+// });
 
-const secondaryEmotions = computed(() => {
-  if (emotionData.value && emotionData.value.secondary_emotions) {
-    return emotionData.value.secondary_emotions.map(
-      (emotion) => Object.keys(emotion)[0]
-    );
-  }
-  return [];
-});
+// const secondaryEmotions = computed(() => {
+//   if (emotionData.value && emotionData.value.secondary_emotions) {
+//     return emotionData.value.secondary_emotions.map(
+//       (emotion) => Object.keys(emotion)[0]
+//     );
+//   }
+//   return [];
+// });
 
 const startAnimation = () => {
   animationStarted.value = true;
@@ -100,9 +88,7 @@ const startAnimation = () => {
 
   setTimeout(() => {
     expansionComplete.value = true;
-    // 애니메이션 완료 후 상태 저장 및 다음 뷰로 이동
-    store.setAnimationComplete(true);
-    router.push({ name: 'recommend-view', query: { animationComplete: 'true' } });
+    router.push("/recommend");
   }, 6000);
 };
 
@@ -195,7 +181,7 @@ h1 {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: #1a1a1a;
+  background: #222;
   border-radius: 50%;
 }
 
@@ -212,7 +198,7 @@ h1 {
   position: absolute;
   width: 100%;
   height: 100px;
-  background: #1a1a1a;
+  background: #222;
   transform: rotateX(90deg) translateZ(0);
   top: calc(50% - 50px);
   right: 0;
@@ -274,7 +260,6 @@ h1 {
   transform: translateX(0);
   transition: transform 1.5s ease-out;
   z-index: 10;
-  background-color: #1a1a1a;
 }
 
 .black-overlay.visible {
