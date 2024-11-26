@@ -16,6 +16,7 @@
           <span class="content__category">{{
             movie.genre_ids.join(", ")
           }}</span>
+          
           <p class="content__description">{{ movie.overview }}</p>
           <button class="close-button" @click="closeModal">×</button>
 
@@ -90,7 +91,6 @@
                 class="provider-tag"
               >
                 <img :src="provider.logo_path" alt="" />
-                {{ provider.provider_name }}
               </h4>
             </div>
           </div>
@@ -234,6 +234,12 @@ const prevVideo = () => {
   justify-content: flex-start;
   overflow-y: auto;
   max-height: 90vh;
+}
+
+.card-modal__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* 스크롤바 스타일 */
@@ -430,21 +436,10 @@ const prevVideo = () => {
   margin-top: 30px;
   margin-bottom: 15px;
   color: #fff;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 .card-modal__content > div {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 15px;
   margin-bottom: 20px;
-  backdrop-filter: blur(5px);
-  transition: all 0.3s ease;
-}
-
-.card-modal__content > div:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-5px);
 }
 
 /* 2. 갤러리와 동영상의 가로 스크롤 제거 */
@@ -462,11 +457,10 @@ const prevVideo = () => {
 }
 
 .provider-tag img {
-  width: 40px;
-  height: 40px;
+  width: 120px; /* 40px에서 120px로 변경 */
+  height: 120px; /* 40px에서 120px로 변경 */
   transition: transform 0.3s ease;
 }
-
 .provider-tag img:hover {
   transform: scale(1.1);
 }
@@ -495,7 +489,6 @@ const prevVideo = () => {
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* 리뷰 섹션 스타일 개선 */
 .card-modal__content div > p {
   background: rgba(255, 255, 255, 0.05);
   padding: 10px;
@@ -503,6 +496,7 @@ const prevVideo = () => {
   margin-bottom: 10px;
   cursor: pointer;
   transition: background 0.3s ease;
+  color: #bababa; /* overview와 같은 색상 적용 */
 }
 
 .card-modal__content div > p:hover {
@@ -521,5 +515,12 @@ const prevVideo = () => {
 
 .button:hover {
   color: #45a049;
+}
+
+.gallery-item img,
+.video-modal-content iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 </style>
