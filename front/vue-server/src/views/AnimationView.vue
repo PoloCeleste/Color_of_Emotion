@@ -32,7 +32,7 @@
         <div class="movie-scroll-container" v-if="expansionComplete">
           <div class="movie-cards">
             <MovieCard
-              v-for="(movie, index) in movies"
+              v-for="(movie, index) in store.recommendedMovies"
               :key="movie.movie_id"
               :movie="movie"
               :delay="index * 0.2"
@@ -47,6 +47,9 @@
 <script setup>
 import { ref, computed, onMounted, defineProps } from "vue";
 import MovieCard from "@/components/MovieCard.vue";
+import { useMovieStore } from "@/store/stores";
+
+const store = useMovieStore();
 
 defineProps({
   movies: {
@@ -100,6 +103,7 @@ const startAnimation = () => {
 
 onMounted(() => {
   emotionData.value = JSON.parse(localStorage.getItem("emotionAnalysis"));
+  store.setEmotionData(emotionData);
 });
 </script>
 
