@@ -421,7 +421,7 @@ const prevVideo = () => {
 }
 
 .lightbox img {
-  max-width: 90%;
+  width: 80%;
   max-height: 90%;
 }
 
