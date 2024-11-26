@@ -32,7 +32,7 @@ const filmStrip = ref(null);
 const isAnimating = ref(true);
 let animationId = null;
 let startTime = null;
-const duration = 30000; // 속도제어
+const duration = 50000; // 속도제어
 
 const firstRow18 = computed(() => movieStore.recommendedMovies.slice(0, 18));
 const firstRow6 = computed(() => movieStore.recommendedMovies.slice(18, 24));
@@ -155,7 +155,7 @@ watch(() => movieStore.recommendedMovies, (newMovies) => {
   position: absolute;
   top: 0;
   left: 0;
-  width: 400%;
+  width: 600%;
   height: 100%;
   
   --s: 20px;
