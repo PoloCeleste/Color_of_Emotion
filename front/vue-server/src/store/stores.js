@@ -18,7 +18,7 @@ export const useMovieStore = defineStore("movie", {
     loading: false,
     error: null,
     animationComplete: false,
-    lastAnimationState: null
+    lastAnimationState: null,
   }),
 
   actions: {
@@ -107,11 +107,11 @@ export const useMovieStore = defineStore("movie", {
     },
 
     setAnimationComplete(value) {
-      this.animationComplete = value
+      this.animationComplete = value;
     },
-    
+
     setLastAnimationState(state) {
-      this.lastAnimationState = state
-    }
-  }
+      this.lastAnimationState = state;
+    },
+  },
 });
