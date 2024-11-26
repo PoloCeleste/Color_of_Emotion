@@ -44,7 +44,9 @@
         </div>
       </div>
     </div>
-    <MovieCard v-show="three" />
+    <transition mode="fade">
+      <MovieCard v-show="three" />
+    </transition>
   </div>
 </template>
 
@@ -134,9 +136,9 @@ const animate = (timestamp) => {
       setTimeout(() => {
         staticPosters.forEach((poster) => {
           poster.classList.add("dimmed");
+          three.value = true;
         });
       }, 1500); // flowing 포스터가 사라지는 시간(0.5초) 후에 실행
-      three.value = true;
     } else {
       filmStrip.value.style.transform = `translateX(${translateX}%)`;
       filmStrip.value.querySelectorAll(".movie-poster").forEach((poster) => {
