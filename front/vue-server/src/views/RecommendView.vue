@@ -3,6 +3,10 @@
     <div class="film-container" ref="filmStrip">
       <div class="film-strip-container">
         <div class="film-strip-row">
+          <!-- 10개의 빈 포스터 카드 추가 -->
+          <div v-for="i in 10" :key="`empty1-${i}`" class="movie-poster empty">
+            <div style=" width: 100%; height: 100%;"></div>
+          </div>
           <div v-for="movie in firstRow18" :key="movie.id" class="movie-poster flowing">
             <img :src="movie.poster_path" :alt="movie.title" />
           </div>
@@ -11,6 +15,10 @@
           </div>
         </div>
         <div class="film-strip-row">
+          <!-- 10개의 빈 포스터 카드 추가 -->
+          <div v-for="i in 10" :key="`empty2-${i}`" class="movie-poster empty">
+            <div style="width: 100%; height: 100%;"></div>
+          </div>
           <div v-for="movie in secondRow18" :key="movie.id" class="movie-poster flowing">
             <img :src="movie.poster_path" :alt="movie.title" />
           </div>
@@ -155,7 +163,7 @@ watch(() => movieStore.recommendedMovies, (newMovies) => {
   position: absolute;
   top: 0;
   left: 0;
-  width: 600%;
+  width: 700%;
   height: 100%;
   
   --s: 20px;
@@ -165,13 +173,15 @@ watch(() => movieStore.recommendedMovies, (newMovies) => {
     calc(2 * var(--s)) calc(100% - var(--s)) padding-box;
   border: var(--s) solid var(--c);
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
 }
 
 .film-strip-container {
   position: absolute;
   top: 10%;
   left: 0;
-  width: 200%; /* 너비를 늘려 모든 포스터가 표시되도록 함 */
+  width: 300%; /* 너비를 늘려 모든 포스터가 표시되도록 함 */
   height: 80%;
   display: flex;
   flex-direction: column;
@@ -222,6 +232,10 @@ watch(() => movieStore.recommendedMovies, (newMovies) => {
 
 .movie-poster.static.dimmed {
   filter: brightness(0.6);
+}
+
+.movie-poster.empty {
+  background-color: transparent;
 }
 
 button {
