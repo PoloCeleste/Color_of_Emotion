@@ -267,9 +267,45 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         }
         
     async def process_final_results(self, first_analysis_result, second_analysis_result):
-        if not first_analysis_result or not second_analysis_result:
+        if not second_analysis_result:
             return {'error': '분석에 필요한 데이터가 부족합니다.'}
-
+        
+        # first_analysis_result가 없는 경우 second_analysis_result만으로 분석
+        if not first_analysis_result:
+            emotion_scores = {}
+            for emotion in class_labels:
+                current_intensity = second_analysis_result['normalized_means'].get(emotion, 0)
+                score = abs(current_intensity)  # 현재 강도만 고려
+                emotion_scores[emotion] = round(score, 2)
+                
+            sorted_emotions = sorted(emotion_scores.items(), key=lambda x: x[1], reverse=True)
+            
+            result = {
+                'emotion_scores': emotion_scores,
+                'second_phase_std': second_analysis_result['standard_deviation'],
+                'frames_analyzed': {
+                    'second_phase': second_analysis_result['total_frames']
+                }
+            }
+            
+            # 주감정 선정 (가장 높은 점수)
+            result['primary_emotion'] = {sorted_emotions[0][0]: sorted_emotions[0][1]}
+            
+            # 부감정 선정 (주감정 점수의 40% 이상, 최대 2개)
+            primary_score = sorted_emotions[0][1]
+            threshold = primary_score * 0.4
+            secondary_emotions = []
+            
+            for emotion, score in sorted_emotions[1:]:
+                if score >= threshold:
+                    secondary_emotions.append({emotion: score})
+                if len(secondary_emotions) == 2:
+                    break
+                    
+            if secondary_emotions:
+                result['secondary_emotions'] = secondary_emotions
+                
+            return result
         # 감정 변화량 및 통계적 유의성 계산
         emotion_changes = {}
         significant_changes = {}
