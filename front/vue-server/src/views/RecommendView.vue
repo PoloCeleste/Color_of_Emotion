@@ -3,18 +3,23 @@
     <div class="film-container" ref="filmStrip">
       <div class="film-strip-container">
         <div class="film-strip-row">
-          <div v-for="movie in firstRow" :key="movie.id" class="movie-poster">
+          <div v-for="movie in firstRow18" :key="movie.id" class="movie-poster flowing">
+            <img :src="movie.poster_path" :alt="movie.title" />
+          </div>
+          <div v-for="movie in firstRow6" :key="movie.id" class="movie-poster static">
             <img :src="movie.poster_path" :alt="movie.title" />
           </div>
         </div>
         <div class="film-strip-row">
-          <div v-for="movie in secondRow" :key="movie.id" class="movie-poster">
+          <div v-for="movie in secondRow18" :key="movie.id" class="movie-poster flowing">
+            <img :src="movie.poster_path" :alt="movie.title" />
+          </div>
+          <div v-for="movie in secondRow6" :key="movie.id" class="movie-poster static">
             <img :src="movie.poster_path" :alt="movie.title" />
           </div>
         </div>
       </div>
     </div>
-    <button @click="toggleAnimation">{{ isAnimating ? '정지' : '시작' }}</button>
   </div>
 </template>
 
@@ -27,10 +32,33 @@ const filmStrip = ref(null);
 const isAnimating = ref(true);
 let animationId = null;
 let startTime = null;
-const duration = 60000; // 60초
+const duration = 30000; // 속도제어
 
-const firstRow = computed(() => movieStore.recommendedMovies.slice(0, 24));
-const secondRow = computed(() => movieStore.recommendedMovies.slice(24, 48));
+const firstRow18 = computed(() => movieStore.recommendedMovies.slice(0, 18));
+const firstRow6 = computed(() => movieStore.recommendedMovies.slice(18, 24));
+const secondRow18 = computed(() => movieStore.recommendedMovies.slice(24, 42));
+const secondRow6 = computed(() => movieStore.recommendedMovies.slice(42, 48));
+
+const isCentered = ref(false);
+
+const checkCentered = () => {
+  if (!filmStrip.value) return;
+  
+  const staticPosters = filmStrip.value.querySelectorAll('.movie-poster.static');
+  const firstStaticPoster = staticPosters[0];
+  const lastStaticPoster = staticPosters[staticPosters.length - 1];
+  
+  if (!firstStaticPoster || !lastStaticPoster) return;
+  
+  const firstPosterRect = firstStaticPoster.getBoundingClientRect();
+  const lastPosterRect = lastStaticPoster.getBoundingClientRect();
+  const viewportCenter = window.innerWidth / 2;
+  const postersCenter = (firstPosterRect.left + lastPosterRect.right) / 2;
+  
+  const tolerance = 5; // 더 정확한 중앙 정렬을 위해 이 값을 조정하세요
+  
+  isCentered.value = Math.abs(postersCenter - viewportCenter) < tolerance;
+};
 
 const animate = (timestamp) => {
   if (!startTime) startTime = timestamp;
@@ -38,21 +66,37 @@ const animate = (timestamp) => {
   const progress = (elapsed % duration) / duration;
   
   if (filmStrip.value) {
-    filmStrip.value.style.transform = `translateX(${-progress * 50}%)`;
+    checkCentered();
+    
+    let translateX = -progress * 100;
+    
+    if (isCentered.value) {
+      // 정적 포스터를 뷰포트 중앙에 맞추기 위해 위치 조정
+      const staticPosters = filmStrip.value.querySelectorAll('.movie-poster.static');
+      const firstStaticPoster = staticPosters[0];
+      const lastStaticPoster = staticPosters[staticPosters.length - 1];
+      const firstPosterRect = firstStaticPoster.getBoundingClientRect();
+      const lastPosterRect = lastStaticPoster.getBoundingClientRect();
+      const viewportCenter = window.innerWidth / 2;
+      const postersCenter = (firstPosterRect.left + lastPosterRect.right) / 2;
+      const adjustment = (viewportCenter - postersCenter) / filmStrip.value.offsetWidth * 100;
+      translateX += adjustment;
+
+      filmStrip.value.style.transform = `translateX(${translateX}%)`;
+      
+      // 애니메이션 정지
+      cancelAnimationFrame(animationId);
+      isAnimating.value = false;
+    } else {
+      filmStrip.value.style.transform = `translateX(${translateX}%)`;
+      filmStrip.value.querySelectorAll('.movie-poster').forEach((poster) => {
+        poster.style.transform = 'none';
+      });
+    }
   }
 
   if (isAnimating.value) {
     animationId = requestAnimationFrame(animate);
-  }
-};
-
-const toggleAnimation = () => {
-  isAnimating.value = !isAnimating.value;
-  if (isAnimating.value) {
-    startTime = null;
-    animationId = requestAnimationFrame(animate);
-  } else {
-    cancelAnimationFrame(animationId);
   }
 };
 
@@ -92,7 +136,7 @@ watch(() => movieStore.recommendedMovies, (newMovies) => {
   position: absolute;
   top: 0;
   left: 0;
-  width: 200%;
+  width: 400%;
   height: 100%;
   
   --s: 20px;
@@ -108,13 +152,12 @@ watch(() => movieStore.recommendedMovies, (newMovies) => {
   position: absolute;
   top: 10%;
   left: 0;
-  width: 100%;
+  width: 200%; /* 너비를 늘려 모든 포스터가 표시되도록 함 */
   height: 80%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
-
 
 .film-strip-row {
   width: 100%;
@@ -149,6 +192,14 @@ watch(() => movieStore.recommendedMovies, (newMovies) => {
   object-fit: cover;
 }
 
+.movie-poster.flowing {
+  transition: transform 0.5s ease;
+}
+
+.movie-poster.static {
+  transition: none;
+}
+
 button {
   position: absolute;
   bottom: 20px;
@@ -160,4 +211,3 @@ button {
   z-index: 10;
 }
 </style>
-
