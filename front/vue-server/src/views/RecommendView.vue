@@ -88,19 +88,27 @@ const animate = (timestamp) => {
       cancelAnimationFrame(animationId);
       isAnimating.value = false;
 
-      // 애니메이션이 멈춘 후 flowing 포스터 사라지게 하기
+      // flowing 포스터 사라지게 하기
+      const flowingPosters = filmStrip.value.querySelectorAll('.movie-poster.flowing');
+      flowingPosters.forEach((poster) => {
+        poster.style.opacity = '0';
+      });
+
+      // flowing 포스터가 완전히 사라진 후 static 포스터 어둡게 하기
       setTimeout(() => {
-        const flowingPosters = filmStrip.value.querySelectorAll('.movie-poster.flowing');
-        flowingPosters.forEach((poster) => {
-          poster.style.opacity = '0';
+        staticPosters.forEach((poster) => {
+          poster.classList.add('dimmed');
         });
-      }, 500); // 0.5초 후에 사라지기 시작
+      }, 500); // flowing 포스터가 사라지는 시간(0.5초) 후에 실행
     } else {
       filmStrip.value.style.transform = `translateX(${translateX}%)`;
       filmStrip.value.querySelectorAll('.movie-poster').forEach((poster) => {
         poster.style.transform = 'none';
         if (poster.classList.contains('flowing')) {
           poster.style.opacity = '1';
+        }
+        if (poster.classList.contains('static')) {
+          poster.classList.remove('dimmed');
         }
       });
     }
@@ -204,11 +212,16 @@ watch(() => movieStore.recommendedMovies, (newMovies) => {
 }
 
 .movie-poster.flowing {
-  transition: transform 0.5s ease, opacity 0.5s ease;
+  transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1), 
+              opacity 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .movie-poster.static {
-  transition: none;
+  transition: filter 1.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.movie-poster.static.dimmed {
+  filter: brightness(0.6);
 }
 
 button {

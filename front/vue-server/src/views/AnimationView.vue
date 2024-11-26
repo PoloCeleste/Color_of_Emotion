@@ -25,22 +25,7 @@
           class="black-overlay"
           :class="{ visible: isExpanded, expand: isExpanded }"
         >
-          <div class="text-box">
-            <div>주감정: {{ primaryEmotion }}</div>
-            <div v-if="secondaryEmotions.length">
-              부감정: {{ secondaryEmotions.join(", ") }}
-            </div>
-          </div>
-          <div class="movie-scroll-container" v-if="expansionComplete">
-            <div class="movie-cards">
-              <MovieCard
-                v-for="(movie, index) in store.recommendedMovies"
-                :key="movie.movie_id"
-                :movie="movie"
-                :delay="index * 0.2"
-              />
-            </div>
-          </div>
+        
         </div>
       </div>
     </Transition>
@@ -48,9 +33,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, defineProps } from "vue";
+import { ref, onMounted, defineProps } from "vue";
 import { useRouter } from "vue-router";
-import MovieCard from "@/components/MovieCard.vue";
+// import MovieCard from "@/components/MovieCard.vue";
 import { useMovieStore } from "@/store/stores";
 
 const router = useRouter();
@@ -70,21 +55,21 @@ const isSideExpanded = ref(false);
 const expansionComplete = ref(false);
 const emotionData = ref(null);
 
-const primaryEmotion = computed(() => {
-  if (emotionData.value && emotionData.value.primary_emotion) {
-    return Object.keys(emotionData.value.primary_emotion)[0];
-  }
-  return "";
-});
+// const primaryEmotion = computed(() => {
+//   if (emotionData.value && emotionData.value.primary_emotion) {
+//     return Object.keys(emotionData.value.primary_emotion)[0];
+//   }
+//   return "";
+// });
 
-const secondaryEmotions = computed(() => {
-  if (emotionData.value && emotionData.value.secondary_emotions) {
-    return emotionData.value.secondary_emotions.map(
-      (emotion) => Object.keys(emotion)[0]
-    );
-  }
-  return [];
-});
+// const secondaryEmotions = computed(() => {
+//   if (emotionData.value && emotionData.value.secondary_emotions) {
+//     return emotionData.value.secondary_emotions.map(
+//       (emotion) => Object.keys(emotion)[0]
+//     );
+//   }
+//   return [];
+// });
 
 const startAnimation = () => {
   animationStarted.value = true;
