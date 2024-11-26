@@ -1,31 +1,49 @@
 <template>
-  <div class='recommend-container'>
+  <div class="recommend-container">
     <div class="film-container" ref="filmStrip">
       <div class="film-strip-container">
         <div class="film-strip-row">
-          <div v-for="movie in firstRow18" :key="movie.id" class="movie-poster flowing">
+          <div
+            v-for="movie in firstRow18"
+            :key="movie.id"
+            class="movie-poster flowing"
+          >
             <img :src="movie.poster_path" :alt="movie.title" />
           </div>
-          <div v-for="movie in firstRow6" :key="movie.id" class="movie-poster static">
+          <div
+            v-for="movie in firstRow6"
+            :key="movie.id"
+            class="movie-poster static"
+          >
             <img :src="movie.poster_path" :alt="movie.title" />
           </div>
         </div>
         <div class="film-strip-row">
-          <div v-for="movie in secondRow18" :key="movie.id" class="movie-poster flowing">
+          <div
+            v-for="movie in secondRow18"
+            :key="movie.id"
+            class="movie-poster flowing"
+          >
             <img :src="movie.poster_path" :alt="movie.title" />
           </div>
-          <div v-for="movie in secondRow6" :key="movie.id" class="movie-poster static">
+          <div
+            v-for="movie in secondRow6"
+            :key="movie.id"
+            class="movie-poster static"
+          >
             <img :src="movie.poster_path" :alt="movie.title" />
           </div>
         </div>
       </div>
     </div>
+    <MovieCard :isAnimating="!isAnimating" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-import { useMovieStore } from '@/store/stores';
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { useMovieStore } from "@/store/stores";
+import MovieCard from "@/components/MovieCard.vue";
 
 const movieStore = useMovieStore();
 const filmStrip = ref(null);
@@ -43,20 +61,22 @@ const isCentered = ref(false);
 
 const checkCentered = () => {
   if (!filmStrip.value) return;
-  
-  const staticPosters = filmStrip.value.querySelectorAll('.movie-poster.static');
+
+  const staticPosters = filmStrip.value.querySelectorAll(
+    ".movie-poster.static"
+  );
   const firstStaticPoster = staticPosters[0];
   const lastStaticPoster = staticPosters[staticPosters.length - 1];
-  
+
   if (!firstStaticPoster || !lastStaticPoster) return;
-  
+
   const firstPosterRect = firstStaticPoster.getBoundingClientRect();
   const lastPosterRect = lastStaticPoster.getBoundingClientRect();
   const viewportCenter = window.innerWidth / 2;
   const postersCenter = (firstPosterRect.left + lastPosterRect.right) / 2;
-  
+
   const tolerance = 5; // 더 정확한 중앙 정렬을 위해 이 값을 조정하세요
-  
+
   isCentered.value = Math.abs(postersCenter - viewportCenter) < tolerance;
 };
 
@@ -64,43 +84,48 @@ const animate = (timestamp) => {
   if (!startTime) startTime = timestamp;
   const elapsed = timestamp - startTime;
   const progress = (elapsed % duration) / duration;
-  
+
   if (filmStrip.value) {
     checkCentered();
-    
+
     let translateX = -progress * 100;
-    
+
     if (isCentered.value) {
       // 정적 포스터를 뷰포트 중앙에 맞추기 위해 위치 조정
-      const staticPosters = filmStrip.value.querySelectorAll('.movie-poster.static');
+      const staticPosters = filmStrip.value.querySelectorAll(
+        ".movie-poster.static"
+      );
       const firstStaticPoster = staticPosters[0];
       const lastStaticPoster = staticPosters[staticPosters.length - 1];
       const firstPosterRect = firstStaticPoster.getBoundingClientRect();
       const lastPosterRect = lastStaticPoster.getBoundingClientRect();
       const viewportCenter = window.innerWidth / 2;
       const postersCenter = (firstPosterRect.left + lastPosterRect.right) / 2;
-      const adjustment = (viewportCenter - postersCenter) / filmStrip.value.offsetWidth * 100;
+      const adjustment =
+        ((viewportCenter - postersCenter) / filmStrip.value.offsetWidth) * 100;
       translateX += adjustment;
 
       filmStrip.value.style.transform = `translateX(${translateX}%)`;
-      
+
       // 애니메이션 정지
       cancelAnimationFrame(animationId);
       isAnimating.value = false;
 
       // 애니메이션이 멈춘 후 flowing 포스터 사라지게 하기
       setTimeout(() => {
-        const flowingPosters = filmStrip.value.querySelectorAll('.movie-poster.flowing');
+        const flowingPosters = filmStrip.value.querySelectorAll(
+          ".movie-poster.flowing"
+        );
         flowingPosters.forEach((poster) => {
-          poster.style.opacity = '0';
+          poster.style.opacity = "0";
         });
       }, 500); // 0.5초 후에 사라지기 시작
     } else {
       filmStrip.value.style.transform = `translateX(${translateX}%)`;
-      filmStrip.value.querySelectorAll('.movie-poster').forEach((poster) => {
-        poster.style.transform = 'none';
-        if (poster.classList.contains('flowing')) {
-          poster.style.opacity = '1';
+      filmStrip.value.querySelectorAll(".movie-poster").forEach((poster) => {
+        poster.style.transform = "none";
+        if (poster.classList.contains("flowing")) {
+          poster.style.opacity = "1";
         }
       });
     }
@@ -122,14 +147,17 @@ onUnmounted(() => {
   cancelAnimationFrame(animationId);
 });
 
-watch(() => movieStore.recommendedMovies, (newMovies) => {
-  if (newMovies.length > 0) {
-    // 영화 데이터가 로드되면 애니메이션 재시작
-    cancelAnimationFrame(animationId);
-    startTime = null;
-    animationId = requestAnimationFrame(animate);
+watch(
+  () => movieStore.recommendedMovies,
+  (newMovies) => {
+    if (newMovies.length > 0) {
+      // 영화 데이터가 로드되면 애니메이션 재시작
+      cancelAnimationFrame(animationId);
+      startTime = null;
+      animationId = requestAnimationFrame(animate);
+    }
   }
-});
+);
 </script>
 
 <style scoped>
@@ -149,11 +177,10 @@ watch(() => movieStore.recommendedMovies, (newMovies) => {
   left: 0;
   width: 400%;
   height: 100%;
-  
+
   --s: 20px;
   --c: #222;
-  background: 
-    conic-gradient(at 50% var(--s), var(--c) 75%, #0000 0) 0 0 /
+  background: conic-gradient(at 50% var(--s), var(--c) 75%, #0000 0) 0 0 /
     calc(2 * var(--s)) calc(100% - var(--s)) padding-box;
   border: var(--s) solid var(--c);
   box-sizing: border-box;
