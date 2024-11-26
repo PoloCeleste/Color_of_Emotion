@@ -1,8 +1,8 @@
 <template>
   <div class="movie-cards">
     <div
-      v-for="(movie) in selectedMovies"
-      :key="movie.id"
+      v-for="(movie, index) in selectedMovies"
+      :key="index"
       class="movie-card"
       @click="openModal(movie)"
     >
@@ -15,6 +15,7 @@
     <CardModal
       v-if="selectedMovie"
       :movie="selectedMovie"
+      :isActive="isModalActive"
       @close="closeModal"
     />
   </div>
@@ -28,6 +29,7 @@ import CardModal from "./CardModal.vue";
 const movieStore = useMovieStore();
 const selectedMovies = ref([]);
 const selectedMovie = ref(null);
+const isModalActive = ref(false);
 
 watch(
   () => movieStore.recommendedMovies,
@@ -39,10 +41,14 @@ watch(
 
 const openModal = (movie) => {
   selectedMovie.value = movie;
+  isModalActive.value = true;
 };
 
 const closeModal = () => {
-  selectedMovie.value = null;
+  isModalActive.value = false;
+  setTimeout(() => {
+    selectedMovie.value = null;
+  }, 300); // 애니메이션 종료 후 선택된 영화 초기화
 };
 </script>
 
