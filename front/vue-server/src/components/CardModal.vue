@@ -1,78 +1,34 @@
 <template>
-  <div class="card-modal" :class="{ 'is-active': isActive }">
-    <div class="card-modal__inner" ref="modalInner">
-      <div class="card-modal__image">
-        <img :src="movie.poster_path" :alt="movie.title" />
-      </div>
-      <div class="card-modal__content">
-        <h2 class="content__heading">{{ movie.title }}</h2>
-        <span class="content__category">{{ movie.genre_ids.join(", ") }}</span>
-        <p class="content__description">{{ movie.overview }}</p>
-        <button class="close-button" @click="closeModal">×</button>
+  <Transition name="modal">
+    <div v-if="isActive" class="card-modal">
+      <div class="card-modal__inner">
+        <div class="card-modal__image">
+          <img :src="movie.poster_path" :alt="movie.title" />
+        </div>
+        <div class="card-modal__content">
+          <h2 class="content__heading">{{ movie.title }}</h2>
+          <span class="content__category">{{ movie.genre_ids.join(", ") }}</span>
+          <p class="content__description">{{ movie.overview }}</p>
+          <button class="close-button" @click="closeModal">×</button>
+        </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
-import { ref, watch, onMounted, onUnmounted } from 'vue';
-import { gsap } from 'gsap';
-import { Flip } from 'gsap/Flip';
 
-gsap.registerPlugin(Flip);
-
-const props = defineProps({
+defineProps({
   movie: Object,
   isActive: Boolean,
 });
 
 const emit = defineEmits(['close']);
 
-const modalInner = ref(null);
-
 const closeModal = () => {
   emit('close');
 };
-
-watch(() => props.isActive, (newValue) => {
-  if (newValue) {
-    animateOpen();
-  } else {
-    animateClose();
-  }
-});
-
-const animateOpen = () => {
-  const state = Flip.getState(modalInner.value);
-  gsap.set(modalInner.value, { clearProps: 'all' });
-  Flip.from(state, {
-    duration: 0.7,
-    ease: 'power3.inOut',
-    scale: true,
-    onComplete: () => {
-      gsap.to('.card-modal__content', { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 });
-    }
-  });
-};
-
-const animateClose = () => {
-  gsap.to('.card-modal__content', { opacity: 0, y: 20, duration: 0.3 });
-};
-
-const handleEscape = (e) => {
-  if (e.key === 'Escape' && props.isActive) {
-    closeModal();
-  }
-};
-
-onMounted(() => {
-  document.addEventListener('keydown', handleEscape);
-});
-
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleEscape);
-});
 </script>
 
 <style scoped>
@@ -86,15 +42,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
   z-index: 1000;
-}
-
-.card-modal.is-active {
-  opacity: 1;
-  visibility: visible;
 }
 
 .card-modal__inner {
@@ -124,8 +72,6 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  opacity: 0;
-  transform: translateY(20px);
 }
 
 .content__heading {
@@ -162,6 +108,18 @@ onUnmounted(() => {
   color: white;
   cursor: pointer;
   z-index: 10;
+}
+
+/* 트랜지션 애니메이션 */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
 }
 
 @media (max-width: 768px) {

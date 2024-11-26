@@ -13,7 +13,7 @@
       </div>
     </div>
     <CardModal
-      v-if="selectedMovie"
+      v-show="selectedMovie"
       :movie="selectedMovie"
       :isActive="isModalActive"
       @close="closeModal"
@@ -74,13 +74,33 @@ const closeModal = () => {
 .movie-card {
   cursor: pointer;
   flex: 0 0 auto;
-  width: 390px; /* 300px에서 450px로 1.5배 증가 */
-  height: 520px; /* 400px에서 600px로 1.5배 증가 */
-  margin: 15px; /* 10px에서 15px로 증가 */
-  transition: transform 0.3s ease;
+  width: 390px;
+  height: 585px;
+  margin: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .movie-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.movie-card__image {
+  width: 100%;
+  height: 100%;
+}
+
+.movie-card__image > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.movie-card:hover .movie-card__image > img {
   transform: scale(1.05);
 }
 
