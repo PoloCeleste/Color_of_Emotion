@@ -87,7 +87,7 @@ const updateCard = (idx) => {
   if (Flip.isFlipping(card)) return;
 
   const cardState = Flip.getState(card, {
-    props: "transform,width,height",
+    props: "box-shadow, border-radius",
   });
   const image = card.querySelector(".movie-card__image");
   const imageState = Flip.getState(image);
@@ -95,53 +95,32 @@ const updateCard = (idx) => {
   selectedMovies.value[idx].isActive = !selectedMovies.value[idx].isActive;
   const active = selectedMovies.value[idx].isActive;
 
-  const duration = active ? 0.8 : 0.6;
-  const ease = "power3.inOut";
+  const duration = active ? 0.7 : 0.5;
+  const ease = "quint.out";
 
   const cardContent = document.querySelectorAll(".content__group")[idx];
 
-  if (active) {
-    gsap.fromTo(
-      cardContent,
-      { opacity: 0, x: 100 },
-      {
-        duration: 1,
-        opacity: 1,
-        x: 0,
-        ease: "expo.out",
-        delay: 0.3,
-      }
-    );
-  } else {
-    gsap.to(cardContent, {
-      duration: 0.4,
-      opacity: 0,
-      x: 50,
-      ease: "power2.in",
-    });
-  }
-
+  gsap.killTweensOf(cardContent);
+  gsap.to(cardContent, {
+    duration: active ? 1 : 0.2,
+    ease: "expo.out",
+    stagger: 0.1,
+    alpha: active ? 1 : 0,
+    y: active ? 0 : 20,
+    delay: active ? 0.4 : 0,
+  });
   Flip.from(cardState, {
-    duration: active ? 0.8 : 0.6,
-    ease: "power3.inOut",
+    duration: duration,
+    ease: ease,
     absolute: true,
-    prune: true,
-    simple: true,
-    onComplete: () => {
-      if (active) {
-        gsap.to(card, {
-          x: 0,
-          duration: 0.3,
-          ease: "power2.out",
-        });
-      }
-    },
+    zIndex: 1,
   });
 
   Flip.from(imageState, {
-    duration,
-    ease,
+    duration: duration,
     absolute: true,
+    ease: ease,
+    simple: true,
   });
 };
 
@@ -210,9 +189,16 @@ onMounted(() => {
 }
 
 .movie-card__image > img {
+  will-change: transform;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  -o-object-fit: cover;
   object-fit: cover;
+  -o-object-position: center center;
+  object-position: center center;
   transition: transform 0.3s;
 }
 
