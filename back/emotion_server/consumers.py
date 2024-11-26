@@ -151,7 +151,7 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         if frame is None:
             return None, None
 
-        frame = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX)
+        # frame = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_classifier.detectMultiScale(gray, 1.3, 5)
         label = ''
@@ -159,7 +159,7 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         prob = ''
         emotion_data = ''
 
-        frame = cv2.GaussianBlur(frame, (5, 5), 0)
+        # frame = cv2.GaussianBlur(frame, (5, 5), 0)
         display_color = (255, 161, 54)
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x+w, y+h), display_color, 2)
