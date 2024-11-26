@@ -1,1 +1,9 @@
-[{"model": "movies.emotion", "pk": 1, "fields": {"name": "Joy"}}, {"model": "movies.emotion", "pk": 2, "fields": {"name": "Sadness"}}, {"model": "movies.emotion", "pk": 3, "fields": {"name": "Anger"}}, {"model": "movies.emotion", "pk": 4, "fields": {"name": "Embarrassment"}}, {"model": "movies.emotion", "pk": 5, "fields": {"name": "Anxiety"}}, {"model": "movies.emotion", "pk": 6, "fields": {"name": "Pain"}}, {"model": "movies.emotion", "pk": 7, "fields": {"name": "Neutral"}}]
+[
+  { "model": "movies.emotion", "pk": 1, "fields": { "name": "Joy" } },
+  { "model": "movies.emotion", "pk": 2, "fields": { "name": "Sadness" } },
+  { "model": "movies.emotion", "pk": 3, "fields": { "name": "Anger" } },
+  { "model": "movies.emotion", "pk": 4, "fields": { "name": "Embarrassment" } },
+  { "model": "movies.emotion", "pk": 5, "fields": { "name": "Anxiety" } },
+  { "model": "movies.emotion", "pk": 6, "fields": { "name": "Pain" } },
+  { "model": "movies.emotion", "pk": 7, "fields": { "name": "Neutral" } }
+]

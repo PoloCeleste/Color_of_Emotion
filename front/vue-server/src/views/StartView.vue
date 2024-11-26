@@ -3,28 +3,32 @@
     <div class="content-wrapper">
       <Transition name="camera-body" mode="out-in">
         <div v-if="isModalOpen" class="camera-body">
-          <div class="shutter-button" :class="{ 'pulse': isModalOpen }"></div>
-          <div class="flash-window" :class="{ 'glow': isModalOpen }"></div>
+          <div class="shutter-button" :class="{ pulse: isModalOpen }"></div>
+          <div class="flash-window" :class="{ glow: isModalOpen }"></div>
         </div>
       </Transition>
-      
+
       <div class="circle-container">
-        <div class="circle" :class="{ 'rainbow-shadow': measurementComplete, 'hover-effect': !isModalOpen }">
+        <div
+          class="circle"
+          :class="{
+            'rainbow-shadow': measurementComplete,
+            'hover-effect': !isModalOpen,
+          }"
+        >
           <Transition name="button" mode="out-in">
-            <button 
-              v-if="!measurementComplete" 
-              class="measure-button" 
+            <button
+              v-if="!measurementComplete"
+              class="measure-button"
               @click="openModal"
               :disabled="isModalOpen"
             >
               Let's find your emotion
             </button>
-            <button 
-              v-else 
-              class="start-button" 
-              @click="goToRecommend"
-              :class="{ 'ready': measurementComplete }"
-              style="background-color: whitesmoke;"
+            <button
+              v-else
+              class="start-button"
+              style="background-color: whitesmoke"
             >
               START
             </button>
@@ -32,100 +36,111 @@
         </div>
       </div>
     </div>
-    
+
     <Transition name="modal">
-      <MeasureModal 
-        v-if="isModalOpen" 
-        :isOpen="isModalOpen" 
-        @close="closeModal" 
-        @complete="completeMeasurement" 
+      <MeasureModal
+        v-if="isModalOpen"
+        :isOpen="isModalOpen"
+        @close="closeModal"
+        @complete="completeMeasurement"
       />
     </Transition>
   </div>
 </template>
 
 <script setup>
-import MeasureModal from '@/components/MeasureModal.vue'
-import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import MeasureModal from "@/components/MeasureModal.vue";
+import { useRouter } from "vue-router";
+import { ref, onMounted, nextTick } from "vue";
 
 // 상수 정의
-const TRANSITION_DURATION = 800  // 기본 트랜지션 시간
-const DELAY_DURATION = 800      // 지연 시간
-const BACKGROUND_TRANSITION = 800  // 배경색 전환 시간
+const TRANSITION_DURATION = 800; // 기본 트랜지션 시간
+const DELAY_DURATION = 800; // 지연 시간
+const BACKGROUND_TRANSITION = 800; // 배경색 전환 시간
 
-document.documentElement.style.setProperty('--transition-duration', `${TRANSITION_DURATION}ms`)
-document.documentElement.style.setProperty('--delay-duration', `${DELAY_DURATION}ms`)
+document.documentElement.style.setProperty(
+  "--transition-duration",
+  `${TRANSITION_DURATION}ms`
+);
+document.documentElement.style.setProperty(
+  "--delay-duration",
+  `${DELAY_DURATION}ms`
+);
 
 // 상태 관리
-const router = useRouter()
-const isModalOpen = ref(false)
-const measurementComplete = ref(false)
-const originalColor = ref('')
+const router = useRouter();
+const isModalOpen = ref(false);
+const measurementComplete = ref(false);
+const originalColor = ref("");
 
 // 라우터 핸들러
 const goToRecommend = () => {
-  sessionStorage.setItem('hasVisitedStart', 'true')
-  router.push('/recommend')
-}
+  setTimeout(() => {
+    router.push({
+      path: "/recommend",
+      replace: true,
+    });
+  }, 800); // 모달 트랜지션 시간과 동일하게 설정
+};
 
 // 모달 컨트롤
 const openModal = () => {
-  isModalOpen.value = true
+  isModalOpen.value = true;
   // 모달이 나타나고 나서 배경색과 카메라 몸통이 등장하도록 지연
   setTimeout(() => {
-    updateBackgroundColors('#929191')
-  }, TRANSITION_DURATION)
-}
+    updateBackgroundColors("#929191");
+  }, TRANSITION_DURATION);
+};
 
 const updateBackgroundColors = (color) => {
-  const startContainer = document.querySelector('.start-container')
-  const body = document.body
-  
+  const startContainer = document.querySelector(".start-container");
+  const body = document.body;
+
   if (startContainer && body) {
-    startContainer.style.transition = `background-color ${BACKGROUND_TRANSITION}ms ease`
-    body.style.transition = `background-color ${BACKGROUND_TRANSITION}ms ease`
-    startContainer.style.backgroundColor = color
-    body.style.backgroundColor = color
+    startContainer.style.transition = `background-color ${BACKGROUND_TRANSITION}ms ease`;
+    body.style.transition = `background-color ${BACKGROUND_TRANSITION}ms ease`;
+    startContainer.style.backgroundColor = color;
+    body.style.backgroundColor = color;
   }
-}
+};
 
 const closeModal = () => {
   // 배경색 변경과 카메라 몸통 퇴장을 동시에 실행
-  updateBackgroundColors(originalColor.value)
-  
+  updateBackgroundColors(originalColor.value);
+
   // 배경색 변경과 카메라 몸통 퇴장이 완료된 후 모달 닫기
   setTimeout(() => {
-    isModalOpen.value = false
-  }, TRANSITION_DURATION)  // 약간의 여유 시간 추가
-}
+    isModalOpen.value = false;
+  }, TRANSITION_DURATION); // 약간의 여유 시간 추가
+};
 
 // onMounted 훅 추가
 onMounted(() => {
-  const startContainer = document.querySelector('.start-container')
-  originalColor.value = startContainer.style.backgroundColor
-})
+  const startContainer = document.querySelector(".start-container");
+  originalColor.value = startContainer.style.backgroundColor;
+});
 
 // 측정 완료
 const completeMeasurement = () => {
   // 1. 플래시 효과 추가
-  const flash = document.createElement('div')
-  flash.className = 'camera-flash'
-  document.querySelector('.camera-body').appendChild(flash)
-  
-  // 2. 플래시 효과 후 배경색 변경과 카메라 몸통 퇴장
-  setTimeout(() => {
-    updateBackgroundColors(originalColor.value)
-    flash.remove()
-    
-    // 3. 모달창 퇴장과 측정 완료 상태 변경
-    setTimeout(() => {
-      isModalOpen.value = false
-      measurementComplete.value = true
-    }, TRANSITION_DURATION)
-  }, 300) // 플래시 지속 시간
-}
+  const flash = document.createElement("div");
+  flash.className = "camera-flash";
+  document.querySelector(".camera-body").appendChild(flash);
 
+  // 2. 플래시 효과 후 배경색 변경과 카메라 몸통 퇴장
+  setTimeout(async () => {
+    updateBackgroundColors(originalColor.value);
+    flash.remove();
+
+    // 3. 모달창 퇴장과 측정 완료 상태 변경
+    setTimeout(async () => {
+      isModalOpen.value = false;
+      measurementComplete.value = true;
+      await nextTick();
+      goToRecommend();
+    }, TRANSITION_DURATION);
+  }, 300); // 플래시 지속 시간
+};
 </script>
 
 <style scoped>
@@ -133,7 +148,7 @@ const completeMeasurement = () => {
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity var(--transition-duration) ease,
-              transform var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
+    transform var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modal-enter-from {
@@ -161,7 +176,8 @@ const completeMeasurement = () => {
   justify-content: center;
   align-items: center;
   position: relative;
-  transition: background-color var(--transition-duration) ease var(--delay-duration);
+  transition: background-color var(--transition-duration) ease
+    var(--delay-duration);
 }
 
 /* 카메라 몸통 스타일링 */
@@ -176,14 +192,12 @@ const completeMeasurement = () => {
   border-radius: 20px;
   border: 2px solid #444;
   overflow: hidden;
-  box-shadow: 
-    inset 0 0 50px rgba(0, 0, 0, 0.5),
-    0 10px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5), 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
 /* 카메라 장식 요소 */
 .camera-body::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 20px;
   right: 30px;
@@ -191,13 +205,11 @@ const completeMeasurement = () => {
   height: 60px;
   background: #222;
   border-radius: 50%;
-  box-shadow: 
-    inset 0 0 10px rgba(0, 0, 0, 0.8),
-    0 0 0 2px #444;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8), 0 0 0 2px #444;
 }
 
 .camera-body::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 40px;
   left: 40px;
@@ -208,7 +220,7 @@ const completeMeasurement = () => {
 }
 
 .camera-body .shutter-button {
-  content: '';
+  content: "";
   position: absolute;
   top: 30px;
   right: 150px;
@@ -217,15 +229,13 @@ const completeMeasurement = () => {
   background: #555;
   border-radius: 50%;
   border: 2px solid #666;
-  box-shadow: 
-    inset 0 0 10px rgba(0, 0, 0, 0.5),
-    0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
   cursor: pointer;
 }
 
 /* 플래시 창 추가 */
 .camera-body .flash-window {
-  content: '';
+  content: "";
   position: absolute;
   top: 25px;
   left: 200px;
@@ -234,8 +244,7 @@ const completeMeasurement = () => {
   background: linear-gradient(145deg, #ffffff, #e0e0e0);
   border-radius: 4px;
   border: 2px solid #444;
-  box-shadow: 
-    inset 0 0 15px rgba(255, 255, 255, 0.8),
+  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.8),
     0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
@@ -300,9 +309,7 @@ const completeMeasurement = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 
-    inset 0 0 50px rgba(0, 0, 0, 0.1),
-    0 10px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.2);
   transform-style: preserve-3d;
   perspective: 1000px;
   transition: transform 0.3s ease;
@@ -311,9 +318,7 @@ const completeMeasurement = () => {
 
 .circle:hover {
   transform: translateY(-5px);
-  box-shadow: 
-    inset 0 0 60px rgba(0, 0, 0, 0.15),
-    0 15px 25px rgba(0, 0, 0, 0.3),
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.15), 0 15px 25px rgba(0, 0, 0, 0.3),
     0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -337,7 +342,7 @@ const completeMeasurement = () => {
 
 .measure-button:hover {
   transform: scale(1.1);
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .start-button {
@@ -360,7 +365,7 @@ const completeMeasurement = () => {
 }
 
 /* rainbow-shadow 클래스가 활성화될 때 start-button 스타일 */
-.rainbow-shadow .start-button {
+/* .rainbow-shadow .start-button {
   background: linear-gradient(
     to right,
     #ff0000,
@@ -374,11 +379,15 @@ const completeMeasurement = () => {
   background-clip: text;
   color: transparent;
   animation: gradient-shift 5s linear infinite;
-}
+} */
 
 @keyframes gradient-shift {
-  0% { background-position: 0% center; }
-  100% { background-position: 200% center; }
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
 }
 
 /* 트랜지션 효과 */
@@ -392,18 +401,28 @@ const completeMeasurement = () => {
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes glow {
-  0% { opacity: 0.8; }
-  50% { 
+  0% {
+    opacity: 0.8;
+  }
+  50% {
     opacity: 1;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
   }
-  100% { opacity: 0.8; }
+  100% {
+    opacity: 0.8;
+  }
 }
 
 /* 버튼 트랜지션 */
@@ -421,9 +440,7 @@ const completeMeasurement = () => {
 /* 호버 효과 개선 */
 .circle.hover-effect:hover {
   transform: translateY(-5px);
-  box-shadow: 
-    inset 0 0 60px rgba(0, 0, 0, 0.15),
-    0 15px 25px rgba(0, 0, 0, 0.3),
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.15), 0 15px 25px rgba(0, 0, 0, 0.3),
     0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -439,41 +456,31 @@ const completeMeasurement = () => {
 } */
 
 /* rainbow-shadow 클래스가 활성화될 때 start-button 스타일 */
-.rainbow-shadow .start-button {
-  background: linear-gradient(
-    to right,
-    #ff0000,
-    #ff8000,
-    #ffff00,
-    #00ff00,
-    #0000ff,
-    #ff0000
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: rotate-colors 5s linear infinite;
-}
 
-.rainbow-shadow {
+/* .rainbow-shadow {
   border: 4px solid transparent;
   background-image: linear-gradient(white, white),
-                   linear-gradient(to right,
-                     #ff0000,
-                     #ff8000,
-                     #ffff00,
-                     #00ff00,
-                     #0000ff,
-                     #ff0000
-                   );
+    linear-gradient(
+      to right,
+      #ff0000,
+      #ff8000,
+      #ffff00,
+      #00ff00,
+      #0000ff,
+      #ff0000
+    );
   background-origin: border-box;
   background-clip: padding-box, border-box;
   box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
   animation: rotate-colors 5s linear infinite;
-}
+} */
 
 @keyframes rotate-colors {
-  0% { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
 }
 </style>

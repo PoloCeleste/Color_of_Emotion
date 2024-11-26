@@ -1,6 +1,11 @@
 <template>
   <div>
     <div class="camera-container">
+      <div v-if="showIntroMessages" class="camera-display">
+        <div class="intro-messages">
+          <h2>{{ currentMessage }}</h2>
+        </div>
+      </div>
       <video
         ref="videoElement"
         class="camera-display"
@@ -78,27 +83,12 @@
         </div>
       </div>
     </div>
-
-    <p
-      class="emotion-text"
-      :style="{
-        color: showIntroMessages ? 'black' : 'white',
-      }"
-    >
-      {{
-        showIntroMessages
-          ? "측정 준비중"
-          : emotions
-          ? `측정중 (${Math.round(measurementProgress)}%)`
-          : ""
-      }}
-    </p>
   </div>
 </template>
 
 <script setup>
-// import { defineEmits } from "vue";
-import { ref, onUnmounted, computed } from "vue";
+import { defineEmits } from "vue";
+import { ref, onUnmounted, computed, onMounted } from "vue";
 
 const videoElement = ref(null);
 const canvasElement = ref(null);
@@ -122,6 +112,12 @@ const result = ref(null);
 
 const showIntroMessages = ref(false);
 const currentMessage = ref("");
+
+onMounted(() => {
+  const startMessage = ["안녕", "여길 봐", "3... 2... 1...", ""];
+  showMessages(startMessage, false);
+});
+
 const messages = [
   "카메라를 통해 감정을 측정합니다",
   "편안한 자세로 정면을 바라봐주세요",
@@ -134,7 +130,7 @@ const display_flag = ref(false);
 const measurementProgress = ref(0);
 const isFaceDetected = ref(false);
 // 메세지 보여주기 및 2차 플래그 전송
-const showMessages = async () => {
+const showMessages = async (messages, flag) => {
   // currentMessage.value = "준비하세요...";
   showIntroMessages.value = true;
   let messageIndex = 0;
@@ -143,7 +139,7 @@ const showMessages = async () => {
     if (messageIndex < messages.length) {
       currentMessage.value = messages[messageIndex];
       messageIndex++;
-    } else {
+    } else if (flag) {
       setTimeout(() => {
         if (analyzing.value) {
           isSecondPhase.value = true;
@@ -155,9 +151,12 @@ const showMessages = async () => {
           );
         }
       }, 1000);
-
       clearInterval(messageInterval);
       showIntroMessages.value = false;
+    } else {
+      clearInterval(messageInterval);
+      showIntroMessages.value = false;
+      startStreaming();
     }
   }, 1000);
 };
@@ -166,7 +165,7 @@ const firstPhaseFrameCount = ref(0); // 1차 촬영 프레임 수
 const secondPhaseFrameCount = ref(0); // 2차 촬영 프레임 수
 const isSecondPhase = ref(false); // 2차 촬영 진행 여부
 
-// const emit = defineEmits(["emotion-detected", "auto-close"]);
+const emit = defineEmits(["measurement-complete"]);
 
 // 최종 결과 저장 및 카메라 종료
 const handleAnalysisResult = (analysisResult) => {
@@ -177,6 +176,7 @@ const handleAnalysisResult = (analysisResult) => {
   // 결과 표시
   result.value = analysisResult;
   buttonText.value = "측정 완료";
+  emit("measurement-complete", analysisResult);
 };
 
 // 진행도 계산 함수
@@ -230,14 +230,12 @@ const startStreaming = async () => {
       display_flag.value = true;
       setTimeout(() => {
         display_flag.value = false;
-        const context = canvasElement.value.getContext("2d");
-        const width = videoElement.value.width;
-        const height = videoElement.value.height;
         const delay = 100;
         const jpegQuality = 0.7;
 
         const URL = process.env.VUE_APP_API_URL;
         // const URL = "192.168.31.207:8000";
+        // const URL = "192.168.201.124:8000";
 
         ws.value = new WebSocket(`ws://${URL}/ws/stream/`);
 
@@ -248,7 +246,7 @@ const startStreaming = async () => {
               type: "start_analysis",
             })
           );
-          showMessages();
+          showMessages(messages, true);
         };
 
         ws.value.onmessage = (event) => {
@@ -282,6 +280,9 @@ const startStreaming = async () => {
             clearInterval(intervalId.value);
             return;
           }
+          const context = canvasElement.value.getContext("2d");
+          const width = videoElement.value.width;
+          const height = videoElement.value.height;
 
           frameCount.value++;
 
@@ -417,6 +418,7 @@ img {
   display: flex; /* 추가 */
   justify-content: center; /* 추가 */
   align-items: center; /* 추가 */
+  color: rgba(255, 245, 238, 0.795);
 }
 
 button {

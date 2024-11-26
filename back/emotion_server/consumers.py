@@ -1,19 +1,15 @@
-﻿import asyncio, base64, time
-import cv2
-import numpy as np
-from channels.generic.websocket import AsyncWebsocketConsumer
+﻿from channels.generic.websocket import AsyncWebsocketConsumer
+import asyncio, base64, time, cv2, torch, json
+from sklearn.preprocessing import RobustScaler
 from channels.exceptions import StopConsumer
-from PIL import Image, ImageFont, ImageDraw
-from os import path as pth, getcwd
-import torch, json
-import torch.nn as nn
-import torch.nn.functional as F
 import torchvision.transforms as tt
+from os import path as pth, getcwd
+import torch.nn.functional as F
+from scipy import stats
 from .models import *
-
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
+
 
 emotion={
     'Joy':1,
@@ -33,6 +29,16 @@ display_color = (86, 189, 246)
 
 model=None
 face_classifier=None
+
+def remove_outliers_iqr(df):
+    # 각 열에 대해 IQR 계산
+    Q1 = df.quantile(0.25)
+    Q3 = df.quantile(0.75)
+    IQR = Q3 - Q1
+    
+    # IQR 범위 밖의 데이터를 이상치로 간주하고 제거
+    df_filtered = df[~((df < (Q1 - 1.5 * IQR)) | (df > (Q3 + 1.5 * IQR))).any(axis=1)]
+    return df_filtered
 
 def load_model():
     global model, face_classifier
@@ -60,6 +66,9 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         self.first_analysis_result={}
         self.second_analysis_result={}
         self.final_analysis_result={}
+        self.emotion_time_series = []
+        self.face_landmarks = []
+        self.lighting_conditions = []
     
     async def connect(self):
         self.loop = asyncio.get_running_loop()
@@ -142,14 +151,15 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         if frame is None:
             return None, None
 
+        frame = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_classifier.detectMultiScale(gray, 1.3, 5)
         label = ''
         domination = False
         prob = ''
         emotion_data = ''
-        # label_position = (90, 10)
-        
+
+        frame = cv2.GaussianBlur(frame, (5, 5), 0)
         display_color = (255, 161, 54)
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x+w, y+h), display_color, 2)
@@ -162,15 +172,15 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
                 roi = tt.ToTensor()(roi).unsqueeze(0)
 
                 tensor = self.emotion_model(roi)
-                probs = {class_labels[i]: round(prob, 2) for i, prob in enumerate(F.softmax(tensor, dim=1).detach().numpy()[0] * 100)}
-                # pred = torch.max(tensor, dim=1)[1].tolist()
-                # label = class_labels[pred[0]]
+                probs = F.softmax(tensor, dim=1).detach().numpy()[0] * 100
+                self.emotion_time_series.append({
+                    'timestamp': time.time(),
+                    'emotions': {class_labels[i]: float(prob) for i, prob in enumerate(probs)}
+                })
                 prob = {}
-                for p in probs.keys():
-                    prob[p] = round(float(probs[p]), 2)
-                # if p == label:
-                #     domination = {label: prob[label]}
-                # print(label)
+                for i, p in enumerate(probs):
+                    prob[class_labels[i]] = round(float(p), 2)
+
                 # print(prob)
                 label = "Face Detected"
                 flag = True
@@ -180,13 +190,6 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
                 label = 'No Face Found'
                 display_color = (0, 255, 0)
                 flag = False
-
-        # font_path = pth.join(getcwd(), assets, 'NotoSansKR-Regular.otf')
-        # font = ImageFont.truetype(font_path, 32)
-        # img_pil = Image.fromarray(frame)
-        # draw = ImageDraw.Draw(img_pil)
-        # draw.text(label_position, label, font=font, fill=display_color)
-        # frame = np.array(img_pil)
 
         # 프레임을 base64로 인코딩
         _, buffer = cv2.imencode('.jpg', frame)
@@ -214,10 +217,11 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         
         # 데이터프레임 생성
         df = pd.DataFrame(valid_data)
+        df_filtered = remove_outliers_iqr(df)
         
-        # MinMaxScaler를 사용하여 정규화
-        scaler = MinMaxScaler()
-        normalized_data = scaler.fit_transform(df)
+        # RobustScaler를 사용하여 정규화
+        scaler = RobustScaler()
+        normalized_data = scaler.fit_transform(df_filtered)
         df_normalized = pd.DataFrame(normalized_data, columns=df.columns)
         
         # 정규화된 데이터의 평균과 표준편차 계산
@@ -227,7 +231,8 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         return {
             'normalized_means': normalized_means.to_dict(),
             'standard_deviation': normalized_std.to_dict(),
-            'total_frames': len(valid_data)
+            'total_frames': len(valid_data),
+            'raw_data': df.to_dict(orient='list')
         }
 
     async def process_second_results(self, second_phase_data):
@@ -243,10 +248,11 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         
         # 데이터프레임 생성
         df = pd.DataFrame(valid_data)
+        df_filtered = remove_outliers_iqr(df)
         
-        # MinMaxScaler를 사용하여 정규화
-        scaler = MinMaxScaler()
-        normalized_data = scaler.fit_transform(df)
+        # RobustScaler를 사용하여 정규화
+        scaler = RobustScaler()
+        normalized_data = scaler.fit_transform(df_filtered)
         df_normalized = pd.DataFrame(normalized_data, columns=df.columns)
         
         # 정규화된 데이터의 평균과 표준편차 계산
@@ -256,30 +262,45 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         return {
             'normalized_means': normalized_means.to_dict(),
             'standard_deviation': normalized_std.to_dict(),
-            'total_frames': len(valid_data)
+            'total_frames': len(valid_data),
+            'raw_data': df.to_dict(orient='list')
         }
-
-    async def process_final_results(self, first_analysis_result, second_analysis_result):
-        """두 단계의 감정 변화 분석 및 주/부감정 선정"""
-        if not first_analysis_result or not second_analysis_result:
-            return {
-                'status': 'error',
-                'message': '분석에 필요한 데이터가 부족합니다.'
-            }
         
-        # 감정 변화량 계산 (2차 - 1차)
+    async def process_final_results(self, first_analysis_result, second_analysis_result):
+        if not first_analysis_result or not second_analysis_result:
+            return {'error': '분석에 필요한 데이터가 부족합니다.'}
+
+        # 감정 변화량 및 통계적 유의성 계산
         emotion_changes = {}
+        significant_changes = {}
         for emotion in class_labels:
             first_value = first_analysis_result['normalized_means'].get(emotion, 0)
             second_value = second_analysis_result['normalized_means'].get(emotion, 0)
-            emotion_changes[emotion] = round(second_value - first_value, 2)
-        
-        # 양수 변화량만 필터링하고 내림차순 정렬
-        positive_changes = {k: v for k, v in emotion_changes.items() if v > 0}
-        sorted_changes = sorted(positive_changes.items(), key=lambda x: x[1], reverse=True)
-        
+            change = round(second_value - first_value, 2)
+            emotion_changes[emotion] = change
+
+            # 통계적 유의성 검정 (t-test 사용)
+            t_statistic, p_value = stats.ttest_ind(
+                first_analysis_result['raw_data'][emotion],
+                second_analysis_result['raw_data'][emotion]
+            )
+            if p_value < 0.05:  # 유의수준 0.05
+                significant_changes[emotion] = change
+
+        # 감정 변화량의 절대값과 현재 강도를 고려한 점수 계산
+        emotion_scores = {}
+        for emotion, change in emotion_changes.items():
+            current_intensity = second_analysis_result['normalized_means'].get(emotion, 0)
+            score = abs(change) * (1 + current_intensity)  # 변화량과 현재 강도를 모두 고려
+            emotion_scores[emotion] = round(score, 2)
+
+        # 점수에 따라 정렬
+        sorted_emotions = sorted(emotion_scores.items(), key=lambda x: x[1], reverse=True)
+
         result = {
             'emotion_changes': emotion_changes,
+            'significant_changes': significant_changes,
+            'emotion_scores': emotion_scores,
             'first_phase_std': first_analysis_result['standard_deviation'],
             'second_phase_std': second_analysis_result['standard_deviation'],
             'frames_analyzed': {
@@ -287,237 +308,25 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
                 'second_phase': second_analysis_result['total_frames']
             }
         }
-        
-        # 주감정 선정 (변화량이 가장 큰 양수 값)
-        if sorted_changes:
-            result['primary_emotion'] = {
-                sorted_changes[0][0]: sorted_changes[0][1]
-            }
-            
-            # 부감정 선정 (변화량이 양수인 것 중 상위 2개)
-            if len(sorted_changes) > 1:
-                secondary_emotions = []
-                for emotion, value in sorted_changes[1:3]:
-                    secondary_emotions.append({emotion: value})
-                if secondary_emotions:
-                    result['secondary_emotions'] = secondary_emotions
-        
+
+        # 주감정 선정 (점수가 가장 높고 통계적으로 유의한 변화)
+        for emotion, score in sorted_emotions:
+            if emotion in significant_changes:
+                result['primary_emotion'] = {emotion: score}
+                break
+
+        # 부감정 선정 (주감정 점수의 60% 이상이면서 통계적으로 유의한 변화, 최대 2개)
+        if 'primary_emotion' in result:
+            primary_emotion = list(result['primary_emotion'].keys())[0]
+            primary_score = list(result['primary_emotion'].values())[0]
+            threshold = primary_score * 0.4
+            secondary_emotions = []
+            for emotion, score in sorted_emotions:
+                if emotion != primary_emotion and score >= threshold and emotion in significant_changes:
+                    secondary_emotions.append({emotion: score})
+                if len(secondary_emotions) == 2:
+                    break
+            if secondary_emotions:
+                result['secondary_emotions'] = secondary_emotions
+
         return result
-
-'''
-
-
-    async def process_first_results(self, first_phase_data):
-        """첫 번째 단계의 감정 데이터 정규화"""
-        if not first_phase_data:
-            return {}
-        
-        # 감정 데이터 누적
-        emotion_sums = {
-            'Joy': 0, 'Embarrassment': 0, 'Anger': 0,
-            'Anxiety': 0, 'Pain': 0, 'Sadness': 0, 'Neutral': 0
-        }
-        
-        total_frames = len(first_phase_data)
-        
-        for data in first_phase_data:
-            if data and 'emotion' in data:
-                emotions = data['emotion']
-                for emotion, value in emotions.items():
-                    emotion_sums[emotion] += value
-        
-        # 정규화된 감정값 계산 (평균)
-        if total_frames > 0:
-            normalized_emotions = {
-                emotion: round(value/total_frames, 2)
-                for emotion, value in emotion_sums.items()
-            }
-            return normalized_emotions
-        return {}
-
-    async def process_second_results(self, second_phase_data):
-        """두 번째 단계의 감정 데이터 정규화"""
-        if not second_phase_data:
-            return {}
-        
-        # 감정 데이터 누적
-        emotion_sums = {
-            'Joy': 0, 'Embarrassment': 0, 'Anger': 0,
-            'Anxiety': 0, 'Pain': 0, 'Sadness': 0, 'Neutral': 0
-        }
-        
-        total_frames = len(second_phase_data)
-        
-        for data in second_phase_data:
-            if data and 'emotion' in data:
-                emotions = data['emotion']
-                for emotion, value in emotions.items():
-                    emotion_sums[emotion] += value
-        
-        # 정규화된 감정값 계산 (평균)
-        if total_frames > 0:
-            normalized_emotions = {
-                emotion: round(value/total_frames, 2)
-                for emotion, value in emotion_sums.items()
-            }
-            return normalized_emotions
-        return {}
-
-    async def process_final_results(self, first_analysis_result, second_analysis_result):
-        """두 단계의 감정 데이터를 비교하여 주감정과 부감정을 추출"""
-        if not first_analysis_result or not second_analysis_result:
-            return {
-                'status': 'error',
-                'message': '분석에 필요한 데이터가 부족합니다.'
-            }
-        
-        # 모든 감정의 평균값 계산
-        emotion_averages = {}
-        for emotion in class_labels:
-            first_value = first_analysis_result.get(emotion, 0)
-            second_value = second_analysis_result.get(emotion, 0)
-            emotion_averages[emotion] = round((first_value + second_value) / 2, 2)
-        
-        # 감정값들을 내림차순으로 정렬
-        sorted_emotions = sorted(emotion_averages.items(), key=lambda x: x[1], reverse=True)
-        
-        result = {
-            'primary_emotion': {
-                'emotion': sorted_emotions[0][0],
-                'value': sorted_emotions[0][1]
-            }
-        }
-        
-        # 부감정 추출 (상위 2개까지, 임계값 20% 이상인 경우만)
-        secondary_emotions = []
-        for emotion, value in sorted_emotions[1:3]:
-            if value >= sorted_emotions[0][1]*0.5:  # 임계값 설정
-                secondary_emotions.append({
-                    'emotion': emotion,
-                    'value': value
-                })
-        
-        if secondary_emotions:
-            result['secondary_emotions'] = secondary_emotions
-        
-        return result
-'''
-'''
-    async def process_first_results(self, first_phase_data):
-        """첫 번째 단계의 감정 데이터 처리"""
-        if not first_phase_data:
-            return {}
-        
-        # 감정별 데이터 누적
-        emotion_counts = {label: 0 for label in class_labels}
-        total_frames = 0
-        dominant_emotions = []
-        
-        for data in first_phase_data:
-            if data and 'emotion' in data:
-                emotions = data['emotion']
-                for emotion, value in emotions.items():
-                    emotion_counts[emotion] += value
-                if 'domination' in data:
-                    dominant_emotions.append(list(data['domination'].keys())[0])
-                total_frames += 1
-        
-        if total_frames > 0:
-            # 각 감정의 평균값 계산
-            avg_emotions = {
-                emotion: round(count/total_frames, 2) 
-                for emotion, count in emotion_counts.items()
-            }
-            
-            # 가장 많이 감지된 지배적 감정 찾기
-            if dominant_emotions:
-                from collections import Counter
-                most_common = Counter(dominant_emotions).most_common(1)[0]
-                main_emotion = {most_common[0]: round(most_common[1]/total_frames * 100, 2)}
-            else:
-                main_emotion = {}
-            
-            return {
-                'main_emotion': main_emotion,
-                'average_emotions': avg_emotions,
-                'total_frames': total_frames
-            }
-        return {}
-
-    async def process_second_results(self, second_phase_data):
-        """두 번째 단계의 감정 데이터 처리"""
-        if not second_phase_data:
-            return {}
-        
-        # 첫 번째 단계와 동일한 처리 로직 사용
-        emotion_counts = {label: 0 for label in class_labels}
-        total_frames = 0
-        dominant_emotions = []
-        
-        for data in second_phase_data:
-            if data and 'emotion' in data:
-                emotions = data['emotion']
-                for emotion, value in emotions.items():
-                    emotion_counts[emotion] += value
-                if 'domination' in data:
-                    dominant_emotions.append(list(data['domination'].keys())[0])
-                total_frames += 1
-        
-        if total_frames > 0:
-            avg_emotions = {
-                emotion: round(count/total_frames, 2) 
-                for emotion, count in emotion_counts.items()
-            }
-            
-            if dominant_emotions:
-                from collections import Counter
-                most_common = Counter(dominant_emotions).most_common(1)[0]
-                main_emotion = {most_common[0]: round(most_common[1]/total_frames * 100, 2)}
-            else:
-                main_emotion = {}
-                
-            return {
-                'main_emotion': main_emotion,
-                'average_emotions': avg_emotions,
-                'total_frames': total_frames
-            }
-        return {}
-
-    async def process_final_results(self, first_analysis_result, second_analysis_result):
-        """두 단계의 분석 결과를 비교하여 최종 결과 생성"""
-        if not first_analysis_result or not second_analysis_result:
-            return {
-                'status': 'error',
-                'message': '분석에 필요한 데이터가 부족합니다.'
-            }
-        
-        # 감정 변화량 계산
-        emotion_changes = {}
-        for emotion in class_labels:
-            first_value = first_analysis_result['average_emotions'].get(emotion, 0)
-            second_value = second_analysis_result['average_emotions'].get(emotion, 0)
-            emotion_changes[emotion] = round(second_value - first_value, 2)
-        
-        # 가장 큰 변화를 보인 감정 찾기
-        max_change_emotion = max(emotion_changes.items(), key=lambda x: abs(x[1]))
-        
-        return {
-            'first_phase': {
-                'main_emotion': first_analysis_result['main_emotion'],
-                'emotions': first_analysis_result['average_emotions']
-            },
-            'second_phase': {
-                'main_emotion': second_analysis_result['main_emotion'],
-                'emotions': second_analysis_result['average_emotions']
-            },
-            'emotion_changes': emotion_changes,
-            'most_changed_emotion': {
-                'emotion': max_change_emotion[0],
-                'change': max_change_emotion[1]
-            },
-            'frames_analyzed': {
-                'first_phase': first_analysis_result['total_frames'],
-                'second_phase': second_analysis_result['total_frames']
-            }
-        }
-'''
