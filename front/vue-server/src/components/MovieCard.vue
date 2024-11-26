@@ -1,12 +1,10 @@
 <template>
   <div class="movie-cards">
     <div
-      v-for="(movie, idx) in selectedMovies"
+      v-for="(movie) in selectedMovies"
       :key="movie.id"
       class="movie-card"
-      :class="{ 'is-active': movie.isActive }"
-      @click="updateCard(idx)"
-      :data-card="true"
+      @click="openModal(movie)"
     >
       <div class="movie-card__inner" ref="cardInners">
         <div class="movie-card__image">
@@ -14,138 +12,48 @@
         </div>
       </div>
     </div>
-    <div class="modal-overlay" v-if="anyCardActive" @click="closeModal"></div>
-    <div class="content">
-      <div
-        v-for="movie in selectedMovies"
-        :key="movie.id"
-        class="content__group"
-        v-show="movie.isActive"
-      >
-        <div class="modal-content" @click="closeModal">
-          <button class="close-button">×</button>
-          <div class="modal-info">
-            <h2 class="content__heading">{{ movie.title }}</h2>
-            <span class="content__category">{{
-              movie.genre_ids.join(", ")
-            }}</span>
-            <p class="content__description">{{ movie.overview }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <CardModal
+      v-if="selectedMovie"
+      :movie="selectedMovie"
+      @close="closeModal"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, defineProps, onMounted } from "vue";
+import { ref, watch } from "vue";
 import { useMovieStore } from "@/store/stores";
-import { gsap } from "gsap";
-import { Flip } from "gsap/Flip";
-
-gsap.registerPlugin(Flip);
+import CardModal from "./CardModal.vue";
 
 const movieStore = useMovieStore();
-const cardInners = ref([]);
-const isBackgroundAnimationComplete = ref(false);
-const props = defineProps({
-  isAnimating: Boolean,
-});
-
-watch(
-  () => props.isAnimating,
-  (newValue) => {
-    if (!newValue) {
-      setTimeout(() => {
-        isBackgroundAnimationComplete.value = true;
-      }, 500);
-    }
-  }
-);
-
-const anyCardActive = computed(() => {
-  return selectedMovies.value.some((movie) => movie.isActive);
-});
-
 const selectedMovies = ref([]);
+const selectedMovie = ref(null);
 
 watch(
   () => movieStore.recommendedMovies,
   (newMovies) => {
-    selectedMovies.value = newMovies.slice(48, 51).map((movie) => ({
-      ...movie,
-      isActive: false,
-    }));
+    selectedMovies.value = newMovies.slice(48, 51);
   },
   { immediate: true }
 );
 
-const updateCard = (idx) => {
-  const card = cardInners.value[idx];
-  if (Flip.isFlipping(card)) return;
-
-  const cardState = Flip.getState(card, {
-    props: "box-shadow, border-radius",
-  });
-  const image = card.querySelector(".movie-card__image");
-  const imageState = Flip.getState(image);
-
-  selectedMovies.value[idx].isActive = !selectedMovies.value[idx].isActive;
-  const active = selectedMovies.value[idx].isActive;
-
-  const duration = active ? 0.7 : 0.5;
-  const ease = "quint.out";
-
-  const cardContent = document.querySelectorAll(".content__group")[idx];
-
-  gsap.killTweensOf(cardContent);
-  gsap.to(cardContent, {
-    duration: active ? 1 : 0.2,
-    ease: "expo.out",
-    stagger: 0.1,
-    alpha: active ? 1 : 0,
-    y: active ? 0 : 20,
-    delay: active ? 0.4 : 0,
-  });
-  Flip.from(cardState, {
-    duration: duration,
-    ease: ease,
-    absolute: true,
-    zIndex: 1,
-  });
-
-  Flip.from(imageState, {
-    duration: duration,
-    absolute: true,
-    ease: ease,
-    simple: true,
-  });
+const openModal = (movie) => {
+  selectedMovie.value = movie;
 };
 
 const closeModal = () => {
-  selectedMovies.value = selectedMovies.value.map((movie) => ({
-    ...movie,
-    isActive: false,
-  }));
+  selectedMovie.value = null;
 };
-
-onMounted(() => {
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && anyCardActive.value) {
-      closeModal();
-    }
-  });
-});
 </script>
 
 <style scoped>
 .movie-cards {
   margin: auto 0;
   width: 90%;
-  max-width: 1200px;
+  max-width: 1560px; /* 1200px에서 1800px로 증가 */
   display: flex;
   justify-content: center;
-  gap: 2rem;
+  gap: 3rem; /* 2rem에서 3rem으로 증가하여 카드 간 간격 확대 */
 }
 
 @keyframes fadeIn {
@@ -160,9 +68,9 @@ onMounted(() => {
 .movie-card {
   cursor: pointer;
   flex: 0 0 auto;
-  width: 300px;
-  height: 400px;
-  margin: 10px;
+  width: 390px; /* 300px에서 450px로 1.5배 증가 */
+  height: 520px; /* 400px에서 600px로 1.5배 증가 */
+  margin: 15px; /* 10px에서 15px로 증가 */
   transition: transform 0.3s ease;
 }
 
