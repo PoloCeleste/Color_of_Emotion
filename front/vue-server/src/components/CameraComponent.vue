@@ -166,7 +166,7 @@ const secondPhaseFrameCount = ref(0); // 2차 촬영 프레임 수
 const isSecondPhase = ref(false); // 2차 촬영 진행 여부
 
 const emit = defineEmits(["measurement-complete"]);
-import { useMovieStore } from "@/stores/movieStore";
+import { useMovieStore } from "@/store/stores";
 
 const movieStore = useMovieStore();
 

@@ -20,7 +20,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import FilmAnimation from "@/components/FilmAnimation.vue";
-import { useMovieStore } from "@/stores/movieStore";
+import { useMovieStore } from "@/store/stores";
 
 const showFilm = ref(false);
 const store = useMovieStore();
