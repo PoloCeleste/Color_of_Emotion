@@ -13,7 +13,10 @@
         <div class="side" :class="{ expanded: isSideExpanded }"></div>
         <div class="film" :class="{ 'move-right': isSideExpanded }"></div>
       </div>
-      <div class="black-overlay" :class="{ visible: isExpanded, expand: isExpanded }">
+      <div
+        class="black-overlay"
+        :class="{ visible: isExpanded, expand: isExpanded }"
+      >
         <div class="text-box">
           <div>주감정: {{ primaryEmotion }}</div>
           <div v-if="secondaryEmotions.length">
@@ -36,8 +39,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, defineProps } from 'vue';
-import MovieCard from '@/components/MovieCard.vue';
+import { ref, computed, onMounted, defineProps } from "vue";
+import MovieCard from "@/components/MovieCard.vue";
 
 defineProps({
   movies: {
@@ -53,36 +56,25 @@ const isSideExpanded = ref(false);
 const expansionComplete = ref(false);
 const emotionData = ref(null);
 
-// const getEmotionId = (emotionName) => {
-//   const emotionMap = {
-//     Joy: 1,
-//     Sadness: 2,
-//     Anger: 3,
-//     Embarrassment: 4,
-//     Anxiety: 5,
-//     Pain: 6,
-//     Neutral: 7,
-//   };
-//   return emotionMap[emotionName];
-// };
-
 const primaryEmotion = computed(() => {
   if (emotionData.value && emotionData.value.primary_emotion) {
     return Object.keys(emotionData.value.primary_emotion)[0];
   }
-  return '';
+  return "";
 });
 
 const secondaryEmotions = computed(() => {
   if (emotionData.value && emotionData.value.secondary_emotions) {
-    return emotionData.value.secondary_emotions.map(emotion => Object.keys(emotion)[0]);
+    return emotionData.value.secondary_emotions.map(
+      (emotion) => Object.keys(emotion)[0]
+    );
   }
   return [];
 });
 
 const startAnimation = () => {
   animationStarted.value = true;
-  
+
   setTimeout(() => {
     isRotated.value = true;
   }, 1500);
@@ -133,9 +125,7 @@ onMounted(() => {
   border-radius: 50%;
   background: linear-gradient(145deg, #f0f0f0, #ffffff);
   border: 2px solid darkgray;
-  box-shadow: 
-    inset 0 0 50px rgba(0, 0, 0, 0.1),
-    0 10px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.2);
   transform-style: preserve-3d;
   perspective: 1000px;
   transition: all 0.3s ease;

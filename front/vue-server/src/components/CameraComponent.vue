@@ -166,11 +166,15 @@ const secondPhaseFrameCount = ref(0); // 2차 촬영 프레임 수
 const isSecondPhase = ref(false); // 2차 촬영 진행 여부
 
 const emit = defineEmits(["measurement-complete"]);
+import { useMovieStore } from "@/stores/movieStore";
+
+const movieStore = useMovieStore();
 
 // 최종 결과 저장 및 카메라 종료
 const handleAnalysisResult = (analysisResult) => {
   // 분석 결과를 localStorage에 저장
   localStorage.setItem("emotionAnalysis", JSON.stringify(analysisResult));
+  movieStore.setEmotionData(analysisResult);
   // 스트림 정지
   stopStreaming();
   // 결과 표시

@@ -2,21 +2,16 @@
   <div class="about">
     <Transition name="fade">
       <div class="circle-container" v-if="!showFilm" @click="startAnimation">
-        <div
-          class="circle"
-          :class="{
-            'hover-effect': !isModalOpen,
-          }"
-        >
+        <div class="circle">
           <h1>START</h1>
         </div>
       </div>
     </Transition>
     <Transition name="fade">
       <FilmAnimation
-        v-if="showFilm && recommendedMovies.length > 0"
-        :movies="recommendedMovies"
-        :emotionData="emotionData"
+        v-if="showFilm && store.recommendedMovies.length > 0"
+        :movies="store.recommendedMovies"
+        :emotionData="store.emotionData"
       />
     </Transition>
   </div>
@@ -25,66 +20,19 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import FilmAnimation from "@/components/FilmAnimation.vue";
-import axios from "axios";
+import { useMovieStore } from "@/stores/movieStore";
 
-const recommendedMovies = ref([]);
-const emotionData = ref(null);
-const loading = ref(false);
-const error = ref(null);
 const showFilm = ref(false);
-
-const URL = process.env.VUE_APP_API_URL;
-const api = axios.create({
-  baseURL: `http://${URL}`,
-  headers: { "Content-Type": "application/json" },
-});
-
-const getEmotionId = (emotionName) => {
-  const emotionMap = {
-    Joy: 1,
-    Sadness: 2,
-    Anger: 3,
-    Embarrassment: 4,
-    Anxiety: 5,
-    Pain: 6,
-    Neutral: 7,
-  };
-  return emotionMap[emotionName];
-};
-
-const getMovieRecommendations = async () => {
-  try {
-    loading.value = true;
-    emotionData.value = JSON.parse(localStorage.getItem("emotionAnalysis"));
-    const emotions = [];
-
-    const primaryEmotion = Object.keys(emotionData.value.primary_emotion)[0];
-    emotions.push(getEmotionId(primaryEmotion));
-
-    if (emotionData.value.secondary_emotions) {
-      emotionData.value.secondary_emotions.slice(0, 2).forEach((emotion) => {
-        emotions.push(getEmotionId(Object.keys(emotion)[0]));
-      });
-    }
-
-    const response = await api.post("/api/v1/recommend_movies/", {
-      emotions: emotions,
-    });
-    recommendedMovies.value = response.data;
-  } catch (err) {
-    error.value = "영화 추천을 가져오는 중 오류가 발생했습니다.";
-    console.error("Error:", err);
-  } finally {
-    loading.value = false;
-  }
-};
+const store = useMovieStore();
 
 const startAnimation = () => {
   showFilm.value = true;
 };
 
 onMounted(() => {
-  getMovieRecommendations();
+  if (store.emotionData) {
+    store.getMovieRecommendations();
+  }
 });
 </script>
 
