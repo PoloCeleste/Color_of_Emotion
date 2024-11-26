@@ -6,27 +6,7 @@
       <div class="side" :class="{ expanded: isSideExpanded }"></div>
       <div class="film" :class="{ 'move-right': isSideExpanded }"></div>
     </div>
-    <div
-      class="black-overlay"
-      :class="{ visible: isExpanded, expand: isExpanded }"
-    >
-      <div class="text-box">
-        <div>주감정: {{ primaryEmotion }}</div>
-        <div v-if="secondaryEmotions.length">
-          부감정: {{ secondaryEmotions.join(", ") }}
-        </div>
-      </div>
-      <div class="movie-scroll-container" v-if="expansionComplete">
-        <div class="movie-cards">
-          <MovieCard
-            v-for="(movie, index) in movies"
-            :key="movie.movie_id"
-            :movie="movie"
-            :delay="index * 0.2"
-          />
-        </div>
-      </div>
-    </div>
+    <div class="black-overlay" :class="{ 'visible': isExpanded, 'expand': isExpanded }"></div>
   </div>
 </template>
 
@@ -108,7 +88,7 @@ onMounted(() => {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: #1a1a1a;
+  background: #222;
   border-radius: 50%;
 }
 
@@ -125,21 +105,21 @@ onMounted(() => {
   position: absolute;
   width: 100%;
   height: 100px;
-  background: #1a1a1a;
+  background: #222;
   transform: rotateX(90deg) translateZ(0);
   top: calc(50% - 50px);
   right: 0;
   transform-origin: right center;
-  z-index: -1;
+  z-index: 2; /* 양수 값으로 변경 */
 }
 
 .film {
   position: absolute;
   width: 100%;
   height: 100px;
-  transform: rotateX(90deg) translateZ(0);
+  transform: rotateX(90deg) translateZ(-1px); /* Z 값을 약간 뒤로 이동 */
   top: calc(50% - 50px);
-  right: 5;
+  right: -3px;
   z-index: 1;
   opacity: 0;
   transition: opacity 1.5s ease-out;
@@ -147,8 +127,17 @@ onMounted(() => {
   /* 필름 스트립 패턴 복원 */
   --s: 8px;
   --c: #222;
-  background: conic-gradient(at 50% var(--s), var(--c) 75%, #0000 0) 0 0 /
-    calc(2 * var(--s)) calc(100% - var(--s)) padding-box;
+  background: 
+    /* 필름 구멍 패턴 */
+    radial-gradient(circle at center, transparent 30%, var(--c) 30%, var(--c) 40%, transparent 40%) 
+    0 50%/calc(2*var(--s)) 100% repeat-x,
+    /* 필름 스트립 배경 */
+    linear-gradient(90deg, 
+      var(--c) var(--s), 
+      #333 var(--s), 
+      #333 calc(100% - var(--s)), 
+      var(--c) calc(100% - var(--s))
+    );
   border: var(--s) solid var(--c);
   box-sizing: border-box;
 }
@@ -191,52 +180,21 @@ onMounted(() => {
 }
 
 .black-overlay.visible {
-  transform: translateX(-100%); /* 왼쪽으로 이동하여 화면을 덮음 */
-  --s: 20px;
-  --c: #222;
-  background: conic-gradient(at 50% var(--s), var(--c) 75%, #0000 0) 0 0 /
-    calc(2 * var(--s)) calc(100% - var(--s)) padding-box;
+  transform: translateX(-100%);
+  --s: 32px; /* 더 큰 패턴 */
+  --c: #1a1a1a;
+  background: 
+    /* 필름 구멍 패턴 */
+    radial-gradient(circle at center, transparent 30%, var(--c) 30%, var(--c) 40%, transparent 40%) 
+    0 50%/calc(2*var(--s)) 100% repeat-x,
+    /* 필름 스트립 배경 */
+    linear-gradient(90deg, 
+      var(--c) var(--s), 
+      #222 var(--s), 
+      #222 calc(100% - var(--s)), 
+      var(--c) calc(100% - var(--s))
+    );
   border: var(--s) solid var(--c);
   box-sizing: border-box;
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-}
-
-.text-box {
-  color: whitesmoke;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.movie-scroll-container {
-  width: 100%;
-  height: 60vh;
-  overflow-y: auto;
-  margin-top: 2rem;
-  padding: 0 2rem;
-}
-
-.movie-scroll-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.movie-scroll-container::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.movie-scroll-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-}
-
-.movie-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 2rem;
-  padding: 1rem;
 }
 </style>
