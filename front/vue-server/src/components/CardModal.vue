@@ -22,13 +22,12 @@
           <div v-if="movie.reviews">
             <h3>리뷰</h3>
             <div v-for="(review, index) in movie.reviews" :key="index">
-              <p v-if="showFullReviewIndex !== index && review.length > 100">
-                {{ review.substring(0, 100) }}...
-                <button @click="showFullReview(index)">더보기</button>
+              <p v-if="showFullReviewIndex !== index && review.length > 100" @click="showFullReview(index)">
+                {{ review.substring(0, 100) }}...더보기
               </p>
               <p v-else-if="showFullReviewIndex === index">
-                {{ review }}
-                <button @click="hideFullReview(index)">줄이기</button>
+                {{ review }}<br>
+                <button class="button" @click="hideFullReview(index)">줄이기</button>
               </p>
               <p v-else>{{ review }}</p>
             </div>
@@ -194,16 +193,20 @@ const prevVideo = () => {
 </script>
 
 <style scoped>
-.card-modal {
+/* 공통 스타일 */
+.card-modal, .lightbox, .video-modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.card-modal {
+  background-color: rgba(0, 0, 0, 0.8);
   z-index: 1000;
 }
 
@@ -218,19 +221,12 @@ const prevVideo = () => {
   border: whitesmoke 1px solid;
 }
 
-.card-modal__image {
+.card-modal__image, .card-modal__content {
   flex: 1;
   overflow: hidden;
 }
 
-.card-modal__image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .card-modal__content {
-  flex: 1;
   padding: 40px;
   color: white;
   display: flex;
@@ -240,6 +236,7 @@ const prevVideo = () => {
   max-height: 90vh;
 }
 
+/* 스크롤바 스타일 */
 .card-modal__content::-webkit-scrollbar {
   width: 10px;
 }
@@ -258,6 +255,7 @@ const prevVideo = () => {
   background: rgba(255, 255, 255, 0.5);
 }
 
+/* 컨텐츠 스타일 */
 .content__heading {
   font-size: 42px;
   margin-bottom: 10px;
@@ -282,48 +280,26 @@ const prevVideo = () => {
   color: #bababa;
 }
 
+/* 버튼 스타일 */
+.close-button, .nav-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
 .close-button {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: none;
-  border: none;
   font-size: 30px;
-  color: white;
-  cursor: pointer;
   z-index: 10;
-}
-
-.gallery-container,
-.video-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.gallery-item,
-.video-item {
-  width: calc(100% - 80px);
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-}
-
-.gallery-item img,
-.video-item iframe {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .nav-button {
   background: rgba(255, 255, 255, 0.3);
-  border: none;
-  color: white;
   font-size: 24px;
   padding: 10px;
-  cursor: pointer;
   transition: background 0.3s;
 }
 
@@ -331,6 +307,37 @@ const prevVideo = () => {
   background: rgba(255, 255, 255, 0.5);
 }
 
+/* 갤러리 및 비디오 컨테이너 */
+.gallery-container, .video-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding: 10px 0;
+  scroll-snap-type: x mandatory;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+.gallery-item, .video-item {
+  flex: 0 0 auto;
+  width: calc(100% - 80px);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  scroll-snap-align: start;
+}
+
+.gallery-item img, .video-item img, .video-item iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 제공자 태그 */
 .provider-container {
   display: flex;
   flex-wrap: wrap;
@@ -354,6 +361,7 @@ const prevVideo = () => {
   margin-right: 5px;
 }
 
+/* 추가 정보 링크 */
 .more-info {
   margin-top: 20px;
 }
@@ -368,17 +376,16 @@ const prevVideo = () => {
 }
 
 /* 트랜지션 애니메이션 */
-.modal-enter-active,
-.modal-leave-active {
+.modal-enter-active, .modal-leave-active {
   transition: opacity 0.3s, transform 0.3s;
 }
 
-.modal-enter-from,
-.modal-leave-to {
+.modal-enter-from, .modal-leave-to {
   opacity: 0;
   transform: scale(0.9);
 }
 
+/* 미디어 쿼리 */
 @media (max-width: 768px) {
   .card-modal__inner {
     flex-direction: column;
@@ -396,63 +403,14 @@ const prevVideo = () => {
     font-size: 32px;
   }
 
-  .gallery-item,
-  .video-item {
+  .gallery-item, .video-item {
     width: calc(50% - 10px);
   }
 }
 
-.gallery-container,
-.video-container {
-  display: flex;
-  overflow-x: auto;
-  gap: 10px;
-  padding: 10px 0;
-  scroll-snap-type: x mandatory;
-  width: 100%; /* 컨테이너 너비 제한 */
-  flex-wrap: nowrap; /* 줄바꿈 방지 */
-}
-
-.gallery-item,
-.video-item {
-  flex: 0 0 auto;
-  width: 200px;
-  height: 150px;
-  scroll-snap-align: start;
-  cursor: pointer;
-  position: relative;
-}
-
-.gallery-item img,
-.video-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.video-item .play-button {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 0;
-  height: 0;
-  border-top: 20px solid transparent;
-  border-left: 30px solid white;
-  border-bottom: 20px solid transparent;
-}
-
-.lightbox,
-.video-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+/* 라이트박스 및 비디오 모달 */
+.lightbox, .video-modal {
   background-color: rgba(0, 0, 0, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
   z-index: 2000;
 }
 
@@ -466,8 +424,102 @@ const prevVideo = () => {
   height: 80%;
 }
 
-.video-modal-content iframe {
-  width: 100%;
-  height: 100%;
+/* 1. 리뷰, 갤러리, 동영상, 보려면? 섹션에 효과 추가 */
+.card-modal__content h3 {
+  font-size: 24px;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.card-modal__content > div {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.card-modal__content > div:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-5px);
+}
+
+/* 2. 갤러리와 동영상의 가로 스크롤 제거 */
+.gallery-container, .video-container {
+  overflow-x: hidden;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+/* 3. provider 아이콘만 표시 */
+.provider-tag {
+  background: none;
+  padding: 0;
+  margin: 5px;
+}
+
+.provider-tag img {
+  width: 40px;
+  height: 40px;
+  transition: transform 0.3s ease;
+}
+
+.provider-tag img:hover {
+  transform: scale(1.1);
+}
+
+/* 4. 더 알아보기 버튼 매력적으로 꾸미기 */
+.more-info {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.more-info a {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.more-info a:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 리뷰 섹션 스타일 개선 */
+.card-modal__content div > p {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.card-modal__content div > p:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 5px 10px;
+  margin-top: 5px;
+  transition: color 0.3s ease;
+}
+
+.button:hover {
+  color: #45a049;
 }
 </style>
