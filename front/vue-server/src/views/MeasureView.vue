@@ -1,16 +1,22 @@
 <template>
   <div class="start-container">
     <div class="content-wrapper">
-      <Transition name="button" mode="out-in" appear>
+      <Transition name="button" mode="out-in">
         <div class="circle-container" @click="openModal">
           <div class="circle" :class="{ 'hover-effect': !isModalOpen }">
-            <h1 v-if="!measurementComplete" class="measure-button" :disabled="isModalOpen">
+            <h1
+              v-if="!measurementComplete"
+              class="measure-button"
+              :disabled="isModalOpen"
+            >
               Let's find your emotion
             </h1>
             <Transition name="fade" mode="out-in">
-              <h1 v-if="emotionStage > 0" 
-                  class="emotion-info typewriter" 
-                  :class="emotionClass">
+              <h1
+                v-if="emotionStage > 0"
+                class="emotion-info typewriter"
+                :class="emotionClass"
+              >
                 {{ typedEmotion }}
               </h1>
             </Transition>
@@ -109,23 +115,23 @@ onMounted(() => {
   originalColor.value = startContainer.style.backgroundColor;
 });
 
-const currentEmotion = ref('');
-const typedEmotion = ref('');
+const currentEmotion = ref("");
+const typedEmotion = ref("");
 const emotionStage = ref(0);
 const typingSpeed = 100;
 let typingInterval = null;
 
 computed(() => ({
-  'primary': emotionStage.value === 1,
-  'secondary': emotionStage.value === 2,
-  'tertiary': emotionStage.value === 3
+  primary: emotionStage.value === 2,
+  secondary: emotionStage.value === 3,
+  tertiary: emotionStage.value === 4,
 }));
 
 const typeEmotion = (emotion) => {
   let currentIndex = 0;
-  typedEmotion.value = '';
+  typedEmotion.value = "";
   clearInterval(typingInterval);
-  
+
   typingInterval = setInterval(() => {
     if (currentIndex < emotion.length) {
       typedEmotion.value += emotion[currentIndex];
@@ -138,35 +144,42 @@ const typeEmotion = (emotion) => {
 
 const showEmotionSequentially = async (emotionData) => {
   const primaryEmotion = Object.keys(emotionData.primary_emotion)[0];
-  const secondaryEmotions = emotionData.secondary_emotions.map(emotion => Object.keys(emotion)[0]);
+  const secondaryEmotions = emotionData.secondary_emotions.map(
+    (emotion) => Object.keys(emotion)[0]
+  );
 
-  currentEmotion.value = 'Your emotions';
-  typeEmotion('Your emotions');
-  emotionStage.value = 0;
-  await new Promise(resolve => setTimeout(resolve, 2000));
-
+  // 시작 문구
+  currentEmotion.value = "Your emotions";
+  typeEmotion("Your emotions");
   emotionStage.value = 1;
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  // 주감정 표시
+  emotionStage.value = 2;
   currentEmotion.value = primaryEmotion;
   typeEmotion(primaryEmotion);
-  await new Promise(resolve => setTimeout(resolve, 2000));
 
-  if (secondaryEmotions.length > 0) {
-    emotionStage.value = 2;
-    currentEmotion.value = secondaryEmotions[0];
-    typeEmotion(secondaryEmotions[0]);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-  }
+  // 주감정이 마지막인 경우
+  if (secondaryEmotions.length === 0) return;
 
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  // 첫 번째 부감정 표시
+  emotionStage.value = 3;
+  currentEmotion.value = secondaryEmotions[0];
+  typeEmotion(secondaryEmotions[0]);
+
+  // 첫 번째 부감정이 마지막인 경우
+  if (secondaryEmotions.length === 1) return;
+
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+
+  // 두 번째 부감정 표시 (존재하는 경우)
   if (secondaryEmotions.length > 1) {
-    emotionStage.value = 3;
+    emotionStage.value = 4;
     currentEmotion.value = secondaryEmotions[1];
     typeEmotion(secondaryEmotions[1]);
-    await new Promise(resolve => setTimeout(resolve, 2000));
   }
-
-  currentEmotion.value = '';
-  typedEmotion.value = '';
-  emotionStage.value = 0;
 };
 
 const completeMeasurement = () => {
@@ -194,8 +207,8 @@ const completeMeasurement = () => {
 
       setTimeout(() => {
         goToRecommend();
-      }, TRANSITION_DURATION * 2);
-    }, TRANSITION_DURATION);
+      });
+    });
   }, 300);
 };
 
@@ -505,7 +518,8 @@ onBeforeUnmount(() => {
   font-size: 2rem;
 }
 
-.secondary, .tertiary {
+.secondary,
+.tertiary {
   font-size: 1.5rem;
 }
 
@@ -539,8 +553,13 @@ onBeforeUnmount(() => {
 }
 
 @keyframes blink-caret {
-  from, to { border-color: transparent; }
-  50% { border-color: #2c3e50; }
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #2c3e50;
+  }
 }
 
 .emotion-info {
@@ -550,7 +569,13 @@ onBeforeUnmount(() => {
   transition: all 0.5s ease;
 }
 
-.primary { font-size: 2.5rem; }
-.secondary { font-size: 2rem; }
-.tertiary { font-size: 1.5rem; }
+.primary {
+  font-size: 2.5rem;
+}
+.secondary {
+  font-size: 2rem;
+}
+.tertiary {
+  font-size: 1.5rem;
+}
 </style>
