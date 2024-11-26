@@ -31,6 +31,7 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useMovieStore } from '@/store/stores';
@@ -97,17 +98,20 @@ const animate = (timestamp) => {
       isAnimating.value = false;
 
       // flowing 포스터 사라지게 하기
-      const flowingPosters = filmStrip.value.querySelectorAll('.movie-poster.flowing');
-      flowingPosters.forEach((poster) => {
+      setTimeout(() => {
+        const flowingPosters = filmStrip.value.querySelectorAll('.movie-poster.flowing');
+        flowingPosters.forEach((poster) => {
         poster.style.opacity = '0';
       });
+      }, 500)
+      
 
       // flowing 포스터가 완전히 사라진 후 static 포스터 어둡게 하기
       setTimeout(() => {
         staticPosters.forEach((poster) => {
           poster.classList.add('dimmed');
         });
-      }, 500); // flowing 포스터가 사라지는 시간(0.5초) 후에 실행
+      }, 1500); // flowing 포스터가 사라지는 시간(0.5초) 후에 실행
     } else {
       filmStrip.value.style.transform = `translateX(${translateX}%)`;
       filmStrip.value.querySelectorAll('.movie-poster').forEach((poster) => {
