@@ -8,26 +8,24 @@
         </div>
       </Transition>
 
-      <div class="circle-container">
-        <div
-          class="circle"
-          :class="{
-            'rainbow-shadow': measurementComplete,
-            'hover-effect': !isModalOpen,
-          }"
-        >
-          <Transition name="button" mode="out-in">
-            <button
+      <Transition name="button" mode="fade">
+        <div class="circle-container" @click="openModal">
+          <div
+            class="circle"
+            :class="{
+              'hover-effect': !isModalOpen,
+            }"
+          >
+            <h1
               v-if="!measurementComplete"
               class="measure-button"
-              @click="openModal"
               :disabled="isModalOpen"
             >
               Let's find your emotion
-            </button>
-          </Transition>
+            </h1>
+          </div>
         </div>
-      </div>
+      </Transition>
     </div>
 
     <Transition name="modal">
@@ -325,6 +323,7 @@ const completeMeasurement = () => {
   border: none;
   cursor: pointer;
   letter-spacing: 2px;
+  text-align: center;
   transform: scale(1);
   transition: transform 0.3s ease, color 0.3s ease;
   transform: translateZ(0); /* 하드웨어 가속 활성화 */
@@ -339,7 +338,6 @@ const completeMeasurement = () => {
 }
 
 .start-button {
-  padding: 20px 40px;
   font-size: 50px;
   font-weight: bold;
   background: transparent;
@@ -356,23 +354,6 @@ const completeMeasurement = () => {
 .circle:hover .start-button {
   transform: translateZ(0) scale(1.1);
 }
-
-/* rainbow-shadow 클래스가 활성화될 때 start-button 스타일 */
-/* .rainbow-shadow .start-button {
-  background: linear-gradient(
-    to right,
-    #ff0000,
-    #ff8000,
-    #ffff00,
-    #00ff00,
-    #0000ff,
-    #ff0000
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradient-shift 5s linear infinite;
-} */
 
 @keyframes gradient-shift {
   0% {
@@ -435,45 +416,5 @@ const completeMeasurement = () => {
   transform: translateY(-5px);
   box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.15), 0 15px 25px rgba(0, 0, 0, 0.3),
     0 0 0 2px rgba(0, 0, 0, 0.1);
-}
-
-/* Start 버튼 효과 */
-/* .start-button.ready {
-  animation: ready-pulse 2s infinite;
-}
-
-@keyframes ready-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-} */
-
-/* rainbow-shadow 클래스가 활성화될 때 start-button 스타일 */
-
-/* .rainbow-shadow {
-  border: 4px solid transparent;
-  background-image: linear-gradient(white, white),
-    linear-gradient(
-      to right,
-      #ff0000,
-      #ff8000,
-      #ffff00,
-      #00ff00,
-      #0000ff,
-      #ff0000
-    );
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-  box-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
-  animation: rotate-colors 5s linear infinite;
-} */
-
-@keyframes rotate-colors {
-  0% {
-    filter: hue-rotate(0deg);
-  }
-  100% {
-    filter: hue-rotate(360deg);
-  }
 }
 </style>

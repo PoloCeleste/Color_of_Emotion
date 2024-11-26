@@ -5,7 +5,6 @@
         <div
           class="circle"
           :class="{
-            'rainbow-shadow': measurementComplete,
             'hover-effect': !isModalOpen,
           }"
         >
