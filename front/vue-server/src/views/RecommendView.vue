@@ -44,7 +44,7 @@
         </div>
       </div>
     </div>
-    <MovieCard :isAnimating="!isAnimating" />
+    <MovieCard v-show="three" />
   </div>
 </template>
 
@@ -59,6 +59,7 @@ const isAnimating = ref(true);
 let animationId = null;
 let startTime = null;
 const duration = 50000; // 속도제어
+const three = ref(false);
 
 const firstRow18 = computed(() => movieStore.recommendedMovies.slice(0, 18));
 const firstRow6 = computed(() => movieStore.recommendedMovies.slice(18, 24));
@@ -135,6 +136,7 @@ const animate = (timestamp) => {
           poster.classList.add("dimmed");
         });
       }, 1500); // flowing 포스터가 사라지는 시간(0.5초) 후에 실행
+      three.value = true;
     } else {
       filmStrip.value.style.transform = `translateX(${translateX}%)`;
       filmStrip.value.querySelectorAll(".movie-poster").forEach((poster) => {
