@@ -11,7 +11,7 @@ const routes = [
     path: '/measure',
     name: 'measure-view',
     component: () => import('../views/MeasureView.vue'),
-    meta: { transition: 'zoom' }
+    meta: { transition: 'fade' }
   },
   {
     path: '/animation',

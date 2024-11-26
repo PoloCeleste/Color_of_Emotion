@@ -1,26 +1,17 @@
 <template>
   <div class="start-container">
     <div class="content-wrapper">
-      <Transition name="button" mode="out-in">
+      <Transition name="button" mode="out-in" appear>
         <div class="circle-container" @click="openModal">
-          <div
-            class="circle"
-            :class="{
-              'hover-effect': !isModalOpen,
-            }"
-          >
-            <h1
-              v-if="!measurementComplete"
-              class="measure-button"
-              :disabled="isModalOpen"
-            >
+          <div class="circle" :class="{ 'hover-effect': !isModalOpen }">
+            <h1 v-if="!measurementComplete" class="measure-button" :disabled="isModalOpen">
               Let's find your emotion
             </h1>
-            <Transition name="out-in">
+            <Transition name="fade" mode="out-in">
               <h1 v-if="emotionStage > 0" 
-                  class="emotion-info" 
-                  :style="{ fontSize: `${emotionSize}em`, whiteSpace: 'pre-line' }">
-                {{ emotionInfo }}
+                  class="emotion-info typewriter" 
+                  :class="emotionClass">
+                {{ typedEmotion }}
               </h1>
             </Transition>
           </div>
@@ -49,7 +40,7 @@
 <script setup>
 import MeasureModal from "@/components/MeasureModal.vue";
 import { useRouter } from "vue-router";
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick, onBeforeUnmount, computed } from "vue";
 
 // 상수 정의
 const TRANSITION_DURATION = 800; // 기본 트랜지션 시간
@@ -118,54 +109,63 @@ onMounted(() => {
   originalColor.value = startContainer.style.backgroundColor;
 });
 
-const emotionInfo = ref('');
+const currentEmotion = ref('');
+const typedEmotion = ref('');
 const emotionStage = ref(0);
-const emotionSize = ref(1);
+const typingSpeed = 100;
+let typingInterval = null;
+
+computed(() => ({
+  'primary': emotionStage.value === 1,
+  'secondary': emotionStage.value === 2,
+  'tertiary': emotionStage.value === 3
+}));
+
+const typeEmotion = (emotion) => {
+  let currentIndex = 0;
+  typedEmotion.value = '';
+  clearInterval(typingInterval);
+  
+  typingInterval = setInterval(() => {
+    if (currentIndex < emotion.length) {
+      typedEmotion.value += emotion[currentIndex];
+      currentIndex++;
+    } else {
+      clearInterval(typingInterval);
+    }
+  }, typingSpeed);
+};
 
 const showEmotionSequentially = async (emotionData) => {
   const primaryEmotion = Object.keys(emotionData.primary_emotion)[0];
   const secondaryEmotions = emotionData.secondary_emotions.map(emotion => Object.keys(emotion)[0]);
 
-  // 1. "Your emotions" 표시 후 사라짐
-  emotionInfo.value = 'Your emotions';
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  emotionInfo.value = '';
-  await new Promise(resolve => setTimeout(resolve, 500));
+  currentEmotion.value = 'Your emotions';
+  typeEmotion('Your emotions');
+  emotionStage.value = 0;
+  await new Promise(resolve => setTimeout(resolve, 2000));
 
-  // 2. 감정 표시 로직
-  if (secondaryEmotions.length === 0) {
-    emotionInfo.value = primaryEmotion;
-    emotionStage.value = 1;
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    emotionSize.value = 1.5;
+  emotionStage.value = 1;
+  currentEmotion.value = primaryEmotion;
+  typeEmotion(primaryEmotion);
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
+  if (secondaryEmotions.length > 0) {
     emotionStage.value = 2;
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    emotionSize.value = 2;
-    emotionStage.value = 3;
-  } else if (secondaryEmotions.length === 1) {
-    emotionInfo.value = primaryEmotion;
-    emotionStage.value = 1;
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    emotionSize.value = 1.5;
-    emotionStage.value = 2;
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    emotionInfo.value = `${primaryEmotion}\n${secondaryEmotions[0]}`;
-    emotionSize.value = 1;
-    emotionStage.value = 3;
-  } else {
-    emotionInfo.value = primaryEmotion;
-    emotionStage.value = 1;
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    emotionInfo.value = `${primaryEmotion}\n${secondaryEmotions[0]}`;
-    emotionStage.value = 2;
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    emotionInfo.value = `${primaryEmotion}\n${secondaryEmotions[0]}\n${secondaryEmotions[1]}`;
-    emotionStage.value = 3;
+    currentEmotion.value = secondaryEmotions[0];
+    typeEmotion(secondaryEmotions[0]);
+    await new Promise(resolve => setTimeout(resolve, 2000));
   }
 
-  // 3. 감정 정보 사라짐
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  emotionSize.value = 1;
+  if (secondaryEmotions.length > 1) {
+    emotionStage.value = 3;
+    currentEmotion.value = secondaryEmotions[1];
+    typeEmotion(secondaryEmotions[1]);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+
+  currentEmotion.value = '';
+  typedEmotion.value = '';
   emotionStage.value = 0;
 };
 
@@ -198,6 +198,10 @@ const completeMeasurement = () => {
     }, TRANSITION_DURATION);
   }, 300);
 };
+
+onBeforeUnmount(() => {
+  clearInterval(typingInterval);
+});
 </script>
 
 <style scoped>
@@ -484,12 +488,36 @@ const completeMeasurement = () => {
     0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
+.emotion-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 .emotion-info {
-  font-size: 1.5rem;
   text-align: center;
   color: #333;
-  white-space: pre-line;
   transition: all 0.5s ease;
+}
+
+.primary {
+  font-size: 2rem;
+}
+
+.secondary, .tertiary {
+  font-size: 1.5rem;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
 }
 
 .fade-enter-active,
@@ -501,4 +529,28 @@ const completeMeasurement = () => {
 .fade-leave-to {
   opacity: 0;
 }
+
+.typewriter {
+  font-family: "Courier New", monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 3px solid #2c3e50;
+  animation: blink-caret 0.75s step-end infinite;
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50% { border-color: #2c3e50; }
+}
+
+.emotion-info {
+  font-size: 3rem;
+  text-align: center;
+  color: #333;
+  transition: all 0.5s ease;
+}
+
+.primary { font-size: 2.5rem; }
+.secondary { font-size: 2rem; }
+.tertiary { font-size: 1.5rem; }
 </style>
