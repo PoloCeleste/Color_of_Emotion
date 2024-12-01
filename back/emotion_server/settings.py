@@ -34,6 +34,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+import os
+os.environ["PATH"] += os.pathsep + 'C:/Program Files/Graphviz/bin/'
 
 # Application definition
 
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
     'movies',
     'channels',
     'corsheaders',
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,6 +53,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'emotion_server.apps.EmotionServerConfig',
 ]
+
+GRAPH_MODELS = {
+    'all_applications': True,
+    'graph_models': True,
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
