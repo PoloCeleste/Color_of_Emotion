@@ -1,6 +1,10 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,visualstudiocode,pycharm,python,django,flask,vuejs,database
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,visualstudiocode,pycharm,python,django,flask,vuejs,database
 
+*.crt
+*.key
+*.pem
+
 ### Database ###
 *.accdb
 *.db
@@ -274,7 +278,9 @@ instance/*
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
+
 
 # Thumbnails
 ._*

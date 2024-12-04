@@ -1,4 +1,4 @@
-﻿from django.urls import path
+from django.urls import path
 from .views import Actors, recommend_movies, emotion_colors
 
 app_name = 'movies'

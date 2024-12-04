@@ -22,6 +22,10 @@ env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env()
 
 API_KEY = env('tmdb')
+BACK_SERVER_IP = env('BACK_SERVER_IP')
+BACK_SERVER_URL = env('BACK_SERVER_URL')
+FRONT_URL = env('FRONT_URL')
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -30,9 +34,9 @@ API_KEY = env('tmdb')
 SECRET_KEY = 'django-insecure-^)xfh##=_o*42#863de=!9zrzq_rh%gdx4%7)wxcnuh3_1^a*2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [BACK_SERVER_IP, BACK_SERVER_URL, FRONT_URL]
 
 
 # Application definition
@@ -135,12 +139,35 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = ['ws://127.0.0.1:8000/', 'ws://localhost:8000/', 'ws://0.0.0.0:8000/', 'ws://192.168.201.100:8000/', 'ws://192.168.31.170:8000/', 'ws://180.229.58.136:8000/']
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https', 'ws')
+CORS_ALLOWED_ORIGINS = [
+    f'https://{BACK_SERVER_URL}',
+    f'https://{FRONT_URL}'
+]
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+CORS_ALLOW_CREDENTIALS = True
+
+SECURE_SSL_CERTIFICATE = BASE_DIR/'cert.pem'
+SECURE_SSL_PRIVATE_KEY = BASE_DIR/'django.key'
+
+# HTTPS 설정
+SECURE_HSTS_SECONDS = 31536000  # 1년
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# 쿠키 설정
+CSRF_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_SAMESITE = 'Strict'
 
 CHANNEL_LAYERS={
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
+
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True

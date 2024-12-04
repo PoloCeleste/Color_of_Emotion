@@ -1,4 +1,4 @@
-﻿from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 import asyncio, base64, time, cv2, torch, json
 from sklearn.preprocessing import RobustScaler
 from channels.exceptions import StopConsumer
@@ -9,7 +9,7 @@ from scipy import stats
 from .models import *
 import pandas as pd
 import numpy as np
-
+import datetime
 
 emotion={
     'Joy':1,
@@ -42,7 +42,10 @@ def remove_outliers_iqr(df):
 
 def load_model():
     global model, face_classifier
-    face_classifier = cv2.CascadeClassifier(pth.join(getcwd(), assets,'face_classifier.xml'))
+    cascade_path = pth.join(getcwd(), assets, 'face_classifier.xml')
+    face_classifier = cv2.CascadeClassifier(cascade_path)
+    if face_classifier.empty():
+            raise ValueError("Cascade classifier initialization failed")
 
     if torch.cuda.is_available():
         device = 'cuda'
@@ -84,9 +87,9 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         else:
             data = json.loads(text_data)
             message_type = data.get('type')
-
+            timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
             if message_type == 'start_analysis':
-                print('Analysis Start.')
+                print(timestamp, 'Analysis Start.')
                 self.is_analyzing = True
                 self.first_phase_data = []
                 self.second_phase_data = []
@@ -111,17 +114,17 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
                 }))
 
             elif message_type == 'second_phase':
-                print('In Second Phase.')
+                print(timestamp, 'In Second Phase.')
                 self.is_second_phase = True
                 self.first_analysis_result = await self.process_first_results(self.first_phase_data)
 
             elif message_type == 'restart_second_phase':
                 if self.is_second_phase:
-                    print('Second Phase Restart.')
+                    print(timestamp, 'Second Phase Restart.')
                     self.second_phase_data = []
             
             elif message_type == 'stop_analysis':
-                print('Stop Analysis.')
+                print(timestamp, 'Stop Analysis.')
                 self.is_analyzing = False
                 self.second_analysis_result = await self.process_second_results(self.second_phase_data)
                 
@@ -150,16 +153,16 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         # 이미지가 제대로 디코딩되었는지 확인
         if frame is None:
             return None, None
-
-        # frame = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX)
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
+        n_frame = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX)
+        gray = cv2.cvtColor(n_frame, cv2.COLOR_BGR2GRAY)
         faces = face_classifier.detectMultiScale(gray, 1.3, 5)
         label = ''
         domination = False
         prob = ''
         emotion_data = ''
 
-        # frame = cv2.GaussianBlur(frame, (5, 5), 0)
+        n_frame = cv2.GaussianBlur(n_frame, (5, 5), 0)
         display_color = (255, 161, 54)
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x+w, y+h), display_color, 2)
@@ -346,11 +349,17 @@ class VideoStreamConsumer(AsyncWebsocketConsumer):
         }
 
         # 주감정 선정 (점수가 가장 높고 통계적으로 유의한 변화)
+        primary_emotion_found = False
         for emotion, score in sorted_emotions:
             if emotion in significant_changes:
                 result['primary_emotion'] = {emotion: score}
+                primary_emotion_found = True
                 break
 
+        # 유의한 변화가 없는 경우 가장 큰 값을 가진 감정을 주감정으로 선택
+        if not primary_emotion_found:
+            result['primary_emotion'] = {sorted_emotions[0][0]: sorted_emotions[0][1]}
+        
         # 부감정 선정 (주감정 점수의 60% 이상이면서 통계적으로 유의한 변화, 최대 2개)
         if 'primary_emotion' in result:
             primary_emotion = list(result['primary_emotion'].keys())[0]

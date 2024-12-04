@@ -1,4 +1,4 @@
-﻿from rest_framework import serializers
+from rest_framework import serializers
 from .models import Genre, Provider, Movie, Emotion, EmotionColor
 
 class GenreSerializer(serializers.ModelSerializer):

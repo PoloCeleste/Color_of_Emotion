@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from .models import Movie, EmotionColor
 from skimage import color as skcolor
-import json, random
+import json
 
 
 ## CPU 사용

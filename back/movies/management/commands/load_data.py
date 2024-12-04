@@ -1,4 +1,4 @@
-﻿import json
+import json
 from django.core.management.base import BaseCommand
 from movies.models import Genre, Provider, Movie, Emotion, EmotionColor
 
