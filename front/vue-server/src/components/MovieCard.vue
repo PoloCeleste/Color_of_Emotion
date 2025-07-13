@@ -38,7 +38,10 @@ const router = useRouter();
 watch(
   () => movieStore.recommendedMovies,
   (newMovies) => {
-    selectedMovies.value = newMovies.slice(48, 51);
+    if (newMovies.length >= 3) {
+      // 마지막 3개 영화 사용
+      selectedMovies.value = newMovies.slice(-3);
+    }
   },
   { immediate: true }
 );
