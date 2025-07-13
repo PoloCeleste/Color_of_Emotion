@@ -247,10 +247,8 @@ const startStreaming = async () => {
         const jpegQuality = 0.7;
 
         const URL = process.env.VUE_APP_API_URL;
-        // const URL = "192.168.31.207:8000";
-        // const URL = "192.168.201.124:8000";
 
-        ws.value = new WebSocket(`ws://${URL}/ws/stream/`);
+        ws.value = new WebSocket(`wss://${URL}/ws/stream/`);
 
         ws.value.onopen = () => {
           console.log("WebSocket connected!!!");
@@ -288,6 +286,14 @@ const startStreaming = async () => {
             );
             stopflag.value = true;
           }
+        };
+
+        ws.value.onerror = (error) => {
+          console.error("WebSocket error:", error);
+        };
+
+        ws.value.onclose = (event) => {
+          console.log("WebSocket closed:", event.code, event.reason);
         };
 
         intervalId.value = setInterval(() => {
