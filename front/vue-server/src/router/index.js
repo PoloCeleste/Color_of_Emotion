@@ -1,33 +1,38 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
   {
-    path: '/',
-    name: 'opening-view',
-    component: () => import('../views/OpeningView.vue'),
-    meta: { transition: 'fade' }
+    path: "/",
+    name: "opening-view",
+    component: () => import("../views/OpeningView.vue"),
+    meta: { transition: "fade" },
   },
   {
-    path: '/measure',
-    name: 'measure-view',
-    component: () => import('../views/MeasureView.vue'),
-    meta: { transition: 'fade' }
+    path: "/measure",
+    name: "measure-view",
+    component: () => import("../views/MeasureView.vue"),
+    meta: { transition: "fade" },
   },
   {
-    path: '/animation',
-    name: 'animation-view',
-    component: () => import('../views/AnimationView.vue'),
+    path: "/animation",
+    name: "animation-view",
+    component: () => import("../views/AnimationView.vue"),
   },
   {
-    path: '/recommend',
-    name: 'recommend-view',
-    component: () => import('../views/RecommendView.vue'),
-  }
-]
+    path: "/recommend",
+    name: "recommend-view",
+    component: () => import("../views/RecommendView.vue"),
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "not-found",
+    redirect: "/",
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;
